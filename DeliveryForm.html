@@ -206,8 +206,18 @@ if (typeof geotab !== "undefined") {
           api.call("Get",{typeName:"User",search:{userName:sess.userName}},function(us){
             if(!us||!us.length){ callback(); return; }
             const u = us[0];
+            // Clean display name: firstName+lastName, else capitalize username
+            function cleanName(u, userName){
+              const fn = ((u.firstName||"")+" "+(u.lastName||"")).trim();
+              if(fn) return fn;
+              // fallback: take part before @ and capitalize
+              const base = (userName||"").split("@")[0];
+              return base.replace(/([a-z])([A-Z])/g,"$1 $2")
+                         .replace(/[._]/g," ")
+                         .replace(/\b\w/g,c=>c.toUpperCase()).trim() || userName;
+            }
             const info = {
-              name: ((u.firstName||"")+" "+(u.lastName||"")).trim()||sess.userName,
+              name: cleanName(u, sess.userName),
               userId: u.id||"",
               email: u.name||sess.userName,
               groups: (u.companyGroups||[]).map(g=>g.id),
@@ -234,7 +244,8 @@ if (typeof geotab !== "undefined") {
 
 function setDrv(info){
   Object.assign(DRV,info);
-  if(info.name){
+  // ✅ Driver bar sirf tab dikhao jab vehicle assign ho (actual driver)
+  if(info.vehicleId){
     const db=document.getElementById("dbar");
     db.style.display="flex";
     const init=info.name.split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||"D";
@@ -243,6 +254,7 @@ function setDrv(info){
     document.getElementById("dmt").textContent=(info.email||"")+(info.vehicleName?" • "+info.vehicleName:"");
     document.getElementById("dgrp").textContent="📍 "+(info.groupName||"No Group");
   }
+  // Form fields mein silently fill karo (form submission ke liye)
   const g=id=>document.getElementById(id);
   if(g("ds-drv"))g("ds-drv").value=info.name||"";
   if(g("ds-grp"))g("ds-grp").value=info.groupName||"";
