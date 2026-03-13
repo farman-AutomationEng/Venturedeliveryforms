@@ -20,11 +20,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#F2F5F7;min-height:100vh
 .dgrp{background:rgba(0,181,204,.15);color:#00B5CC;font-size:10px;font-weight:600;padding:3px 9px;border-radius:3px;margin-left:auto;border:1px solid rgba(0,181,204,.25)}
 
 /* ── Tabs ───────────────────────────────── */
-.tabs{display:flex;gap:0;padding:16px 18px 0;max-width:880px;margin:0 auto;border-bottom:0}
-.tab{flex:1;padding:10px 6px 9px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:transparent;color:#6B7280;text-align:center;transition:all .15s;border-bottom:2px solid transparent;letter-spacing:.2px}
-.tab.active{color:#0078D4;border-bottom:2px solid #0078D4;font-weight:700}
-.tab:hover:not(.active){color:#1A2432;background:rgba(0,0,0,.03)}
-.ti{display:block;font-size:15px;margin-bottom:3px}
+.tabs-wrap{background:white;border-bottom:2px solid #E5E7EB;padding:0 18px;max-width:880px;margin:16px auto 0}
+.tabs{display:flex;gap:0;margin:0;padding:0;list-style:none}
+.tab{flex:1;padding:11px 8px 10px;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;font-size:12px;font-weight:600;background:transparent;color:#6B7280;text-align:center;transition:all .15s;letter-spacing:.2px;white-space:nowrap}
+.tab.active{color:#0078D4;border-bottom:3px solid #0078D4;font-weight:700;background:white}
+.tab:hover:not(.active){color:#374151;background:#F9FAFB}
+.ti{display:block;font-size:16px;margin-bottom:2px}
 
 /* ── Card ───────────────────────────────── */
 .card{background:white;max-width:880px;margin:0 auto 40px;border-radius:0 0 6px 6px;padding:20px 18px 32px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #E5E7EB;border-top:none}
