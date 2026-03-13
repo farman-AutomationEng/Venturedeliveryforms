@@ -180,3 +180,76 @@ tbody td.tc{text-align:center}
 /* ── Row hover ── */
 tr.row-link{cursor:pointer}
 tr.row-link:hover td{background:#EFF6FF !important}
+
+/* ════════════════════════════════════════════
+   DeliveryForm — extracted inline styles
+   ════════════════════════════════════════════ */
+
+/* Driver bar flex child */
+.dbar-flex{flex:1}
+
+/* Success screen */
+.succ-title{font-size:22px;margin-bottom:8px;color:#1e293b}
+.succ-sub{color:#64748b;font-size:13px}
+.btn-new{max-width:200px;margin:0 auto;display:block}
+
+/* FROM info box */
+.from-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#475569}
+
+/* Notice variants */
+.notice-mb{margin-bottom:10px}
+.notice-center{text-align:center;font-weight:800}
+
+/* Accepted label */
+.ci-lg{font-size:13px;font-weight:700}
+
+/* Booklets box */
+.bk-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:14px}
+.bk-lbl{font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px}
+
+/* Utility spacing */
+.mb14{margin-bottom:14px}
+.mt10{margin-top:10px}
+.mt14{margin-top:14px}
+
+/* Signature label */
+.sig-lbl{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:6px}
+
+/* Tab panels — initial hidden state */
+.tab-hidden{display:none}
+
+/* Parts table name cell */
+.pt-name{padding:5px 7px;font-weight:600;white-space:nowrap;font-size:11px}
+
+/* Remove button (×) */
+.btn-rm{background:transparent;border:none;cursor:pointer;color:#94a3b8;font-size:16px}
+
+/* Add row/line button */
+.btn-add{padding:8px 12px;background:#E8F4FD;border:1.5px dashed #7BBFDB;border-radius:7px;color:#0078D4;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:14px}
+
+/* ── Invoice tab ── */
+.inv-hdr{display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin-bottom:16px}
+.inv-company{font-weight:900;font-size:16px}
+.inv-addr{font-size:10px;color:#64748b;margin-top:2px}
+.inv-badge{background:white;border:2px solid #e2e8f0;border-radius:8px;padding:8px 14px;font-size:20px;font-weight:900;color:#0078D4}
+.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:14px}
+.totals-box{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px 16px;min-width:200px}
+.totals-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#64748b}
+.ish-input{width:80px;text-align:right;padding:3px 6px;border:1.5px solid #e2e8f0;border-radius:5px;font-size:12px}
+.totals-due{border-top:2px solid #1e3a8a;padding-top:8px;display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:#00263E}
+
+/* ── Invoice dynamic row inputs ── */
+.ir-item{width:80px}
+.ir-qty{width:44px}
+.ir-desc{min-width:150px}
+.ir-price{width:80px}
+
+/* ── Loose Parts tab ── */
+.lp-hdr{text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:16px}
+.lp-company{font-weight:900;font-size:18px;letter-spacing:2px}
+.lp-sub{font-weight:800;font-size:12px;color:#00263E;letter-spacing:2px;margin-top:3px}
+
+/* ── Loose Parts dynamic row inputs ── */
+.lr-loc{width:50px}
+.lr-qty{width:38px}
+.lr-part{min-width:140px}
