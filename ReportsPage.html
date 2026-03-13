@@ -2,574 +2,421 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Venture Delivery Reports</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; font-size: 13px; background: #f4f6f9; color: #333; }
-.page-header { background: #1a3a5c; color: #fff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-.page-title { font-size: 18px; font-weight: 700; }
-.page-sub   { font-size: 12px; opacity: 0.75; margin-top: 2px; }
-.filter-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 14px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
-.filter-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
-.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px 20px 0; }
-@media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
-.kpi-card { background: #fff; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #2c5282; }
-.kpi-card.green  { border-left-color: #22c55e; }
-.kpi-card.orange { border-left-color: #f59e0b; }
-.kpi-card.red    { border-left-color: #ef4444; }
-.kpi-label { font-size: 11px; color: #777; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 26px; font-weight: 700; color: #1a3a5c; margin-top: 4px; }
-.kpi-sub   { font-size: 11px; color: #999; margin-top: 2px; }
-.user-info-bar { background: #f0f9ff; border-bottom: 1px solid #bae6fd; padding: 6px 20px; font-size: 11px; color: #0369a1; display: none; align-items: center; gap: 12px; }
-.user-info-bar.show { display: flex; }
-.context-bar { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; margin: 10px 20px 0; padding: 8px 14px; font-size: 12px; display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
-.context-bar.show { display: flex; }
-.ctx-tag { background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 2px 10px; color: #78350f; font-size: 11px; font-weight: 600; }
-.filters-bar { background: #fff; margin: 14px 20px 0; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.filter-label { font-size: 11px; font-weight: 700; color: #2c5282; text-transform: uppercase; letter-spacing: 0.5px; }
-.search-input { flex: 1; min-width: 180px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 20px; font-size: 12px; background: #fafafa; }
-.search-input:focus { outline: none; border-color: #2c5282; }
-.select-filter { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; background: #fafafa; }
-.btn-export  { background: #2c5282; color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.btn-export:hover { background: #1a3a5c; }
-.btn-refresh { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: #555; }
-.table-wrap { margin: 14px 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
-.table-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #eee; }
-.table-title { font-size: 13px; font-weight: 700; color: #1a3a5c; }
-.record-count { font-size: 12px; color: #888; margin-left: 10px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-thead th { background: #f0f4f8; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; white-space: nowrap; cursor: pointer; }
-thead th:hover { background: #e2e8f0; }
-tbody tr { border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-tbody tr:hover { background: #f7fbff; }
-tbody td { padding: 9px 12px; vertical-align: middle; }
-.badge { display: inline-block; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
-.badge-green  { background: #dcfce7; color: #166534; }
-.badge-yellow { background: #fef9c3; color: #854d0e; }
-.badge-red    { background: #fee2e2; color: #991b1b; }
-.badge-blue   { background: #dbeafe; color: #1e40af; }
-.badge-gray   { background: #f3f4f6; color: #6b7280; }
-.driver-cell  { display: flex; align-items: center; gap: 8px; }
-.driver-dot   { width: 26px; height: 26px; border-radius: 50%; background: #2c5282; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-.driver-name  { font-weight: 600; color: #1a3a5c; }
-.driver-group { font-size: 10px; color: #888; }
-#detailPanel { display: none; position: fixed; right: 0; top: 0; bottom: 0; width: 360px; background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 100; overflow-y: auto; flex-direction: column; }
-#detailPanel.show { display: flex; }
-.detail-header { background: #1a3a5c; color: #fff; padding: 16px 20px; display: flex; align-items: flex-start; justify-content: space-between; }
-.detail-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 0; }
-.detail-body  { padding: 16px; flex: 1; }
-.dsec-title   { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #2c5282; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #ebf4ff; margin-top: 14px; }
-.drow { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-.dkey { color: #777; }
-.dval { font-weight: 600; color: #222; text-align: right; max-width: 58%; word-break: break-word; }
-.detail-actions { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
-.btn-act { flex: 1; padding: 9px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.btn-resend { background: #f59e0b; color: #fff; }
-.btn-view   { background: #2c5282; color: #fff; }
-#loadingState { display: flex; align-items: center; justify-content: center; height: 200px; flex-direction: column; gap: 12px; color: #888; }
-.loader-ring { width: 36px; height: 36px; border: 4px solid #eee; border-top-color: #2c5282; border-radius: 50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-#emptyState { display: none; text-align: center; padding: 40px; color: #aaa; }
-.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border-top: 1px solid #eee; }
-.page-btn { padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; cursor: pointer; background: #fff; }
-.page-btn.active { background: #2c5282; color: #fff; border-color: #2c5282; }
+:root{--blue:#1e3a8a;--blue2:#2563eb;--green:#16a34a;--red:#dc2626;--gray:#64748b;--border:#e2e8f0;--bg:#f0f4f8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height:100vh;color:#1e293b;font-size:13px}
+
+/* ★ API URL */
+/* const API_URL = ... neeche script mein hai */
+
+.hdr{background:linear-gradient(135deg,var(--blue),var(--blue2));padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr h1{color:white;font-size:15px;font-weight:900}
+.hdr p{color:#93c5fd;font-size:10px;letter-spacing:1px;margin-top:2px}
+.geo-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;margin-right:5px}
+.geo-dot.ok{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5)}
+.geo-dot.loading{background:#f59e0b;animation:pulse .8s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.4}to{opacity:1}}
+
+/* KPI */
+.kpis{display:flex;gap:10px;padding:12px 16px;flex-wrap:wrap;background:white;border-bottom:1px solid var(--border)}
+.kpi{flex:1;min-width:110px;background:#f8fafc;border-radius:10px;padding:10px 14px;border-left:3px solid var(--blue2)}
+.kpi.g{border-left-color:var(--green)}.kpi.r{border-left-color:var(--red)}.kpi.y{border-left-color:#f59e0b}
+.kv{font-size:20px;font-weight:900;color:#1e293b;line-height:1}
+.kl{font-size:10px;color:var(--gray);margin-top:3px;font-weight:600}
+
+/* Filters */
+.filters{background:white;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;border-bottom:1px solid var(--border)}
+.ff{display:flex;flex-direction:column;gap:3px}
+.ff label{font-size:9px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.6px}
+.ff input,.ff select{padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;color:#1e293b;background:white;outline:none}
+.ff input:focus,.ff select:focus{border-color:var(--blue2)}
+.btn{padding:7px 14px;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bp{background:var(--blue2);color:white}.bp:hover{background:#1d4ed8}
+.bg{background:#f1f5f9;color:var(--gray);border:1.5px solid var(--border)}.bg:hover{background:var(--border)}
+.bn{background:var(--green);color:white}
+
+/* Table */
+.tbl-wrap{background:white;margin:12px 16px;border-radius:10px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px}
+.tbl-head h2{font-size:13px;font-weight:800}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead tr{background:var(--blue)}
+thead th{padding:9px 10px;text-align:left;color:white;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{background:#1e40af}
+tbody tr{border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .1s}
+tbody tr:hover{background:#eff6ff}
+tbody tr.dmg{background:#fff7ed}
+tbody tr.dmg:hover{background:#ffedd5}
+tbody td{padding:8px 10px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.bg-green{background:#dcfce7;color:#15803d}.bg-blue{background:#dbeafe;color:#1d4ed8}
+.bg-red{background:#fee2e2;color:#dc2626}.bg-yellow{background:#fef9c3;color:#a16207}
+.bg-gray{background:#f1f5f9;color:#475569}
+.drv-name{font-weight:700;color:#1e293b;font-size:12px}
+.drv-grp{font-size:10px;color:var(--blue2);font-weight:600;margin-top:1px}
+
+/* Empty/Loading */
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;color:var(--gray)}
+.sp{border:3px solid var(--border);border-top:3px solid var(--blue2);border-radius:50%;width:28px;height:28px;animation:spin .7s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Detail panel */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none}
+.panel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:95vw;background:white;box-shadow:-6px 0 24px rgba(0,0,0,.15);overflow-y:auto;z-index:201;display:none;animation:slidein .2s}
+@keyframes slidein{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.ph{background:linear-gradient(135deg,var(--blue),var(--blue2));padding:16px 18px;position:sticky;top:0;z-index:10}
+.ph h3{color:white;font-size:14px;font-weight:800}.ph p{color:#93c5fd;font-size:11px;margin-top:2px}
+.pcl{position:absolute;right:14px;top:14px;background:rgba(255,255,255,.2);border:none;color:white;font-size:16px;cursor:pointer;border-radius:5px;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.pb{padding:16px}
+.psec{margin-bottom:14px}
+.psec h4{font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.pr{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f8fafc}
+.pr .l{color:var(--gray);font-size:11px}.pr .v{font-weight:700;font-size:11px;color:#1e293b;text-align:right}
+.dcard{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:8px;padding:10px 12px;margin-bottom:12px;border:1px solid #bfdbfe}
+.dcard .dn{font-size:14px;font-weight:900;color:var(--blue)}
+.dcard .dm{font-size:11px;color:#2563eb;margin-top:2px}
+.dcard .dg{display:inline-block;background:var(--blue2);color:white;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:5px}
+
+/* Pagination */
+.pag{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#f8fafc;border-top:1px solid var(--border);font-size:11px;color:var(--gray);flex-wrap:wrap;gap:6px}
+.pbtns{display:flex;gap:3px}
+.pb2{padding:3px 9px;border:1.5px solid var(--border);border-radius:5px;background:white;font-size:11px;cursor:pointer;font-weight:600;color:var(--gray)}
+.pb2.active{background:var(--blue2);border-color:var(--blue2);color:white}
+.pb2:disabled{opacity:.4;cursor:not-allowed}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:white;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:300;display:none}
 </style>
 </head>
 <body>
 
-<div class="user-info-bar" id="userInfoBar">
-  <span>👤 <strong id="curUserName">–</strong></span>
-  <span>|</span>
-  <span>Group: <strong id="curUserGroup">–</strong></span>
-  <span>|</span>
-  <span id="scopeLabel" style="color:#0369a1;">Loading scope...</span>
-</div>
-
-<div class="page-header">
+<div class="hdr">
   <div>
-    <div class="page-title">🚛 Venture Delivery Reports</div>
-    <div class="page-sub" id="headerSub">dynasty_communications</div>
+    <h1>📊 Venture Delivery Reports</h1>
+    <p id="geo-txt"><span class="geo-dot loading" id="geo-dot"></span>Connecting...</p>
   </div>
-  <div class="filter-badge">
-    <div class="filter-dot" id="filterDot"></div>
-    <span id="filterBadgeText">Syncing MyGeotab filters...</span>
-  </div>
-</div>
-
-<!-- Shows when MyGeotab native filter is active -->
-<div class="context-bar" id="contextBar">
-  <strong>📅 MyGeotab Filter:</strong>
-  <span id="ctxDate" class="ctx-tag"></span>
-  <span id="ctxGroups" class="ctx-tag" style="display:none;"></span>
-</div>
-
-<div class="kpi-row">
-  <div class="kpi-card">       <div class="kpi-label">Total Deliveries</div><div class="kpi-value" id="kpiTotal">–</div><div class="kpi-sub" id="kpiPeriod">–</div></div>
-  <div class="kpi-card green"> <div class="kpi-label">✅ Signed</div>      <div class="kpi-value" id="kpiSigned">–</div><div class="kpi-sub" id="kpiPct">–</div></div>
-  <div class="kpi-card orange"><div class="kpi-label">💰 COD Total</div>   <div class="kpi-value" id="kpiCOD">–</div><div class="kpi-sub">Collected</div></div>
-  <div class="kpi-card red">   <div class="kpi-label">⚠️ Damage</div>     <div class="kpi-value" id="kpiDmg">–</div><div class="kpi-sub">Parts flagged</div></div>
-</div>
-
-<div class="filters-bar">
-  <span class="filter-label">🔍</span>
-  <input type="text" class="search-input" id="searchInput" placeholder="Invoice #, dealer, driver..." oninput="applyFilters()">
-  <select class="select-filter" id="statusFilter" onchange="applyFilters()">
-    <option value="">All Status</option>
-    <option value="signed">✅ Signed</option>
-    <option value="pending">⏳ Pending</option>
-    <option value="damaged">⚠️ Has Damage</option>
-  </select>
-  <select class="select-filter" id="driverFilter" onchange="applyFilters()">
-    <option value="">All Drivers</option>
-  </select>
-  <button class="btn-refresh" onclick="loadReports()">🔄 Refresh</button>
-  <button class="btn-export"  onclick="exportCSV()">⬇ Export CSV</button>
-</div>
-
-<div class="table-wrap">
-  <div class="table-header">
-    <div><span class="table-title">Delivery Records</span><span class="record-count" id="recCount"></span></div>
-  </div>
-  <div id="loadingState"><div class="loader-ring"></div><div>Loading from MyGeotab...</div></div>
-  <div id="emptyState"><div style="font-size:40px;margin-bottom:10px;">📭</div><div>No deliveries found.</div><div style="font-size:11px;margin-top:6px;color:#bbb;">Adjust date range in MyGeotab filter panel.</div></div>
-  <div id="tblWrap" style="display:none;">
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy('deliveryDate')">Date ↕</th>
-            <th onclick="sortBy('invoiceNum')">Invoice #</th>
-            <th>Driver &amp; Group</th>
-            <th>Dealer</th>
-            <th onclick="sortBy('codAmount')">COD $</th>
-            <th>Payment</th>
-            <th>Status</th>
-            <th>Damage</th>
-          </tr>
-        </thead>
-        <tbody id="tBody"></tbody>
-      </table>
-    </div>
-    <div class="pagination" id="pag"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span style="background:rgba(255,255,255,.15);color:white;font-size:10px;font-weight:700;padding:3px 9px;border-radius:15px" id="dbadge"></span>
+    <button class="btn bp" style="font-size:11px;padding:5px 12px" onclick="openForm()">+ New Form</button>
   </div>
 </div>
 
-<div id="detailPanel">
-  <div class="detail-header">
-    <div>
-      <div style="font-size:16px;font-weight:700;" id="dInvNum">–</div>
-      <div style="font-size:12px;opacity:0.75;margin-top:2px;" id="dDealerHead">–</div>
-    </div>
-    <button class="detail-close" onclick="closeDetail()">✕</button>
+<!-- KPI -->
+<div class="kpis">
+  <div class="kpi"><div class="kv" id="k1">—</div><div class="kl">Total Deliveries</div></div>
+  <div class="kpi g"><div class="kv" id="k2">—</div><div class="kl">Total COD</div></div>
+  <div class="kpi r"><div class="kv" id="k3">—</div><div class="kl">Damages</div></div>
+  <div class="kpi y"><div class="kv" id="k4">—</div><div class="kl">Drivers</div></div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <div class="ff"><label>From</label><input type="date" id="f-from"></div>
+  <div class="ff"><label>To</label><input type="date" id="f-to"></div>
+  <div class="ff">
+    <label>Group <span style="color:#22c55e">⚡</span></label>
+    <select id="f-grp" onchange="onGrpChange()">
+      <option value="all">All Groups</option>
+    </select>
   </div>
-  <div class="detail-body">
-    <div class="dsec-title">👤 Driver Info</div>
-    <div class="drow"><span class="dkey">Name</span>     <span class="dval" id="dDrvName">–</span></div>
-    <div class="drow"><span class="dkey">Group</span>    <span class="dval" id="dDrvGroup">–</span></div>
-    <div class="drow"><span class="dkey">Email</span>    <span class="dval" id="dDrvEmail">–</span></div>
-    <div class="drow"><span class="dkey">Geotab ID</span><span class="dval" id="dDrvId">–</span></div>
-
-    <div class="dsec-title">📋 Delivery</div>
-    <div class="drow"><span class="dkey">Date</span>         <span class="dval" id="dDate">–</span></div>
-    <div class="drow"><span class="dkey">From</span>         <span class="dval" id="dFrom">–</span></div>
-    <div class="drow"><span class="dkey">To (Dealer)</span> <span class="dval" id="dDealer">–</span></div>
-    <div class="drow"><span class="dkey">COD Amount</span>  <span class="dval" id="dCOD">–</span></div>
-    <div class="drow"><span class="dkey">Payment</span>     <span class="dval" id="dPay">–</span></div>
-    <div class="drow"><span class="dkey">Accepted</span>    <span class="dval" id="dAccepted">–</span></div>
-    <div class="drow"><span class="dkey">Booklets</span>    <span class="dval" id="dBooklets">–</span></div>
-
-    <div class="dsec-title">⚠️ Damaged / Short Parts</div>
-    <div id="dDmgParts" style="font-size:12px;color:#555;white-space:pre-line;">–</div>
-
-    <div class="dsec-title">🧾 Invoice</div>
-    <div class="drow"><span class="dkey">Total</span><span class="dval" id="dInvTotal">–</span></div>
-    <div class="drow"><span class="dkey">Lines</span><span class="dval" id="dInvLines">–</span></div>
-
-    <div class="dsec-title">✍️ Signatures</div>
-    <div class="drow"><span class="dkey">Driver</span>   <span class="dval" id="dSigDrv">–</span></div>
-    <div class="drow"><span class="dkey">Consignee</span><span class="dval" id="dSigCon">–</span></div>
-    <div class="drow"><span class="dkey">Submitted</span><span class="dval" id="dSubmAt">–</span></div>
-    <div class="drow"><span class="dkey">Record ID</span><span class="dval" id="dRecId">–</span></div>
+  <div class="ff">
+    <label>Driver <span style="color:#22c55e">⚡</span></label>
+    <select id="f-drv"><option value="all">All Drivers</option></select>
   </div>
-  <div class="detail-actions">
-    <button class="btn-act btn-resend" onclick="resendSign()">✉ Resend Sign Link</button>
-    <button class="btn-act btn-view"   onclick="viewPDF()">📄 View PDF</button>
+  <div class="ff">
+    <label>Type</label>
+    <select id="f-type">
+      <option value="all">All Types</option>
+      <option value="delivery_sheet">📋 Delivery</option>
+      <option value="invoice">🧾 Invoice</option>
+      <option value="loose_parts">🔩 Parts</option>
+    </select>
+  </div>
+  <div class="ff">
+    <label>Status</label>
+    <select id="f-sta">
+      <option value="all">All Status</option>
+      <option value="Submitted">Submitted</option>
+      <option value="Signed">Signed</option>
+    </select>
+  </div>
+  <div class="ff"><label>Invoice #</label><input id="f-inv" placeholder="132993" style="width:90px"></div>
+  <div style="display:flex;gap:6px;align-items:flex-end">
+    <button class="btn bp" onclick="loadData()">🔍 Search</button>
+    <button class="btn bg" onclick="resetF()">↺</button>
+    <button class="btn bn" onclick="exportCSV()">⬇ CSV</button>
   </div>
 </div>
+
+<!-- Table -->
+<div class="tbl-wrap">
+  <div class="tbl-head">
+    <h2>Delivery Records <span id="rcnt" style="font-weight:400;color:var(--gray)"></span></h2>
+    <button class="btn bg" style="font-size:11px" onclick="loadData()">↺ Refresh</button>
+  </div>
+  <div class="tbl-scroll">
+    <table>
+      <thead><tr>
+        <th onclick="srt('date')">Date ↕</th>
+        <th onclick="srt('invoiceNo')">Invoice # ↕</th>
+        <th onclick="srt('formType')">Type</th>
+        <th onclick="srt('driverName')">Driver ↕</th>
+        <th onclick="srt('dealer')">Dealer ↕</th>
+        <th onclick="srt('codAmount')">COD ↕</th>
+        <th>Issues</th>
+        <th onclick="srt('status')">Status ↕</th>
+      </tr></thead>
+      <tbody id="tbody">
+        <tr><td colspan="8"><div class="empty"><div class="sp"></div><div>Loading...</div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pag">
+    <span id="pinfo"></span>
+    <div class="pbtns" id="pbtns"></div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="overlay" id="ov" onclick="closeP()"></div>
+<div class="panel" id="panel">
+  <div class="ph">
+    <h3 id="ptitle">Detail</h3><p id="psub"></p>
+    <button class="pcl" onclick="closeP()">✕</button>
+  </div>
+  <div class="pb" id="pbody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-var geotabApi = null, geotabState = null;
-var currentUser = { name:"", id:"", groups:[], groupNames:[] };
-var isAdmin = false;
-var allRecords = [], filteredRecords = [];
-var sortField = "deliveryDate", sortAsc = false;
-var pageSize = 20, currentPage = 1;
-var selectedRecord = null;
-var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxs3y3TQWpDojT9U1VBuQsqW0VJ6SAla7isikJNIz5ubyk1MO3nCphCwTv5QKrUhVjwg/exec";
-var ADDIN_ID = "aVentureTrlrDelivForms01";
+// ★ APPS SCRIPT URL
+const API_URL = "https://script.google.com/macros/s/AKfycbz47-vTLl6L00t4bBNzeWu0hf85RdZWQEBJLfk-ferQ3KAdXWk_yfWtpNgml4-I1382-w/exec";
+const FORM_URL = "https://farman-automationeng.github.io/Venture-delivery-forms/DeliveryForm.html";
 
-// ── MyGeotab Add-In Registration ──
-if (typeof geotab !== "undefined") {
-  geotab.addin.venturereports = function(api, state) {
-    return {
-      initialize: function(freshApi, freshState, cb) {
-        geotabApi = freshApi; geotabState = freshState;
+let ALL=[], FILT=[], GROUPS=[], DRIVERS=[], SK="date", SD=-1, PG=1;
+const PP=25;
 
-        freshApi.getSession(function(session) {
-          freshApi.call("Get", { typeName:"User", search:{ name: session.userName } }, function(users) {
-            if (users && users.length > 0) {
-              var u = users[0];
-              currentUser.name = ((u.firstName||"")+" "+(u.lastName||"")).trim() || session.userName;
-              currentUser.id   = u.id;
-
-              // Admin check — has Supervisor or Admin in security groups
-              isAdmin = (u.securityGroups||[]).some(function(sg){
-                var n = (sg.name||"").toLowerCase();
-                return n.indexOf("admin")!==-1 || n.indexOf("supervisor")!==-1;
-              });
-
-              var gids = (u.companyGroups||[]).map(function(g){ return g.id; });
-              currentUser.groups = gids;
-
-              freshApi.call("Get", { typeName:"Group" }, function(allG) {
-                var m = {}; allG.forEach(function(g){ m[g.id]=g.name||g.id; });
-                currentUser.groupNames = gids.map(function(id){ return m[id]||id; });
-                showUserBar(); cb();
-              }, function(){ showUserBar(); cb(); });
-            } else { cb(); }
-          }, function(){ cb(); });
-        }, function(){ cb(); });
-      },
-
-      focus: function(freshApi, freshState) {
-        geotabApi = freshApi; geotabState = freshState;
-        // ── KEY: bind to MyGeotab native filter changes ──
-        freshState.bind("filterChanged", function() {
-          loadReports();
-        });
-        loadReports();
-      },
-
-      blur: function(freshApi, freshState) {
-        freshState.unbind("filterChanged"); // cleanup
-      }
-    };
-  };
-
-} else {
-  // Dev mode
-  currentUser = { name:"Admin (Dev)", id:"b1", groups:["b2"], groupNames:["Venture Team"] };
-  isAdmin = true;
-  window.addEventListener("load", function() { showUserBar(); loadMockData(); });
-}
-
-function showUserBar() {
-  document.getElementById("userInfoBar").classList.add("show");
-  document.getElementById("curUserName").textContent  = currentUser.name || "–";
-  document.getElementById("curUserGroup").textContent = currentUser.groupNames.join(", ") || "–";
-  document.getElementById("scopeLabel").textContent   = isAdmin
-    ? "Showing: All deliveries (admin access)"
-    : "Showing: Your group deliveries only";
-}
-
-// ── LOAD from MyGeotab AddInData ──
-function loadReports() {
-  showLoading(true);
-  var startDate=null, endDate=null, groupIds=[];
-
-  // Read MyGeotab native filter
-  if (geotabState && geotabState.filter) {
-    var f = geotabState.filter;
-    if (f.dateRange) { startDate = f.dateRange.startDate||null; endDate = f.dateRange.endDate||null; }
-    if (f.groups && f.groups.length>0) { f.groups.forEach(function(g){ groupIds.push(g.id); }); }
-  }
-
-  updateContextBar(startDate, endDate, groupIds);
-
-  if (!geotabApi) { showLoading(false); return; }
-
-  geotabApi.call("Get", { typeName:"AddInData", search:{ addInId:ADDIN_ID } }, function(recs) {
-    var parsed = [];
-    recs.forEach(function(rec) {
-      try {
-        var d = typeof rec.details==="string" ? JSON.parse(rec.details) : rec.details;
-        d._recordId = rec.id;
-        parsed.push(d);
-      } catch(e) {}
-    });
-
-    // ── Apply MyGeotab date filter ──
-    if (startDate || endDate) {
-      var sd = startDate ? new Date(startDate) : null;
-      var ed = endDate   ? new Date(endDate)   : null;
-      parsed = parsed.filter(function(r) {
-        var d = r.deliveryDate ? new Date(r.deliveryDate) : null;
-        if (!d) return true;
-        if (sd && d < sd) return false;
-        if (ed && d > ed) return false;
-        return true;
-      });
-    }
-
-    // ── Apply group filter ──
-    // Non-admin: filter to their own groups
-    // Admin + MyGeotab group filter active: filter to selected groups
-    // Admin + no group filter: show all
-    var gFilter = isAdmin ? groupIds : currentUser.groups;
-    if (gFilter.length > 0) {
-      parsed = parsed.filter(function(r) {
-        if (!r.driverGroups || r.driverGroups.length===0) return isAdmin;
-        return r.driverGroups.some(function(g){ return gFilter.indexOf(g)!==-1; });
-      });
-    }
-
-    allRecords = parsed;
-    populateDriverFilter();
-    applyFilters();
-    showLoading(false);
-  }, function(err) {
-    showLoading(false);
-    document.getElementById("loadingState").style.display = "flex";
-    document.getElementById("loadingState").innerHTML =
-      '<div style="color:#c00;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">⚠️</div><div>Failed: '+err+'</div></div>';
-  });
-}
-
-function updateContextBar(sd, ed, gids) {
-  var bar = document.getElementById("contextBar");
-  if (sd || gids.length>0) {
-    bar.classList.add("show");
-    document.getElementById("ctxDate").textContent = sd
-      ? "📅 " + fmtDate(sd) + " → " + fmtDate(ed || new Date())
-      : "📅 All dates";
-    if (gids.length > 0) {
-      document.getElementById("ctxGroups").textContent = "👥 " + gids.length + " group(s)";
-      document.getElementById("ctxGroups").style.display = "inline-block";
-    } else {
-      document.getElementById("ctxGroups").style.display = "none";
-    }
-    document.getElementById("filterBadgeText").textContent = sd ? fmtDate(sd)+" → "+fmtDate(ed||new Date()) : "Active";
-    document.getElementById("headerSub").textContent = "dynasty_communications — Filtered view";
-  } else {
-    bar.classList.remove("show");
-    document.getElementById("filterBadgeText").textContent = "All records";
-    document.getElementById("headerSub").textContent = "dynasty_communications — All records";
-  }
-}
-
-// ── LOCAL FILTERS (search / status / driver) ──
-function applyFilters() {
-  var q   = (document.getElementById("searchInput").value||"").toLowerCase();
-  var st  = document.getElementById("statusFilter").value;
-  var drv = document.getElementById("driverFilter").value;
-
-  filteredRecords = allRecords.filter(function(r) {
-    if (q) {
-      var hay = [r.invoiceNum,r.toDealer,r.driverName,r.fromLocation,r.codAmount].join(" ").toLowerCase();
-      if (hay.indexOf(q)===-1) return false;
-    }
-    if (st==="signed"  && !hasSig(r))    return false;
-    if (st==="pending" && hasSig(r))     return false;
-    if (st==="damaged" && !hasDmg(r))    return false;
-    if (drv && r.driverName!==drv)       return false;
-    return true;
-  });
-
-  filteredRecords.sort(function(a,b) {
-    var av=a[sortField]||"", bv=b[sortField]||"";
-    if (sortField==="codAmount")    { av=parseFloat(av)||0; bv=parseFloat(bv)||0; }
-    if (sortField==="deliveryDate") { av=new Date(av||0);   bv=new Date(bv||0);   }
-    if (av<bv) return sortAsc?-1:1;
-    if (av>bv) return sortAsc?1:-1;
-    return 0;
-  });
-
-  currentPage = 1;
-  renderTable();
-  updateKPIs();
-}
-
-function sortBy(f) {
-  if (sortField===f) sortAsc=!sortAsc; else { sortField=f; sortAsc=false; }
-  applyFilters();
-}
-
-function populateDriverFilter() {
-  var sel = document.getElementById("driverFilter");
-  var cur = sel.value;
-  while (sel.options.length>1) sel.remove(1);
-  var seen = {};
-  allRecords.forEach(function(r) {
-    if (r.driverName && !seen[r.driverName]) {
-      seen[r.driverName]=true;
-      var o=document.createElement("option"); o.value=o.textContent=r.driverName; sel.appendChild(o);
-    }
-  });
-  sel.value = cur;
-}
-
-// ── RENDER TABLE ──
-function renderTable() {
-  var tbody = document.getElementById("tBody");
-  tbody.innerHTML = "";
-  var total = filteredRecords.length;
-  document.getElementById("recCount").textContent = total + " record(s)";
-
-  if (total===0) {
-    document.getElementById("tblWrap").style.display = "none";
-    document.getElementById("emptyState").style.display = "block";
+// ★ MyGeotab api se groups+drivers load
+function initGeo(){
+  setGeo("loading","Connecting...");
+  if(typeof api==="undefined"){
+    setGeo("ok","Dev Mode");
+    setMockGeoData();
+    loadData();
     return;
   }
-  document.getElementById("tblWrap").style.display = "block";
-  document.getElementById("emptyState").style.display = "none";
-
-  var start = (currentPage-1)*pageSize;
-  filteredRecords.slice(start, start+pageSize).forEach(function(r) {
-    var tr = document.createElement("tr");
-    tr.onclick = function(){ openDetail(r); };
-
-    var nm = r.driverName||"?";
-    var ini = nm.split(" ").map(function(w){ return w[0]||""; }).join("").substring(0,2).toUpperCase();
-    var grp = (r.driverGroupNames||[]).join(", ")||"–";
-
-    var sBadge = hasSig(r)
-      ? '<span class="badge badge-green">✅ Signed</span>'
-      : '<span class="badge badge-yellow">⏳ Pending</span>';
-    var dBadge = hasDmg(r)
-      ? '<span class="badge badge-red">⚠️ Yes</span>'
-      : '<span class="badge badge-gray">–</span>';
-    var pays = (r.paymentTypes||[]).map(function(p){
-      return '<span class="badge badge-blue" style="margin:1px;">'+p+'</span>';
-    }).join(" ");
-
-    tr.innerHTML =
-      '<td>'+(r.deliveryDate||"–")+'</td>'+
-      '<td><strong>'+(r.invoiceNum||"–")+'</strong></td>'+
-      '<td><div class="driver-cell"><div class="driver-dot">'+ini+'</div><div><div class="driver-name">'+nm+'</div><div class="driver-group">'+grp+'</div></div></div></td>'+
-      '<td>'+(r.toDealer||"–")+'</td>'+
-      '<td>'+(r.codAmount?"$"+parseFloat(r.codAmount).toFixed(2):"–")+'</td>'+
-      '<td>'+(pays||'<span class="badge badge-gray">–</span>')+'</td>'+
-      '<td>'+sBadge+'</td>'+
-      '<td>'+dBadge+'</td>';
-    tbody.appendChild(tr);
-  });
-
-  // Pagination
-  var pages = Math.ceil(total/pageSize);
-  var pag = document.getElementById("pag"); pag.innerHTML="";
-  for (var i=1;i<=pages;i++) {
-    var b=document.createElement("button");
-    b.className="page-btn"+(i===currentPage?" active":"");
-    b.textContent=i;
-    b.onclick=(function(pg){ return function(){ currentPage=pg; renderTable(); }; })(i);
-    pag.appendChild(b);
-  }
-}
-
-function updateKPIs() {
-  var t=filteredRecords.length;
-  var s=filteredRecords.filter(hasSig).length;
-  var cod=filteredRecords.reduce(function(sum,r){ return sum+(parseFloat(r.codAmount)||0); },0);
-  var d=filteredRecords.filter(hasDmg).length;
-  document.getElementById("kpiTotal").textContent  = t;
-  document.getElementById("kpiSigned").textContent = s;
-  document.getElementById("kpiPct").textContent    = t>0?Math.round(s/t*100)+"% rate":"–";
-  document.getElementById("kpiCOD").textContent    = "$"+cod.toFixed(2);
-  document.getElementById("kpiDmg").textContent    = d;
-  document.getElementById("kpiPeriod").textContent = "Records loaded";
-}
-
-// ── DETAIL PANEL ──
-function openDetail(r) {
-  selectedRecord = r;
-  document.getElementById("dInvNum").textContent    = "Invoice #"+(r.invoiceNum||"–");
-  document.getElementById("dDealerHead").textContent= r.toDealer||"–";
-  document.getElementById("dDrvName").textContent   = r.driverName||"–";
-  document.getElementById("dDrvGroup").textContent  = (r.driverGroupNames||[]).join(", ")||"–";
-  document.getElementById("dDrvEmail").textContent  = r.driverEmail||"–";
-  document.getElementById("dDrvId").textContent     = r.driverId||"–";
-  document.getElementById("dDate").textContent      = r.deliveryDate||"–";
-  document.getElementById("dFrom").textContent      = r.fromLocation||"–";
-  document.getElementById("dDealer").textContent    = r.toDealer||"–";
-  document.getElementById("dCOD").textContent       = r.codAmount?"$"+parseFloat(r.codAmount).toFixed(2):"–";
-  document.getElementById("dPay").textContent       = (r.paymentTypes||[]).join(", ")||"–";
-  document.getElementById("dAccepted").textContent  = r.accepted?"✅ Yes":"❌ No";
-  document.getElementById("dBooklets").textContent  = r.booklets||"–";
-
-  var dmg = [];
-  if (r.partsCondition) {
-    r.partsCondition.forEach(function(p){
-      if (p.damaged||p.shortShipped) {
-        var fl=[];
-        if (p.damaged) fl.push("Damaged");
-        if (p.shortShipped) fl.push("Short Shipped");
-        dmg.push("• "+p.part+" — "+fl.join(", ")+(p.comments?" ("+p.comments+")":""));
-      }
+  api.call("Get",{typeName:"Group"},function(gs){
+    GROUPS=(gs||[]).filter(g=>g.id&&!g.id.startsWith("Group")||["GroupCompanyId"].includes(g.id)?false:true);
+    // Actually keep non-system groups
+    GROUPS=(gs||[]).filter(g=>g.id&&g.id!=="GroupCompanyId"&&g.id!=="GroupEverythingId"&&g.id!=="GroupNothingId"&&!g.id.startsWith("Group"));
+    const gs2=document.getElementById("f-grp");
+    GROUPS.sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(g=>{
+      gs2.innerHTML+=`<option value="${g.id}">${g.name||g.id}</option>`;
     });
-  }
-  document.getElementById("dDmgParts").textContent = dmg.length>0 ? dmg.join("\n") : "No damage ✅";
-  document.getElementById("dInvTotal").textContent = r.invTotal||"–";
-  document.getElementById("dInvLines").textContent = r.invLines ? r.invLines.length+" line(s)" : "–";
-  document.getElementById("dSigDrv").textContent   = r.sigDriver   ?"✅ Signed":"⏳ Pending";
-  document.getElementById("dSigCon").textContent   = r.sigConsignee?"✅ Signed":"⏳ Pending";
-  document.getElementById("dSubmAt").textContent   = r.submittedAt?new Date(r.submittedAt).toLocaleString():"–";
-  document.getElementById("dRecId").textContent    = r._recordId||"–";
-  document.getElementById("detailPanel").classList.add("show");
+    api.call("Get",{typeName:"User",search:{isActive:true}},function(us){
+      DRIVERS=(us||[]).filter(u=>!u.isSystemUser);
+      popDrv("all");
+      setGeo("ok","dynasty_communications");
+      loadData();
+    },function(){setGeo("ok","dynasty_communications");loadData();});
+  },function(){setGeo("ok","Connected");loadData();});
 }
 
-function closeDetail() {
-  document.getElementById("detailPanel").classList.remove("show");
-  selectedRecord=null;
+function setGeo(s,t){
+  document.getElementById("geo-dot").className="geo-dot "+s;
+  document.getElementById("geo-txt").innerHTML=`<span class="geo-dot ${s}" id="geo-dot"></span>${t}`;
 }
 
-function resendSign() {
-  if (!selectedRecord) return;
-  alert("(Would resend e-sign link to: " + (selectedRecord.dealerEmail||"no email") + ")");
-}
-function viewPDF() {
-  if (selectedRecord)
-    window.open(WEB_APP_URL+"?action=pdf&recordId="+selectedRecord._recordId,"_blank");
+function onGrpChange(){
+  const gid=document.getElementById("f-grp").value;
+  popDrv(gid);
 }
 
-// ── EXPORT CSV ──
-function exportCSV() {
-  var h = ["Date","Invoice#","Driver","Driver Email","Driver Group","Dealer","COD","Payment","Accepted","Damage","Signed","Submitted"].join(",");
-  var rows = filteredRecords.map(function(r) {
-    return [
-      r.deliveryDate||"", r.invoiceNum||"", r.driverName||"", r.driverEmail||"",
-      (r.driverGroupNames||[]).join("|"), r.toDealer||"", r.codAmount||"0",
-      (r.paymentTypes||[]).join("|"), r.accepted?"Yes":"No",
-      hasDmg(r)?"Yes":"No", hasSig(r)?"Yes":"No", r.submittedAt||""
-    ].map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(",");
+function popDrv(gid){
+  const sel=document.getElementById("f-drv");
+  sel.innerHTML='<option value="all">All Drivers</option>';
+  let drv=DRIVERS;
+  if(gid!=="all") drv=DRIVERS.filter(u=>(u.companyGroups||[]).some(g=>g.id===gid));
+  drv.sort((a,b)=>((a.firstName||"")+" "+(a.lastName||"")).localeCompare((b.firstName||"")+" "+(b.lastName||""))).forEach(u=>{
+    const nm=((u.firstName||"")+" "+(u.lastName||"")).trim()||u.name||u.id;
+    sel.innerHTML+=`<option value="${u.id}">${nm}</option>`;
   });
-  var csv  = [h].concat(rows).join("\n");
-  var blob = new Blob([csv],{type:"text/csv"});
-  var a    = document.createElement("a");
-  a.href   = URL.createObjectURL(blob);
-  a.download = "venture_deliveries_" + new Date().toISOString().split("T")[0] + ".csv";
-  a.click();
 }
 
-// ── HELPERS ──
-function hasSig(r) { return !!(r.sigDriver||r.sigConsignee); }
-function hasDmg(r) { return r.partsCondition&&r.partsCondition.some(function(p){ return p.damaged||p.shortShipped; }); }
-function fmtDate(d) { if (!d) return "–"; var dt=new Date(d); return (dt.getMonth()+1)+"/"+dt.getDate()+"/"+dt.getFullYear(); }
-function showLoading(v) {
-  document.getElementById("loadingState").style.display = v?"flex":"none";
-  if (v) { document.getElementById("tblWrap").style.display="none"; document.getElementById("emptyState").style.display="none"; }
+function setMockGeoData(){
+  GROUPS=[{id:"b9999",name:"Baltimore Fleet"},{id:"b8888",name:"Virginia Fleet"}];
+  DRIVERS=[{id:"b1111",firstName:"Marcus",lastName:"Thompson",companyGroups:[{id:"b9999"}]},{id:"b2222",firstName:"James",lastName:"Davis",companyGroups:[{id:"b9999"}]}];
+  const gs=document.getElementById("f-grp");
+  GROUPS.forEach(g=>gs.innerHTML+=`<option value="${g.id}">${g.name}</option>`);
+  popDrv("all");
 }
 
-// ── DEV MOCK DATA ──
-function loadMockData() {
-  allRecords = [
-    { invoiceNum:"132993", deliveryDate:"2026-03-10", driverName:"John Smith", driverEmail:"jsmith@dynastync.com", driverId:"bU1", driverGroups:["b2"], driverGroupNames:["Venture Team"], toDealer:"Blue Mountain Marine", fromLocation:"Plant City, FL", codAmount:"1933", paymentTypes:["COD"], accepted:true, booklets:"Yes", sigDriver:"x", sigConsignee:"x", partsCondition:[{part:"Tail Light – R",damaged:true,shortShipped:false,comments:"Cracked"}], invTotal:"$4,250.00", invLines:[{},{},{}], submittedAt:"2026-03-10T14:30:00Z", _recordId:"aRec001" },
-    { invoiceNum:"132880", deliveryDate:"2026-03-08", driverName:"Carlos Rivera", driverEmail:"crivera@dynastync.com", driverId:"bU2", driverGroups:["b2"], driverGroupNames:["Venture Team"], toDealer:"Lakeside Trailers", fromLocation:"Plant City, FL", codAmount:"2450", paymentTypes:["Floor Plan"], accepted:true, booklets:"Yes", sigDriver:"x", sigConsignee:"x", partsCondition:[], invTotal:"$6,100.00", invLines:[{},{}], submittedAt:"2026-03-08T11:00:00Z", _recordId:"aRec002" },
-    { invoiceNum:"132875", deliveryDate:"2026-03-07", driverName:"John Smith", driverEmail:"jsmith@dynastync.com", driverId:"bU1", driverGroups:["b2"], driverGroupNames:["Venture Team"], toDealer:"Harbor Sports", fromLocation:"Plant City, FL", codAmount:"1200", paymentTypes:["COD"], accepted:false, booklets:"No", sigDriver:null, sigConsignee:null, partsCondition:[], invTotal:"$2,800.00", invLines:[{}], submittedAt:"2026-03-07T09:15:00Z", _recordId:"aRec003" }
-  ];
-  populateDriverFilter();
-  applyFilters();
+// ★ Fetch data from Apps Script via GET
+async function loadData(){
+  showLoad();
+  const f=getF();
+  const params=new URLSearchParams({action:"reports",...Object.fromEntries(Object.entries(f).filter(([k,v])=>v&&v!=="all"))});
+  try{
+    const resp=await fetch(API_URL+"?"+params);
+    const result=await resp.json();
+    if(result.success){
+      ALL=result.data||[];
+      applyLocal();
+    } else {
+      showErr("API error: "+result.message);
+    }
+  }catch(e){
+    showErr("Network error — check API URL");
+    console.error(e);
+  }
 }
+
+function getF(){
+  return{
+    fromDate:document.getElementById("f-from")?.value||"",
+    toDate:document.getElementById("f-to")?.value||"",
+    groupId:document.getElementById("f-grp")?.value||"all",
+    driverId:document.getElementById("f-drv")?.value||"all",
+    formType:document.getElementById("f-type")?.value||"all",
+    status:document.getElementById("f-sta")?.value||"all",
+  };
+}
+
+function applyLocal(){
+  const invQ=(document.getElementById("f-inv")?.value||"").trim().toLowerCase();
+  FILT=ALL.filter(r=>!invQ||(r.invoiceNo||"").toLowerCase().includes(invQ));
+  sortR(); updateKPI(); PG=1; renderT();
+}
+
+function resetF(){
+  const td=new Date().toISOString().split("T")[0];
+  const fm=new Date();fm.setDate(1);
+  document.getElementById("f-from").value=fm.toISOString().split("T")[0];
+  document.getElementById("f-to").value=td;
+  document.getElementById("f-grp").value="all";
+  document.getElementById("f-drv").value="all";
+  document.getElementById("f-type").value="all";
+  document.getElementById("f-sta").value="all";
+  document.getElementById("f-inv").value="";
+  popDrv("all");
+  loadData();
+}
+
+function srt(k){if(SK===k)SD*=-1;else{SK=k;SD=-1;}sortR();PG=1;renderT();}
+function sortR(){FILT.sort((a,b)=>{const av=a[SK]||"",bv=b[SK]||"";return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;});}
+
+function updateKPI(){
+  const cod=FILT.reduce((s,r)=>s+(parseFloat(r.codAmount)||0),0);
+  const dmg=FILT.filter(r=>r.damaged).length;
+  const drvs=new Set(FILT.map(r=>r.driverUserId).filter(Boolean)).size;
+  document.getElementById("k1").textContent=FILT.length;
+  document.getElementById("k2").textContent="$"+cod.toLocaleString("en-US",{maximumFractionDigits:0});
+  document.getElementById("k3").textContent=dmg;
+  document.getElementById("k4").textContent=drvs;
+}
+
+function renderT(){
+  const tb=document.getElementById("tbody");
+  document.getElementById("rcnt").textContent="("+FILT.length+" records)";
+  if(!FILT.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div style="font-size:32px;margin-bottom:8px">📭</div><div style="font-weight:700">No deliveries found</div><div style="font-size:11px;margin-top:4px">Adjust date range or filters</div></div></td></tr>`;renderPag();return;}
+  const sl=FILT.slice((PG-1)*PP,PG*PP);
+  tb.innerHTML=sl.map(r=>{
+    const dm=r.damaged||r.shortShipped;
+    const iss=[r.damaged&&"⚠️ Dmg",r.shortShipped&&"📦 Short"].filter(Boolean).join(" ");
+    const tb2={delivery_sheet:'<span class="badge bg-blue">📋</span>',invoice:'<span class="badge bg-gray">🧾</span>',loose_parts:'<span class="badge bg-yellow">🔩</span>'}[r.formType]||r.formType||"—";
+    const sb={Submitted:'<span class="badge bg-blue">Submitted</span>',Signed:'<span class="badge bg-green">✅ Signed</span>',Pending:'<span class="badge bg-yellow">⏳ Pending</span>'}[r.status]||`<span class="badge bg-gray">${r.status||"—"}</span>`;
+    return`<tr class="${dm?"dmg":""}" onclick="openD('${r.id}')">
+      <td style="white-space:nowrap;font-weight:600">${r.date||"—"}</td>
+      <td style="font-weight:800;color:var(--blue2)">${r.invoiceNo||"—"}</td>
+      <td>${tb2}</td>
+      <td><div class="drv-name">${r.driverName||"—"}</div><div class="drv-grp">${r.driverGroupName||""}</div></td>
+      <td>${r.dealer||"—"}</td>
+      <td style="font-weight:700;color:var(--green)">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
+      <td>${iss?`<span style="font-size:11px;color:var(--red);font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
+      <td>${sb}</td>
+    </tr>`;
+  }).join("");
+  renderPag();
+}
+
+function renderPag(){
+  const tot=FILT.length,pgs=Math.ceil(tot/PP);
+  const s=Math.min((PG-1)*PP+1,tot),e=Math.min(PG*PP,tot);
+  document.getElementById("pinfo").textContent=tot?`${s}–${e} of ${tot}`:"";
+  const pb=document.getElementById("pbtns");pb.innerHTML="";
+  if(pgs<=1)return;
+  const mk=(lbl,pg,act,dis)=>{const b=document.createElement("button");b.className="pb2"+(act?" active":"");b.textContent=lbl;b.disabled=dis;if(!dis)b.onclick=()=>{PG=pg;renderT();};pb.appendChild(b);};
+  mk("‹",PG-1,false,PG===1);
+  for(let p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++)mk(p,p,p===PG,false);
+  mk("›",PG+1,false,PG===pgs);
+}
+
+function openD(id){
+  const r=ALL.find(x=>x.id===id);if(!r)return;
+  document.getElementById("ptitle").textContent="Invoice #"+(r.invoiceNo||"—");
+  document.getElementById("psub").textContent=(r.formType||"")+" • "+(r.date||"");
+  const parts=(r.parts||[]).filter(p=>p.part);
+  document.getElementById("pbody").innerHTML=`
+    <div class="dcard">
+      <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:6px">👤 Driver</div>
+      <div class="dn">${r.driverName||"Unknown"}</div>
+      <div class="dm">${r.driverEmail||""}</div>
+      <span class="dg">📍 ${r.driverGroupName||"No Group"}</span>
+      ${r.vehicleName?`<span class="dg" style="margin-left:5px">🚛 ${r.vehicleName}</span>`:""}
+    </div>
+    <div class="psec"><h4>📋 Delivery</h4>
+      ${dr("Date",r.date)}${dr("Invoice #",r.invoiceNo)}${dr("Dealer",r.dealer)}
+      ${dr("Contact",r.dealerContact)}${dr("Phone",r.dealerPhone)}
+      ${dr("COD","$"+(parseFloat(r.codAmount)||0).toFixed(2))}
+      ${dr("Payment",r.paymentType)}${dr("Booklets",r.booklets)}${dr("Status",r.status)}
+      ${dr("Damaged?",r.damaged?"⚠️ YES":"No")}${dr("Short Shipped?",r.shortShipped?"📦 YES":"No")}
+      ${r.damagedParts&&r.damagedParts.length?dr("Damaged Parts",r.damagedParts.join(", ")):""}
+    </div>
+    ${r.comments?`<div class="psec"><h4>💬 Comments</h4><div style="background:#f8fafc;border-radius:7px;padding:9px;font-size:12px">${r.comments}</div></div>`:""}
+    ${parts.length?`<div class="psec"><h4>🔧 Parts (${parts.length})</h4>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <tr style="background:#f1f5f9"><th style="padding:5px 7px;text-align:left">Part</th><th>Model</th><th>Dmg</th><th>Short</th></tr>
+        ${parts.map(p=>`<tr style="border-bottom:1px solid #f8fafc;${(p.damaged||p.shortShipped)?"background:#fff7ed":""}"><td style="padding:4px 7px">${p.part}</td><td>${p.model||"—"}</td><td>${p.damaged?"⚠️":"—"}</td><td>${p.shortShipped?"📦":"—"}</td></tr>`).join("")}
+      </table></div>`:""}
+    <div class="psec"><h4>🔗 System</h4>
+      ${dr("MyGeotab ID","<span style='font-family:monospace;font-size:10px'>"+(r.id||"—")+"</span>",true)}
+      ${dr("Saved At",r.savedAt?new Date(r.savedAt).toLocaleString("en-US"):"")}
+    </div>
+    <button class="btn bn" style="width:100%;margin-top:8px" onclick="exportOne('${r.id}')">⬇ Export This Record</button>
+  `;
+  document.getElementById("ov").style.display="block";
+  document.getElementById("panel").style.display="block";
+}
+function dr(l,v,raw=false){return`<div class="pr"><span class="l">${l}</span><span class="v">${raw?v:(v||"—")}</span></div>`;}
+function closeP(){document.getElementById("ov").style.display="none";document.getElementById("panel").style.display="none";}
+
+function exportCSV(){
+  if(!FILT.length){toast("No data!");return;}
+  const hdrs=["Date","Invoice #","Type","Driver","Driver Email","Group","Driver ID","Vehicle","Dealer","COD","Payment","Status","Damaged?","Short?","Damaged Parts","Comments","Saved At"];
+  const rows=FILT.map(r=>[r.date,r.invoiceNo,r.formType,r.driverName,r.driverEmail,r.driverGroupName,r.driverUserId,r.vehicleName,r.dealer,r.codAmount,r.paymentType,r.status,r.damaged?"YES":"No",r.shortShipped?"YES":"No",(r.damagedParts||[]).join("; "),r.comments,r.savedAt].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`));
+  const csv=[hdrs.join(","),...rows.map(r=>r.join(","))].join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="venture_"+new Date().toISOString().split("T")[0]+".csv";a.click();
+  toast("✅ "+FILT.length+" records exported");
+}
+function exportOne(id){const bk=FILT;FILT=[ALL.find(x=>x.id===id)].filter(Boolean);exportCSV();FILT=bk;}
+function openForm(){window.open(FORM_URL,"_blank");}
+function showLoad(){document.getElementById("tbody").innerHTML=`<tr><td colspan="8"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`;}
+function showErr(m){document.getElementById("tbody").innerHTML=`<tr><td colspan="8"><div class="empty"><div style="font-size:28px;margin-bottom:8px">⚠️</div><div style="font-weight:700">${m}</div></div></td></tr>`;}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",2500);}
+
+window.onload=function(){
+  const td=new Date(),fm=new Date();fm.setDate(1);
+  document.getElementById("f-from").value=fm.toISOString().split("T")[0];
+  document.getElementById("f-to").value=td.toISOString().split("T")[0];
+  document.getElementById("dbadge").textContent="📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  document.getElementById("f-inv").addEventListener("keydown",e=>{if(e.key==="Enter")applyLocal();});
+  initGeo();
+};
 </script>
 </body>
 </html>
