@@ -75,9 +75,9 @@ tbody td.tc{text-align:center}
 .pill.rd{background:#DE350B;border-color:#DE350B;color:white}
 
 /* ── Signature ──────────────────────────── */
-.sw{border:1px dashed #9CA3AF;border-radius:4px;background:white;position:relative;overflow:hidden;cursor:crosshair;transition:border-color .15s}
+.sw{border:1px dashed #9CA3AF;border-radius:4px;background:white;position:relative;overflow:hidden;cursor:crosshair;transition:border-color .15s;touch-action:none;-webkit-user-select:none;user-select:none}
 .sw.ok{border:1.5px solid #00875A}
-.sw canvas{display:block;width:100%;height:100px;touch-action:none}
+.sw canvas{display:block;width:100%;height:120px;touch-action:none;-webkit-user-select:none;user-select:none}
 .sph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#9CA3AF;font-size:12px;font-style:italic;pointer-events:none}
 .scl{position:absolute;top:5px;right:7px;background:rgba(0,0,0,.08);border:none;cursor:pointer;font-size:10px;color:#6B7280;font-weight:600;padding:2px 7px;border-radius:3px}
 .sok{position:absolute;bottom:5px;right:8px;font-size:10px;color:#00875A;font-weight:700;display:none}
