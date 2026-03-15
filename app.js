@@ -158,7 +158,31 @@ function initUI() {
     initSig("sig-lpr");
   }, 300);
 
-  // Payment rows — native checkbox tap works with ontouchstart="" on body
+  // Payment type toggles
+  initPayToggles();
+}
+
+function initPayToggles() {
+  var divs = document.querySelectorAll(".ptog");
+  for (var i=0; i<divs.length; i++) {
+    (function(d) {
+      function toggle() {
+        if (d.classList.contains("active")) {
+          d.classList.remove("active");
+        } else {
+          d.classList.add("active");
+        }
+      }
+      d.addEventListener("touchend", function(e) {
+        e.preventDefault();
+        toggle();
+      }, {passive: false});
+      d.addEventListener("click", function(e) {
+        // only fire on non-touch (mouse)
+        if (!e._fromTouch) toggle();
+      });
+    })(divs[i]);
+  }
 }
 
 // ── Event helper: click + touchend ───────────────────────
@@ -318,7 +342,14 @@ function clrS(id) {
 
 // ── Helpers ───────────────────────────────────────────────
 function gv(id){ var e=document.getElementById(id); return e?(e.value||"").trim():""; }
-function gc(id){ var e=document.getElementById(id); return e?!!e.checked:false; }
+function gc(id){
+  var e=document.getElementById(id);
+  if(!e) return false;
+  // ptog div toggle
+  if(e.classList && e.classList.contains("ptog")) return e.classList.contains("active");
+  // normal checkbox fallback
+  return !!e.checked;
+}
 
 function validate(fields) {
   var ok=true;
