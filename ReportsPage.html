@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dynasty Delivery Reports</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+.btn-view{padding:4px 10px;background:#0078D4;color:white;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
+.btn-view:hover{background:#006BBD}
+.drv-name{font-weight:600;font-size:12px}
+.drv-grp{font-size:10px;color:#94a3b8;margin-top:1px}
+</style>
 </head>
 <body>
 
@@ -17,10 +23,10 @@
 </div>
 
 <div class="kpis">
-  <div class="kpi"><div class="kv" id="k1">—</div><div class="kl">Total Deliveries</div></div>
-  <div class="kpi g"><div class="kv" id="k2">—</div><div class="kl">Total COD</div></div>
-  <div class="kpi r"><div class="kv" id="k3">—</div><div class="kl">Damages</div></div>
-  <div class="kpi y"><div class="kv" id="k4">—</div><div class="kl">Drivers</div></div>
+  <div class="kpi">    <div class="kv" id="k1">—</div><div class="kl">Total Deliveries</div></div>
+  <div class="kpi g">  <div class="kv" id="k2">—</div><div class="kl">Total COD</div></div>
+  <div class="kpi r">  <div class="kv" id="k3">—</div><div class="kl">Damages</div></div>
+  <div class="kpi y">  <div class="kv" id="k4">—</div><div class="kl">Drivers</div></div>
 </div>
 
 <div class="err-box" id="errbox"></div>
@@ -75,9 +81,10 @@
         <th onclick="srt('codAmount')">COD ↕</th>
         <th>Issues</th>
         <th onclick="srt('status')">Status ↕</th>
+        <th>Action</th>
       </tr></thead>
       <tbody id="tbody">
-        <tr><td colspan="8"><div class="empty"><div class="sp"></div><div>Loading...</div></div></td></tr>
+        <tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading...</div></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -99,35 +106,38 @@
 <script>
 // ============================================================
 // DYNASTY DELIVERY REPORTS — ReportsPage.html
-// Architecture: geotab.addin lifecycle → api.call(AddInData)
-// MyGeotab injects api via initialize/focus — NOT a global var
 // ============================================================
 
 let ALL=[], FILT=[], DRIVERS=[], SK="date", SD=-1, PG=1;
-let _api = null; // stored from lifecycle methods
+let _api = null;
 const PP=25;
 const ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
 
-// ── Geotab Add-In Entry Point (REQUIRED) ──────────────────────
-// MyGeotab calls initialize() then focus() — passing api object
-// This is the ONLY correct way to receive api in an external URL add-in
+// ── Geotab Add-In Entry Point ─────────────────────────────
 geotab.addin.ventureReports = function() {
   return {
     initialize: function(api, state, callback) {
       _api = api;
       setGeo("ok", "dynasty_communications");
-      // Load groups & drivers in background
+
       api.call("Get", {typeName:"Group"}, function(gs) {
         const sel = document.getElementById("f-grp");
-        const valid = (gs||[]).filter(g => g.id && !["GroupCompanyId","GroupEverythingId","GroupNothingId"].includes(g.id) && !g.id.startsWith("Group"));
-        valid.sort((a,b) => (a.name||"").localeCompare(b.name||"")).forEach(g => {
-          sel.innerHTML += `<option value="${g.id}">${g.name||g.id}</option>`;
-        });
+        const valid = (gs||[]).filter(g =>
+          g.id &&
+          !["GroupCompanyId","GroupEverythingId","GroupNothingId"].includes(g.id) &&
+          !g.id.startsWith("Group")
+        );
+        valid.sort((a,b)=>(a.name||"").localeCompare(b.name||""))
+          .forEach(g => {
+            sel.innerHTML += `<option value="${g.id}">${g.name||g.id}</option>`;
+          });
       }, function(){});
+
       api.call("Get", {typeName:"User", search:{isActive:true}}, function(us) {
         DRIVERS = (us||[]).filter(u => !u.isSystemUser);
         popDrv("all");
       }, function(){});
+
       callback();
     },
     focus: function(api, state) {
@@ -138,67 +148,56 @@ geotab.addin.ventureReports = function() {
   };
 };
 
-// ── Dev mode fallback (when opened outside MyGeotab) ─────────
-// geotab global won't exist outside MyGeotab — show empty state
-if (typeof geotab === "undefined") {
-  window._devMode = true;
-}
+if (typeof geotab === "undefined") { window._devMode = true; }
 
 function setGeo(s,t){
-  document.getElementById("geo-txt").innerHTML=`<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:${s==='ok'?'#22c55e':s==='loading'?'#f59e0b':'#94a3b8'}"></span>${t}`;
+  const c={ok:"#22c55e",loading:"#f59e0b",err:"#94a3b8"};
+  document.getElementById("geo-txt").innerHTML=
+    `<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:${c[s]||c.err}"></span>${t}`;
 }
 
-function onGrpChange(){
-  popDrv(document.getElementById("f-grp").value);
-}
+function onGrpChange(){ popDrv(document.getElementById("f-grp").value); }
 function popDrv(gid){
   const sel=document.getElementById("f-drv");
   sel.innerHTML='<option value="all">All Drivers</option>';
   let drv=gid==="all"?DRIVERS:DRIVERS.filter(u=>(u.companyGroups||[]).some(g=>g.id===gid));
-  drv.sort((a,b)=>((a.firstName||"")+" "+(a.lastName||"")).localeCompare((b.firstName||"")+" "+(b.lastName||""))).forEach(u=>{
-    const nm=((u.firstName||"")+" "+(u.lastName||"")).trim()||u.name||u.id;
-    sel.innerHTML+=`<option value="${u.id}">${nm}</option>`;
-  });
+  drv.sort((a,b)=>((a.firstName||"")+" "+(a.lastName||"")).localeCompare((b.firstName||"")+" "+(b.lastName||"")))
+    .forEach(u=>{
+      const nm=((u.firstName||"")+" "+(u.lastName||"")).trim()||u.name||u.id;
+      sel.innerHTML+=`<option value="${u.id}">${nm}</option>`;
+    });
 }
 
-// ── Load Data via api.call(AddInData) — NO fetch, NO CORS ─────
+// ── Load Data ─────────────────────────────────────────────
 function loadData(){
-  showLoad();
-  hideErr();
-  const f=getF();
-
+  showLoad(); hideErr();
   if(!_api){
-    // No api — dev mode or not yet initialized
-    if(window._devMode){
-      setGeo("ok","Dev Mode");
-      ALL=[];
-      applyLocal();
-    } else {
-      setGeo("loading","Waiting for MyGeotab...");
-    }
+    if(window._devMode){ setGeo("ok","Dev Mode"); ALL=[]; applyLocal(); }
+    else setGeo("loading","Waiting for MyGeotab...");
     return;
   }
-
-  // ✅ CORRECT: api.call to AddInData — runs on MyGeotab's domain, no CSP issues
+  const f=getF();
   _api.call("Get",
     { typeName:"AddInData", search:{ addInId: ADDIN_ID } },
     function(rows){
-      let parsed = (rows||[]).map(r => {
-        try { return typeof r.details==="string" ? JSON.parse(r.details) : r.details; }
-        catch(e){ return null; }
+      let parsed=(rows||[]).map(r=>{
+        try{
+          const d=typeof r.details==="string"?JSON.parse(r.details):r.details;
+          if(d) d.id=r.id;
+          return d;
+        }catch(e){return null;}
       }).filter(Boolean);
-      // Client-side filters
       if(f.fromDate) parsed=parsed.filter(r=>r.date&&r.date>=f.fromDate);
       if(f.toDate)   parsed=parsed.filter(r=>r.date&&r.date<=f.toDate);
-      if(f.driverId&&f.driverId!=="all") parsed=parsed.filter(r=>r.driverId===f.driverId||r.driver===f.driverId);
+      if(f.driverId&&f.driverId!=="all") parsed=parsed.filter(r=>r.driverUserId===f.driverId);
       if(f.formType&&f.formType!=="all") parsed=parsed.filter(r=>r.formType===f.formType);
       if(f.status&&f.status!=="all")     parsed=parsed.filter(r=>r.status===f.status);
       ALL=parsed;
       applyLocal();
     },
     function(err){
-      console.error("AddInData Get error:", err);
-      showErr("Error loading data: " + (err.message||err));
+      console.error("AddInData Get error:",err);
+      showErr("Error loading data: "+(err.message||err));
     }
   );
 }
@@ -232,7 +231,12 @@ function resetF(){
 }
 
 function srt(k){if(SK===k)SD*=-1;else{SK=k;SD=-1;}sortR();PG=1;renderT();}
-function sortR(){FILT.sort((a,b)=>{const av=a[SK]||"",bv=b[SK]||"";return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;});}
+function sortR(){
+  FILT.sort((a,b)=>{
+    const av=a[SK]||"",bv=b[SK]||"";
+    return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;
+  });
+}
 
 function updateKPI(){
   const cod=FILT.reduce((s,r)=>s+(parseFloat(r.codAmount)||0),0);
@@ -244,28 +248,49 @@ function updateKPI(){
   document.getElementById("k4").textContent=drvs||"—";
 }
 
+// ── Render Table ──────────────────────────────────────────
 function renderT(){
   const tb=document.getElementById("tbody");
   document.getElementById("rcnt").textContent="("+FILT.length+")";
+
   if(!FILT.length){
-    tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div style="font-size:26px;margin-bottom:8px">📭</div><div style="font-weight:700">No deliveries found</div></div></td></tr>`;
+    tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div style="font-size:26px;margin-bottom:8px">📭</div><div style="font-weight:700">No deliveries found</div></div></td></tr>`;
     renderPag(); return;
   }
+
   const sl=FILT.slice((PG-1)*PP,PG*PP);
   tb.innerHTML=sl.map(r=>{
     const dm=r.damaged||r.shortShipped;
     const iss=[r.damaged&&"⚠️ Dmg",r.shortShipped&&"📦 Short"].filter(Boolean).join(" ");
-    const tb2={delivery_sheet:'<span class="badge bg-blue">📋</span>',invoice:'<span class="badge bg-gray">🧾</span>',loose_parts:'<span class="badge bg-yellow">🔩</span>'}[r.formType]||"—";
-    const sb={Submitted:'<span class="badge bg-blue">Submitted</span>',Signed:'<span class="badge bg-green">✅ Signed</span>',Pending:'<span class="badge bg-yellow">⏳ Pending</span>'}[r.status]||`<span class="badge bg-gray">${r.status||"—"}</span>`;
-    return`<tr class="${dm?"dmg":""}" onclick="openD('${r.id}')">
+
+    const tb2={
+      delivery_sheet:'<span class="badge bg-blue">📋</span>',
+      invoice:       '<span class="badge bg-gray">🧾</span>',
+      loose_parts:   '<span class="badge bg-yellow">🔩</span>'
+    }[r.formType]||"—";
+
+    const sb={
+      Submitted:'<span class="badge bg-blue">Submitted</span>',
+      Signed:   '<span class="badge bg-green">✅ Signed</span>',
+      Pending:  '<span class="badge bg-yellow">⏳ Pending</span>',
+      Test:     '<span class="badge bg-gray">Test</span>'
+    }[r.status]||`<span class="badge bg-gray">${r.status||"—"}</span>`;
+
+    return`<tr style="${dm?"background:#FFF7ED":""}" onclick="openD('${r.id}')">
       <td style="white-space:nowrap;font-weight:600">${r.date||"—"}</td>
       <td style="font-weight:700;color:#0078D4">${r.invoiceNo||"—"}</td>
       <td>${tb2}</td>
-      <td><div class="drv-name">${r.driverName||"—"}</div><div class="drv-grp">${r.driverGroupName||""}</div></td>
+      <td>
+        <div class="drv-name">${r.driverName||"—"}</div>
+        <div class="drv-grp">${r.driverGroupName||""}</div>
+      </td>
       <td>${r.dealer||"—"}</td>
       <td style="font-weight:700;color:#00875A">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
       <td>${iss?`<span style="font-size:11px;color:#DE350B;font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
       <td>${sb}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="btn-view" onclick="openD('${r.id}')">👁 View</button>
+      </td>
     </tr>`;
   }).join("");
   renderPag();
@@ -277,17 +302,25 @@ function renderPag(){
   document.getElementById("pinfo").textContent=tot?`${s}–${e} of ${tot}`:"";
   const pb=document.getElementById("pbtns"); pb.innerHTML="";
   if(pgs<=1)return;
-  const mk=(l,p,act,dis)=>{const b=document.createElement("button");b.className="pb2"+(act?" active":"");b.textContent=l;b.disabled=dis;if(!dis)b.onclick=()=>{PG=p;renderT();};pb.appendChild(b);};
+  const mk=(l,p,act,dis)=>{
+    const b=document.createElement("button");
+    b.className="pb2"+(act?" active":"");
+    b.textContent=l; b.disabled=dis;
+    if(!dis) b.onclick=()=>{PG=p;renderT();};
+    pb.appendChild(b);
+  };
   mk("‹",PG-1,false,PG===1);
-  for(let p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++)mk(p,p,p===PG,false);
+  for(let p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++) mk(p,p,p===PG,false);
   mk("›",PG+1,false,PG===pgs);
 }
 
+// ── Detail Panel ──────────────────────────────────────────
 function openD(id){
-  const r=ALL.find(x=>x.id===id); if(!r)return;
+  const r=ALL.find(x=>x.id===id); if(!r) return;
   document.getElementById("ptitle").textContent="Invoice #"+(r.invoiceNo||"—");
   document.getElementById("psub").textContent=(r.formType||"")+" • "+(r.date||"");
   const parts=(r.parts||[]).filter(p=>p.part);
+
   document.getElementById("pbody").innerHTML=`
     <div class="dcard">
       <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-bottom:5px">👤 DRIVER</div>
@@ -296,62 +329,117 @@ function openD(id){
       <span style="background:#00263E;color:white;font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;margin-top:5px;display:inline-block">📍 ${r.driverGroupName||"No Group"}</span>
       ${r.vehicleName?`<span style="background:#00263E;color:white;font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;margin:5px 0 0 5px;display:inline-block">🚛 ${r.vehicleName}</span>`:""}
     </div>
+
     <div class="psec"><h4>📋 Delivery</h4>
-      ${dr("Date",r.date)}${dr("Invoice #",r.invoiceNo)}${dr("Dealer",r.dealer)}
+      ${dr("Date",r.date)}${dr("Invoice #",r.invoiceNo)}
+      ${dr("Dealer",r.dealer)}${dr("Address",r.dealerAddress)}
       ${dr("Contact",r.dealerContact)}${dr("Phone",r.dealerPhone)}
+      ${dr("Email",r.dealerEmail)}
       ${dr("COD","$"+(parseFloat(r.codAmount)||0).toFixed(2))}
-      ${dr("Payment",r.paymentType)}${dr("Booklets",r.booklets)}${dr("Status",r.status)}
-      ${dr("Damaged?",r.damaged?"⚠️ YES":"No")}${dr("Short?",r.shortShipped?"📦 YES":"No")}
+      ${dr("Payment",r.paymentType)}${dr("Booklets",r.booklets)}
+      ${dr("Accepted",r.accepted?"✅ YES":"❌ NO")}
+      ${dr("Status",r.status)}
+      ${dr("Damaged?",r.damaged?"⚠️ YES":"No")}
+      ${dr("Short?",r.shortShipped?"📦 YES":"No")}
       ${r.damagedParts&&r.damagedParts.length?dr("Damaged Parts",r.damagedParts.join(", ")):""}
     </div>
-    ${r.comments?`<div class="psec"><h4>💬 Comments</h4><div style="background:#f8fafc;border-radius:6px;padding:8px;font-size:12px">${r.comments}</div></div>`:""}
+
+    ${r.comments?`<div class="psec"><h4>💬 Comments</h4>
+      <div style="background:#f8fafc;border-radius:6px;padding:8px;font-size:12px">${r.comments}</div>
+    </div>`:""}
+
     ${parts.length?`<div class="psec"><h4>🔧 Parts (${parts.length})</h4>
       <table style="width:100%;border-collapse:collapse;font-size:11px">
-        <tr style="background:#f1f5f9"><th style="padding:4px 6px;text-align:left">Part</th><th>Model</th><th>Dmg</th><th>Short</th></tr>
-        ${parts.map(p=>`<tr style="border-bottom:1px solid #f8fafc;${(p.damaged||p.shortShipped)?"background:#fff7ed":""}"><td style="padding:3px 6px">${p.part}</td><td>${p.model||"—"}</td><td>${p.damaged?"⚠️":"—"}</td><td>${p.shortShipped?"📦":"—"}</td></tr>`).join("")}
-      </table></div>`:""}
+        <tr style="background:#f1f5f9">
+          <th style="padding:4px 6px;text-align:left">Part</th>
+          <th>Model</th><th>Dmg</th><th>Short</th><th>Notes</th>
+        </tr>
+        ${parts.map(p=>`<tr style="border-bottom:1px solid #f8fafc;${(p.damaged||p.shortShipped)?"background:#fff7ed":""}">
+          <td style="padding:3px 6px">${p.part}</td>
+          <td>${p.model||"—"}</td>
+          <td>${p.damaged?"⚠️":"—"}</td>
+          <td>${p.shortShipped?"📦":"—"}</td>
+          <td style="color:#64748b">${p.notes||"—"}</td>
+        </tr>`).join("")}
+      </table>
+    </div>`:""}
+
+    <div class="psec"><h4>✍️ Signatures</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
+        ${sigBox("Driver",    r.driverSignature,    r.driverSigned)}
+        ${sigBox("Consignee", r.consigneeSignature, r.consigneeSigned)}
+      </div>
+    </div>
+
     <div class="psec"><h4>🔗 System</h4>
-      ${dr("MyGeotab ID",`<span style='font-family:monospace;font-size:10px'>${r.id||"—"}</span>`,true)}
+      ${dr("MyGeotab ID",`<span style="font-family:monospace;font-size:10px">${r.id||"—"}</span>`,true)}
       ${dr("Saved At",r.savedAt?new Date(r.savedAt).toLocaleString("en-US"):"")}
     </div>`;
+
   document.getElementById("ov").style.display="block";
   document.getElementById("panel").style.display="block";
 }
-function dr(l,v,raw=false){return`<div class="pr"><span class="l">${l}</span><span class="v">${raw?v:(v||"—")}</span></div>`;}
-function closeP(){document.getElementById("ov").style.display="none";document.getElementById("panel").style.display="none";}
 
+function sigBox(label, base64, signed){
+  const lbl=`<div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase;padding:5px 8px;background:#F3F4F6;border-bottom:1px solid #E5E7EB;letter-spacing:.6px">${label}</div>`;
+  let inner="";
+  if(base64&&base64.length>50){
+    inner=`<img src="${base64}" alt="${label}" style="width:100%;height:65px;object-fit:contain;display:block;background:white;padding:4px">`;
+  }else if(signed){
+    inner=`<div style="height:65px;display:flex;align-items:center;justify-content:center;color:#00875A;font-size:11px;font-weight:700">✓ Signed</div>`;
+  }else{
+    inner=`<div style="height:65px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:11px;font-style:italic">Not signed</div>`;
+  }
+  return`<div style="border:1px solid #E5E7EB;border-radius:4px;overflow:hidden;background:#FAFAFA">${lbl}${inner}</div>`;
+}
+
+function dr(l,v,raw=false){
+  return`<div class="pr"><span class="l">${l}</span><span class="v">${raw?v:(v||"—")}</span></div>`;
+}
+function closeP(){
+  document.getElementById("ov").style.display="none";
+  document.getElementById("panel").style.display="none";
+}
+
+// ── CSV Export ────────────────────────────────────────────
 function exportCSV(){
   if(!FILT.length){alert("No data!");return;}
   const h=["Date","Invoice #","Type","Driver","Driver Email","Group","Vehicle","Dealer","COD","Payment","Status","Damaged?","Short?","Damaged Parts","Comments","Saved At"];
-  const rows=FILT.map(r=>[r.date,r.invoiceNo,r.formType,r.driverName,r.driverEmail,r.driverGroupName,r.vehicleName,r.dealer,r.codAmount,r.paymentType,r.status,r.damaged?"YES":"No",r.shortShipped?"YES":"No",(r.damagedParts||[]).join("; "),r.comments,r.savedAt].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`));
+  const rows=FILT.map(r=>[
+    r.date,r.invoiceNo,r.formType,r.driverName,r.driverEmail,
+    r.driverGroupName,r.vehicleName,r.dealer,r.codAmount,r.paymentType,
+    r.status,r.damaged?"YES":"No",r.shortShipped?"YES":"No",
+    (r.damagedParts||[]).join("; "),r.comments,r.savedAt
+  ].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`));
   const csv=[h.join(","),...rows.map(r=>r.join(","))].join("\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="venture_"+new Date().toISOString().split("T")[0]+".csv";a.click();
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="venture_"+new Date().toISOString().split("T")[0]+".csv";
+  a.click();
 }
 
-function showLoad(){document.getElementById("tbody").innerHTML=`<tr><td colspan="8"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`;}
+function showLoad(){
+  document.getElementById("tbody").innerHTML=
+    `<tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`;
+}
 function showErr(m){
   document.getElementById("errbox").style.display="block";
   document.getElementById("errbox").textContent="⚠️ "+m;
-  document.getElementById("tbody").innerHTML=`<tr><td colspan="8"><div class="empty"><div style="font-size:26px;margin-bottom:8px">⚠️</div><div style="font-weight:700">Error loading data</div></div></td></tr>`;
+  document.getElementById("tbody").innerHTML=
+    `<tr><td colspan="9"><div class="empty"><div style="font-size:26px;margin-bottom:8px">⚠️</div><div style="font-weight:700">Error loading data</div></div></td></tr>`;
 }
-function hideErr(){document.getElementById("errbox").style.display="none";}
+function hideErr(){ document.getElementById("errbox").style.display="none"; }
 
 window.onload=function(){
-  const td=new Date(),fm=new Date(); fm.setDate(1);
+  const td=new Date(), fm=new Date(); fm.setDate(1);
   document.getElementById("f-from").value=fm.toISOString().split("T")[0];
   document.getElementById("f-to").value=td.toISOString().split("T")[0];
-  document.getElementById("dbadge").textContent="📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  document.getElementById("dbadge").textContent=
+    "📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
   document.getElementById("f-inv").addEventListener("keydown",e=>{if(e.key==="Enter")applyLocal();});
-
-  // Dev mode: if opened outside MyGeotab (no geotab global), show empty state
-  if(typeof geotab === "undefined"){
-    setGeo("ok","Dev Mode");
-    ALL=[];
-    applyLocal();
+  if(typeof geotab==="undefined"){
+    setGeo("ok","Dev Mode"); ALL=[]; applyLocal();
   }
-  // ✅ If inside MyGeotab: geotab.addin.ventureReports lifecycle fires automatically
-  //    MyGeotab calls initialize() → focus() → loadData() — no manual init needed
 };
 </script>
 </body>
