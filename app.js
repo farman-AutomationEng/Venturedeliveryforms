@@ -94,8 +94,10 @@ function setDrv(info) {
   DRV.groups=info.groups||[]; DRV.vehicleId=info.vehicleId||"";
   DRV.vehicleName=info.vehicleName||""; DRV.plate=info.plate||"";
 
-  // Driver bar — only show when vehicle assigned
+  // Driver bar + Driver Info section — only show when vehicle assigned
+  var drv_sec = document.getElementById("drv-section");
   if (info.vehicleId) {
+    if (drv_sec) drv_sec.style.display = "block";
     var db = document.getElementById("dbar");
     if (db) db.style.display = "flex";
     var init = info.name.split(" ").map(function(w){return w[0]||"";}).join("").toUpperCase().slice(0,2)||"D";
