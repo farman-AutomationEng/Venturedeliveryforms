@@ -455,7 +455,12 @@ function subParts() {
     var cbs=trows[i].querySelectorAll('input[type="checkbox"]');
     rows.push({location:c[0].querySelector("input")?c[0].querySelector("input").value:"",qty:c[1].querySelector("input")?c[1].querySelector("input").value:"",part:pt,pulled:cbs[0]?cbs[0].checked:false,loaded:cbs[1]?cbs[1].checked:false,nc:cbs[2]?cbs[2].checked:false,cod:cbs[3]?cbs[3].checked:false});
   }
-  var data={formType:"loose_parts",salesOrder:gv("ls"),invoiceNo:gv("li"),pl:gv("lpl"),trk:gv("lt"),dealer:gv("ld"),date:gv("ldt"),comments:gv("lc"),driverSigned:SS["sig-lpd"]?SS["sig-lpd"].signed:false,receiverSigned:SS["sig-lpr"]?SS["sig-lpr"].signed:false,driverName:DRV.name,driverGroupName:DRV.groupName,driverUserId:DRV.userId,driverGroupId:DRV.groupId,vehicleId:DRV.vehicleId,vehicleName:DRV.vehicleName,parts:rows,status:"Submitted"};
+  var data={formType:"loose_parts",salesOrder:gv("ls"),invoiceNo:gv("li"),pl:gv("lpl"),trk:gv("lt"),dealer:gv("ld"),date:gv("ldt"),comments:gv("lc"),
+    driverSigned:SS["sig-lpd"]?SS["sig-lpd"].signed:false,
+    receiverSigned:SS["sig-lpr"]?SS["sig-lpr"].signed:false,
+    driverSignature:getSigBase64("sig-lpd"),
+    receiverSignature:getSigBase64("sig-lpr"),
+    driverName:DRV.name,driverGroupName:DRV.groupName,driverUserId:DRV.userId,driverGroupId:DRV.groupId,vehicleId:DRV.vehicleId,vehicleName:DRV.vehicleName,parts:rows,status:"Submitted"};
   submitToAPI(data, function(id){showSucc(id);}, function(e){alert(e.message);});
 }
 
