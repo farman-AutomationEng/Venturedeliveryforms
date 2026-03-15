@@ -158,32 +158,7 @@ function initUI() {
     initSig("sig-lpr");
   }, 300);
 
-  // ✅ Payment type rows — tap anywhere on row to toggle checkbox
-  fixPaymentRows();
-}
-
-function fixPaymentRows() {
-  var rows = document.querySelectorAll(".ci-row");
-  for (var i=0; i<rows.length; i++) {
-    (function(row) {
-      // tap on row text (span) toggles the checkbox
-      var span = row.querySelector("span");
-      if (span) {
-        span.addEventListener("touchend", function(e) {
-          e.preventDefault();
-          var cb = row.querySelector('input[type="checkbox"]');
-          if (cb) {
-            cb.checked = !cb.checked;
-            // Force visual re-render (iOS WebView bug fix)
-            cb.checked = cb.checked;
-          }
-        }, {passive: false});
-        span.addEventListener("click", function(e) {
-          e.preventDefault(); // prevent double toggle
-        });
-      }
-    })(rows[i]);
-  }
+  // Payment rows — native checkbox tap works with ontouchstart="" on body
 }
 
 // ── Event helper: click + touchend ───────────────────────
