@@ -279,3 +279,6 @@ tr.row-link:hover td{background:#EFF6FF !important}
 /* ── Payment type toggle buttons ── */
 .ptog{padding:10px 14px;border:2px solid #D1D5DB;border-radius:6px;font-size:13px;font-weight:600;color:#9CA3AF;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;background:white;transition:all .15s}
 .ptog.active{background:#0078D4;border-color:#0078D4;color:white}
+
+/* ── Radio buttons override Geotab CSS ── */
+.pay-row input[type="radio"]{width:20px;height:20px;accent-color:#0078D4;cursor:pointer;flex-shrink:0;margin:0;-webkit-appearance:radio;appearance:radio}
