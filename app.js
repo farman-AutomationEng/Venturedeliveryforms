@@ -375,9 +375,9 @@ function collectD() {
     if(dm) dmg.push(pt);
     parts.push({part:pt, model:c[1].querySelector("input")?c[1].querySelector("input").value:"", damaged:dm, shortShipped:sh, notes:c[4].querySelector("input")?c[4].querySelector("input").value:""});
   }
-  var pt=[];
-  if(gc("ck-cod"))pt.push("COD"); if(gc("ck-fp"))pt.push("Floor Plan");
-  if(gc("ck-pt"))pt.push("Parts"); if(gc("ck-rv"))pt.push("Return to Vendor"); if(gc("ck-wn"))pt.push("Warranty");
+  // Radio button — only one selected
+  var ptEl = document.querySelector('input[name="paytype"]:checked');
+  var pt = ptEl ? [ptEl.value] : ["COD"];
   return {
     formType:"delivery_sheet", invoiceNo:gv("ds-inv"), dealer:gv("ds-dlr"),
     dealerAddress:gv("ds-adr")+" "+gv("ds-cty"), dealerContact:gv("ds-cnt"),
