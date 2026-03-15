@@ -1,66 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="x-ua-compatible" content="ie=edge">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Venture Trailers — Delivery Form</title>
-<link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css">
-<script src="https://farman-automationeng.github.io/Venturedeliveryforms/app.js"></script>
-</head>
-<body ontouchstart="">
+<style>
+/* ═══════════════════════════════════════════
+   GEOTAB ZENITH THEME — Venture Trailers
+   Colors: #00263E navy · #0078D4 blue · #00B5CC teal
+   ═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',Arial,sans-serif;background:#F2F5F7;min-height:100vh;color:#1A2432;font-size:13px}
 
-<!-- ✅ Exactly like official Geotab samples: div hidden by default, shown in focus() -->
-<div id="vt-app" style="display:none">
+/* ── Header ─────────────────────────────── */
+.hdr{background:#00263E;padding:0 18px;height:52px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.hdr h1{font-size:13px;font-weight:700;color:#FFFFFF;letter-spacing:.3px;text-transform:uppercase}
+.hdr p{font-size:9px;color:#7BBFDB;letter-spacing:1.8px;margin-top:2px;text-transform:uppercase}
+.dbadge{background:rgba(0,181,204,.18);color:#00B5CC;font-size:10px;font-weight:600;padding:3px 10px;border-radius:3px;border:1px solid rgba(0,181,204,.35);letter-spacing:.3px}
+
+/* ── Driver bar ─────────────────────────── */
+.dbar{background:#003554;padding:8px 18px;display:none;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.dav{width:32px;height:32px;border-radius:50%;background:#0078D4;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0}
+.dnm{color:#FFFFFF;font-size:13px;font-weight:600}
+.dmt{color:#7BBFDB;font-size:10px;margin-top:1px}
+.dgrp{background:rgba(0,181,204,.15);color:#00B5CC;font-size:10px;font-weight:600;padding:3px 9px;border-radius:3px;margin-left:auto;border:1px solid rgba(0,181,204,.25)}
+
+/* ── Tabs ───────────────────────────────── */
+.tabs{display:flex;gap:0;padding:16px 18px 0;max-width:880px;margin:0 auto;border-bottom:0}
+.tab{flex:1;padding:10px 6px 9px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:transparent;color:#6B7280;text-align:center;transition:all .15s;border-bottom:2px solid transparent;letter-spacing:.2px}
+.tab.active{color:#0078D4;border-bottom:2px solid #0078D4;font-weight:700}
+.tab:hover:not(.active){color:#1A2432;background:rgba(0,0,0,.03)}
+.ti{display:block;font-size:15px;margin-bottom:3px}
+
+/* ── Card ───────────────────────────────── */
+.card{background:white;max-width:880px;margin:0 auto 40px;border-radius:0 0 6px 6px;padding:20px 18px 32px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #E5E7EB;border-top:none}
+
+/* ── Section header ─────────────────────── */
+.sec{display:flex;align-items:center;gap:8px;margin:22px 0 12px;padding-bottom:8px;border-bottom:1px solid #E5E7EB}
+.sec h3{font-size:11px;font-weight:700;color:#00263E;text-transform:uppercase;letter-spacing:.8px}
+.abadge{font-size:9px;font-weight:600;background:#E8F4FD;color:#0078D4;padding:2px 7px;border-radius:3px;margin-left:4px;border:1px solid #BFDBFE}
+
+/* ── Grid ───────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fc{grid-column:1/-1}
+@media(max-width:480px){.g2{grid-template-columns:1fr}.fc{grid-column:1}}
+
+/* ── Fields ─────────────────────────────── */
+.f{display:flex;flex-direction:column;gap:4px;width:100%;min-width:0}
+.f label{font-size:10px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.7px}
+.f input,.f select,.f textarea{padding:9px 11px;border:1px solid #D1D5DB;border-radius:4px;font-size:13px;font-family:'Inter','Segoe UI',sans-serif;color:#1A2432;background:white;outline:none;width:100%;box-sizing:border-box;-webkit-appearance:none;transition:border-color .15s}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:#0078D4;box-shadow:0 0 0 3px rgba(0,120,212,.1)}
+.f textarea{resize:vertical;min-height:80px}
+.f input[readonly]{background:#F9FAFB;color:#9CA3AF}
+
+/* ── Radio / Checkbox group ─────────────── */
+.cg{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ci{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#374151;padding:3px 0}
+.ci input[type="radio"],.ci input[type="checkbox"]{width:16px;height:16px;accent-color:#0078D4;flex-shrink:0;cursor:pointer}
+
+/* ── Table ──────────────────────────────── */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:4px;border:1px solid #E5E7EB;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+thead tr{background:#00263E}
+thead th{padding:9px 10px;text-align:left;color:white;font-size:10px;font-weight:600;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase}
+tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s}
+tbody tr:nth-child(even){background:#FAFAFA}
+tbody tr:hover{background:#F0F7FF}
+tbody td{padding:6px 7px;vertical-align:middle}
+tbody td input[type="text"]{padding:5px 7px;border:1px solid #E5E7EB;border-radius:3px;font-size:12px;width:100%;font-family:'Inter',sans-serif;box-sizing:border-box}
+tbody td input[type="text"]:focus{border-color:#0078D4;outline:none}
+tbody td.tc{text-align:center}
+.cbt{width:15px;height:15px;accent-color:#0078D4;cursor:pointer}
+
+/* ── Pills ──────────────────────────────── */
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:8px 18px;border:1px solid #D1D5DB;border-radius:20px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#6B7280;transition:all .15s}
+.pill:hover{border-color:#9CA3AF;background:#F9FAFB}
+.pill.gn{background:#00875A;border-color:#00875A;color:white}
+.pill.rd{background:#DE350B;border-color:#DE350B;color:white}
+
+/* ── Signature ──────────────────────────── */
+.sw{border:1px dashed #9CA3AF;border-radius:4px;background:white;position:relative;overflow:hidden;cursor:crosshair;touch-action:none;-webkit-user-select:none;user-select:none;transition:border-color .15s}
+.sw.ok{border:1.5px solid #00875A}
+.sw canvas{display:block;width:100%;height:110px;touch-action:none}
+.sph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#9CA3AF;font-size:12px;font-style:italic;pointer-events:none}
+.scl{position:absolute;top:5px;right:7px;background:rgba(0,0,0,.08);border:none;cursor:pointer;font-size:10px;color:#6B7280;font-weight:600;padding:2px 7px;border-radius:3px}
+.sok{position:absolute;bottom:5px;right:8px;font-size:10px;color:#00875A;font-weight:700;display:none}
+
+/* ── Notice ─────────────────────────────── */
+.notice{background:#FFFBEB;border:1px solid #FDE68A;border-radius:4px;padding:11px 14px;font-size:13px;color:#92400E;margin-bottom:14px}
+.nred{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+
+/* ── Buttons ────────────────────────────── */
+.sa{display:flex;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid #E5E7EB;flex-wrap:wrap}
+.btn{padding:11px 20px;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.2px;font-family:'Inter',sans-serif}
+.bp{background:#0078D4;color:white;flex:2}
+.bp:hover{background:#006BBD}
+.bs{background:white;color:#374151;border:1px solid #D1D5DB;flex:1}
+.bs:hover{background:#F9FAFB;border-color:#9CA3AF}
+.btn:active{opacity:.88}
+
+/* ── Success ────────────────────────────── */
+.succ{display:none;text-align:center;padding:52px 24px}
+.si{width:68px;height:68px;border-radius:50%;background:#00875A;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;color:white}
+.rid{background:#F2F5F7;border-radius:4px;padding:10px 14px;font-family:'Courier New',monospace;font-size:11px;color:#00263E;margin:12px 0 24px;display:inline-block;word-break:break-all;border:1px solid #E5E7EB}
+
+/* ── Spinner ────────────────────────────── */
+.sp{border:3px solid #E5E7EB;border-top:3px solid #0078D4;border-radius:50%;width:18px;height:18px;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Invoice specific ───────────────────── */
+.inv-hdr{display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin-bottom:16px}
+.inv-company{font-weight:900;font-size:16px}
+.inv-addr{font-size:10px;color:#64748b;margin-top:2px}
+.inv-badge{background:white;border:2px solid #e2e8f0;border-radius:8px;padding:8px 14px;font-size:20px;font-weight:900;color:#0078D4;white-space:nowrap}
+.totals-wrap{display:flex;justify-content:flex-end;margin-bottom:14px}
+.totals-box{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px 16px;min-width:200px}
+.totals-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#64748b;align-items:center}
+.totals-due{border-top:2px solid #1e3a8a;padding-top:8px;display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:#00263E}
+
+/* ── Loose Parts specific ───────────────── */
+.lp-hdr{text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:16px}
+.lp-company{font-weight:900;font-size:18px;letter-spacing:2px}
+.lp-sub{font-weight:800;font-size:12px;color:#00263E;letter-spacing:2px;margin-top:3px}
+
+/* ── Misc helpers ───────────────────────── */
+.from-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#475569}
+.bk-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:14px}
+.bk-lbl{font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px}
+.sig-lbl{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:6px}
+.sig-wrap-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-add{padding:8px 12px;background:#E8F4FD;border:1.5px dashed #7BBFDB;border-radius:7px;color:#0078D4;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:14px}
+.btn-rm{background:transparent;border:none;cursor:pointer;color:#94a3b8;font-size:16px;padding:2px 6px}
+
+/* ── Mobile ─────────────────────────────── */
+@media(max-width:520px){
+  .g2{grid-template-columns:1fr}
+  .fc{grid-column:1}
+  .sig-wrap-row{grid-template-columns:1fr}
+  .inv-hdr{flex-direction:column;gap:8px}
+  .card{padding:14px 12px 24px}
+  .sa{flex-direction:column}
+  .sa .btn{flex:none !important;width:100%}
+}
+@media(max-width:380px){
+  .sig-wrap-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
 
 <div class="hdr">
   <div><h1>VENTURE TRAILERS</h1><p>ELECTRONIC DELIVERY SYSTEM</p></div>
   <span class="dbadge" id="dbadge"></span>
 </div>
 
+<!-- Driver Bar -->
 <div class="dbar" id="dbar">
   <div class="dav" id="dav">?</div>
-  <div class="dbar-flex"><div class="dnm" id="dnm"></div><div class="dmt" id="dmt"></div></div>
+  <div style="flex:1"><div class="dnm" id="dnm">Loading...</div><div class="dmt" id="dmt"></div></div>
   <span class="dgrp" id="dgrp"></span>
 </div>
 
-<div class="tabs-wrap">
-  <div class="tabs">
-    <button class="tab active" id="tab0"><span class="ti">📋</span>Delivery</button>
-    <button class="tab" id="tab1"><span class="ti">🧾</span>Invoice</button>
-    <button class="tab" id="tab2"><span class="ti">🔩</span>Parts</button>
-  </div>
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="swT(0,this)"><span class="ti">📋</span>Delivery</button>
+  <button class="tab" onclick="swT(1,this)"><span class="ti">🧾</span>Invoice</button>
+  <button class="tab" onclick="swT(2,this)"><span class="ti">🔩</span>Parts</button>
 </div>
 
 <div class="card">
 
+  <!-- ★ SUCCESS SCREEN -->
   <div class="succ" id="succ">
     <div class="si">✓</div>
-    <h2 class="succ-title">Submitted!</h2>
-    <p class="succ-sub">Saved to MyGeotab • Email will be sent shortly</p>
-    <!-- MyGeotab ID hidden -->
-    <button class="btn bp btn-new" id="btnNew">+ New Form</button>
+    <h2 style="font-size:22px;margin-bottom:8px;color:#1e293b">Submitted!</h2>
+    <p style="color:#64748b;font-size:13px">Saved to MyGeotab • Sheet updated • Email sent</p>
+    <div class="rid" id="riddisp">—</div>
+    <button class="btn bp" style="max-width:200px;margin:0 auto;display:block" onclick="resetF()">+ New Form</button>
   </div>
 
-  <!-- TAB 0: DELIVERY -->
+  <!-- ════════════════════════════════════
+       TAB 0: DELIVERY
+       ════════════════════════════════════ -->
   <div id="t0">
     <div class="notice">⚠️ <strong>Inspect all merchandise.</strong> Damages not replaced unless noted at delivery.</div>
-    <div class="from-box"><strong>FROM:</strong> Venture Trailers • 5301 North Point Blvd, Baltimore MD 21219</div>
+
+    <div class="from-box">
+      <strong>FROM:</strong> Venture Trailers • 5301 North Point Blvd, Baltimore MD 21219
+    </div>
+
+    <!-- Row 1: Date | Invoice No. -->
     <div class="g2">
       <div class="f"><label>Date *</label><input type="date" id="ds-dt"></div>
       <div class="f"><label>Invoice No. *</label><input id="ds-inv" placeholder="132993"></div>
     </div>
+
+    <!-- Consigned To -->
     <div class="sec"><span>🏪</span><h3>Consigned To</h3></div>
     <div class="g2">
+      <!-- Dealer Name: full width -->
       <div class="f fc"><label>Dealer Name *</label><input id="ds-dlr" placeholder="Blue Mountain Marine"></div>
+      <!-- Address: full width -->
       <div class="f fc"><label>Address</label><input id="ds-adr" placeholder="1765 Valley View Dr"></div>
+      <!-- Row: City, State, ZIP | Contact -->
       <div class="f"><label>City, State, ZIP</label><input id="ds-cty" placeholder="Bangor PA 18013"></div>
       <div class="f"><label>Contact</label><input id="ds-cnt" placeholder="Ryan"></div>
+      <!-- Row: Phone | Dealer Email -->
       <div class="f"><label>Phone</label><input type="tel" id="ds-ph" placeholder="610-599-3628"></div>
       <div class="f"><label>Dealer Email</label><input type="email" id="ds-em" placeholder="dealer@company.com"></div>
     </div>
-    <!-- Driver Info: hidden fields only — section hidden, data saved in background -->
-    <div id="drv-section" style="display:none">
+
+    <!-- Driver Info -->
     <div class="sec"><span>👤</span><h3>Driver Info <span class="abadge">⚡ Auto</span></h3></div>
     <div class="g2">
       <div class="f"><label>Driver Name</label><input id="ds-drv" readonly placeholder="Auto from Geotab"></div>
@@ -68,36 +220,65 @@
       <div class="f"><label>Vehicle ID</label><input id="ds-vid" readonly placeholder="Auto"></div>
       <div class="f"><label>Vehicle Name</label><input id="ds-vnm" readonly placeholder="Auto"></div>
     </div>
-    </div>
+
+    <!-- Payment -->
     <div class="sec"><span>💰</span><h3>Payment</h3></div>
     <div class="g2">
-      <div class="f"><label>C.O.D. Amount ($)</label><input type="number" id="ds-cod" placeholder="0.00" step="0.01"></div>
-      <div class="f"><label>Type</label>
-        <div class="cg" id="payment-types">
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-cod" value="COD" checked> C.O.D.</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-fp" value="Floor Plan"> Floor Plan</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-pt" value="Parts"> Parts</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-rv" value="Return to Vendor"> Return to Vendor</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-wn" value="Warranty"> Warranty</div>
+      <!-- Col 1: C.O.D. Amount -->
+      <div class="f">
+        <label>C.O.D. Amount ($)</label>
+        <input type="number" id="ds-cod" placeholder="0.00" step="0.01">
+      </div>
+      <!-- Col 2: Type (radio buttons — single selection) -->
+      <div class="f">
+        <label>Type</label>
+        <div class="cg">
+          <label class="ci"><input type="radio" name="paytype" value="COD" checked> C.O.D.</label>
+          <label class="ci"><input type="radio" name="paytype" value="Floor Plan"> Floor Plan</label>
+          <label class="ci"><input type="radio" name="paytype" value="Parts"> Parts</label>
+          <label class="ci"><input type="radio" name="paytype" value="Return to Vendor"> Return to Vendor</label>
+          <label class="ci"><input type="radio" name="paytype" value="Warranty"> Warranty</label>
         </div>
       </div>
     </div>
+
+    <!-- Parts Condition -->
     <div class="sec"><span>🔧</span><h3>Parts Condition</h3></div>
     <div class="tw">
-      <table><thead><tr><th>Part</th><th>Model</th><th class="tc">Dmg</th><th class="tc">Short</th><th>Notes</th></tr></thead>
-      <tbody id="ptb"></tbody></table>
+      <table>
+        <thead>
+          <tr>
+            <th>Part</th>
+            <th>Model</th>
+            <th style="text-align:center">Dmg</th>
+            <th style="text-align:center">Short</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="ptb"></tbody>
+      </table>
     </div>
-    <div class="notice notice-mb">
-      <label class="ci ci-lg"><input type="checkbox" id="ck-ac"> ACCEPTED — product accepted as is, except where noted.</label>
+
+    <div class="notice" style="margin-bottom:10px">
+      <label class="ci" style="font-size:13px;font-weight:700">
+        <input type="checkbox" id="ck-ac"> ACCEPTED — product accepted as is, except where noted.
+      </label>
     </div>
+
     <div class="bk-box">
       <div class="bk-lbl">Received "You and Your Trailer" booklets?</div>
       <div class="pills">
-        <div class="pill" id="py">✅ Yes</div>
-        <div class="pill" id="pn">❌ No</div>
+        <div class="pill" id="py" onclick="setBk('Y')">✅ Yes</div>
+        <div class="pill" id="pn" onclick="setBk('N')">❌ No</div>
       </div>
     </div>
-    <div class="f mb14"><label>Comments</label><textarea id="ds-cm" placeholder="Any notes..."></textarea></div>
+
+    <div class="f" style="margin-bottom:14px">
+      <label>Comments</label>
+      <textarea id="ds-cm" placeholder="Any notes..."></textarea>
+    </div>
+
+    <!-- Signatures -->
     <div class="sec"><span>✍️</span><h3>Signatures</h3></div>
     <div class="sig-wrap-row">
       <div>
@@ -105,7 +286,7 @@
         <div class="sw" id="sig-driver-wrap">
           <canvas id="sig-driver"></canvas>
           <div class="sph" id="sig-driver-ph">Sign here ✍️</div>
-          <button class="scl" id="clr-driver">Clear</button>
+          <button class="scl" onclick="clrS('sig-driver')">Clear</button>
           <div class="sok" id="sig-driver-ok">✓ Signed</div>
         </div>
       </div>
@@ -114,56 +295,103 @@
         <div class="sw" id="sig-consignee-wrap">
           <canvas id="sig-consignee"></canvas>
           <div class="sph" id="sig-consignee-ph">Sign here ✍️</div>
-          <button class="scl" id="clr-consignee">Clear</button>
+          <button class="scl" onclick="clrS('sig-consignee')">Clear</button>
           <div class="sok" id="sig-consignee-ok">✓ Signed</div>
         </div>
       </div>
     </div>
-    <div class="sa">
-      <button class="btn bs" id="btnDraft">💾 Draft</button>
-      <button class="btn bp" id="subbtn">📤 Submit &amp; Send to Dealer</button>
-    </div>
-  </div>
 
-  <!-- TAB 1: INVOICE -->
-  <div id="t1" class="tab-hidden">
+    <div class="sa">
+      <button class="btn bs">💾 Draft</button>
+      <button class="btn bp" id="subbtn" onclick="subDelivery()">📤 Submit &amp; Send to Dealer</button>
+    </div>
+  </div><!-- /t0 -->
+
+  <!-- ════════════════════════════════════
+       TAB 1: INVOICE
+       ════════════════════════════════════ -->
+  <div id="t1" style="display:none">
+
+    <!-- Company header -->
     <div class="inv-hdr">
-      <div><div class="inv-company">VENTURE TRAILERS, INC.</div><div class="inv-addr">5301 North Point Blvd • Baltimore MD 21219</div></div>
+      <div>
+        <div class="inv-company">VENTURE TRAILERS, INC.</div>
+        <div class="inv-addr">5301 North Point Blvd • Baltimore MD 21219</div>
+      </div>
       <div class="inv-badge">INVOICE</div>
     </div>
+
+    <!-- Row 1: Date | Acct No. -->
     <div class="g2">
       <div class="f"><label>Date</label><input type="date" id="id"></div>
       <div class="f"><label>Acct No.</label><input id="ia" value="3818"></div>
+    </div>
+
+    <!-- Row 2: Invoice # (full width) -->
+    <div class="g2" style="margin-top:12px">
       <div class="f fc"><label>Invoice #</label><input id="ino" placeholder="132993"></div>
     </div>
-    <div class="g2 mt10">
+
+    <!-- Row 3: Bill To | Ship To -->
+    <div class="g2" style="margin-top:12px">
       <div class="f"><label>Bill To</label><textarea id="ibt" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
       <div class="f"><label>Ship To</label><textarea id="ist" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
     </div>
-    <div class="inv-grid-4 mt10">
+
+    <!-- Row 4: PO # | Terms -->
+    <!-- Row 5: Sales Order | Shipping Method -->
+    <div class="g2" style="margin-top:12px">
       <div class="f"><label>PO #</label><input id="ipo"></div>
       <div class="f"><label>Terms</label><input id="itr" value="Due on receipt"></div>
       <div class="f"><label>Sales Order</label><input id="iso"></div>
       <div class="f"><label>Shipping Method</label><input id="ism" placeholder="Marine Freight LLC"></div>
     </div>
+
+    <!-- Line Items -->
     <div class="sec"><span>📦</span><h3>Line Items</h3></div>
-    <div class="tw"><table><thead><tr><th>Item</th><th>Qty</th><th>Description</th><th>Unit Price</th><th>Total</th><th></th></tr></thead><tbody id="itb"></tbody></table></div>
-    <button class="btn-add" id="btnAddIR">+ Add Line</button>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Qty</th><th>Description</th><th>Unit Price</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody id="itb"></tbody>
+      </table>
+    </div>
+    <button class="btn-add" onclick="addIR()">+ Add Line</button>
+
+    <!-- Totals -->
     <div class="totals-wrap">
       <div class="totals-box">
-        <div class="totals-row"><span>Shipping</span><input id="ish" class="ish-input"></div>
-        <div class="totals-due"><span>Amount Due</span><span id="itot">$0.00</span></div>
+        <div class="totals-row">
+          <span>Shipping</span>
+          <input id="ish" style="width:80px;text-align:right;padding:3px 6px;border:1.5px solid #e2e8f0;border-radius:5px;font-size:12px" oninput="calcT()">
+        </div>
+        <div class="totals-due">
+          <span>Amount Due</span>
+          <span id="itot">$0.00</span>
+        </div>
       </div>
     </div>
-    <div class="sa"><button class="btn bs">💾 Draft</button><button class="btn bp" id="btnSubInv">📤 Submit Invoice</button></div>
-  </div>
 
-  <!-- TAB 2: LOOSE PARTS -->
-  <div id="t2" class="tab-hidden">
+    <div class="sa">
+      <button class="btn bs">💾 Draft</button>
+      <button class="btn bp" onclick="subInv()">📤 Submit Invoice</button>
+    </div>
+  </div><!-- /t1 -->
+
+  <!-- ════════════════════════════════════
+       TAB 2: LOOSE PARTS
+       ════════════════════════════════════ -->
+  <div id="t2" style="display:none">
+
     <div class="lp-hdr">
       <div class="lp-company">VENTURE TRAILERS</div>
       <div class="lp-sub">LOOSE PARTS CHECK-IN</div>
     </div>
+
+    <!-- Row 1: Sales Order | Invoice # -->
+    <!-- Row 2: PL# | TRK# -->
+    <!-- Row 3: Dealer | Date -->
     <div class="g2">
       <div class="f"><label>Sales Order #</label><input id="ls"></div>
       <div class="f"><label>Invoice #</label><input id="li"></div>
@@ -172,19 +400,44 @@
       <div class="f"><label>Dealer</label><input id="ld"></div>
       <div class="f"><label>Date</label><input type="date" id="ldt"></div>
     </div>
+
+    <!-- Parts List -->
     <div class="sec"><span>🔩</span><h3>Parts List</h3></div>
-    <div class="tw"><table><thead><tr><th>Loc</th><th>Qty</th><th>Part</th><th class="tc">Pulled</th><th class="tc">Loaded</th><th class="tc">N/C</th><th class="tc">COD</th><th></th></tr></thead><tbody id="ltb"></tbody></table></div>
-    <button class="btn-add" id="btnAddLR">+ Add Row</button>
-    <div class="f mb14"><label>Comments</label><textarea id="lc"></textarea></div>
-    <div class="notice nred notice-center">⚠️ MUST BE COMPLETED AT TIME OF DELIVERY</div>
-    <div class="sec mt14"><span>✍️</span><h3>Signatures</h3></div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Loc</th><th>Qty</th><th>Part</th>
+            <th style="text-align:center">Pulled</th>
+            <th style="text-align:center">Loaded</th>
+            <th style="text-align:center">N/C</th>
+            <th style="text-align:center">COD</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ltb"></tbody>
+      </table>
+    </div>
+    <button class="btn-add" onclick="addLR()">+ Add Row</button>
+
+    <div class="f" style="margin-bottom:14px">
+      <label>Comments</label>
+      <textarea id="lc"></textarea>
+    </div>
+
+    <div class="notice nred" style="text-align:center;font-weight:800;margin-bottom:14px">
+      ⚠️ MUST BE COMPLETED AT TIME OF DELIVERY
+    </div>
+
+    <!-- Signatures -->
+    <div class="sec"><span>✍️</span><h3>Signatures</h3></div>
     <div class="sig-wrap-row">
       <div>
         <div class="sig-lbl">Driver</div>
         <div class="sw" id="sig-lpd-wrap">
           <canvas id="sig-lpd"></canvas>
           <div class="sph" id="sig-lpd-ph">Sign here ✍️</div>
-          <button class="scl" id="clr-lpd">Clear</button>
+          <button class="scl" onclick="clrS('sig-lpd')">Clear</button>
           <div class="sok" id="sig-lpd-ok">✓ Signed</div>
         </div>
       </div>
@@ -193,17 +446,334 @@
         <div class="sw" id="sig-lpr-wrap">
           <canvas id="sig-lpr"></canvas>
           <div class="sph" id="sig-lpr-ph">Sign here ✍️</div>
-          <button class="scl" id="clr-lpr">Clear</button>
+          <button class="scl" onclick="clrS('sig-lpr')">Clear</button>
           <div class="sok" id="sig-lpr-ok">✓ Signed</div>
         </div>
       </div>
     </div>
-    <div class="sa"><button class="btn bs">💾 Draft</button><button class="btn bp" id="btnSubParts">📤 Submit Parts Form</button></div>
-  </div>
+
+    <div class="sa">
+      <button class="btn bs">💾 Draft</button>
+      <button class="btn bp" onclick="subParts()">📤 Submit Parts Form</button>
+    </div>
+  </div><!-- /t2 -->
 
 </div><!-- /card -->
 
-</div><!-- /vt-app -->
+<script>
+// ============================================================
+// VENTURE TRAILERS — DeliveryForm.html
+// Submit via api.call("Add", AddInData) — no fetch, no CORS
+// ============================================================
+const ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+const PARTS = ["Tail Light-R","Tail Light-L","Tail Light-Lens","Marker Light","Tag Bracket","Tongue Jack","Winch Stand","Rollers","Bunks","Fenders","Tires","Actuator","Frame Rails","Tongue"];
+let bklt = "", SS = {};
+const DRV = {name:"",userId:"",email:"",groupId:"",groupName:"",groups:[],vehicleId:"",vehicleName:"",plate:""};
+let _api = null;
 
+// ── Geotab Add-In Entry Point ──────────────────────────────
+if (typeof geotab !== "undefined") {
+  geotab.addin.ventureDelivery = function() {
+    return {
+      initialize: function(api, state, callback) {
+        _api = api;
+        api.getSession(function(sess) {
+          if (!sess) { callback(); return; }
+          api.call("Get", {typeName:"User", search:{userName:sess.userName}}, function(us) {
+            if (!us || !us.length) { callback(); return; }
+            const u = us[0];
+            const info = {
+              name: ((u.firstName||"") + " " + (u.lastName||"")).trim(),
+              userId: u.id || "",
+              email: u.name || sess.userName,
+              groups: (u.companyGroups||[]).map(g => g.id),
+              groupId: (u.companyGroups && u.companyGroups[0]) ? u.companyGroups[0].id : "",
+              vehicleId:"", vehicleName:"", plate:""
+            };
+            if (info.groupId) {
+              api.call("Get", {typeName:"Group", search:{id:info.groupId}}, function(gs) {
+                info.groupName = (gs && gs[0]) ? gs[0].name || "" : "";
+                api.call("Get", {typeName:"DeviceStatusInfo", search:{userSearch:{name:sess.userName}}}, function(dsi) {
+                  if (dsi && dsi[0] && dsi[0].device) {
+                    info.vehicleId = dsi[0].device.id || "";
+                    info.vehicleName = dsi[0].device.name || "";
+                    info.plate = dsi[0].device.licensePlate || "";
+                  }
+                  setDrv(info); callback();
+                }, function(){ setDrv(info); callback(); });
+              }, function(){ setDrv(info); callback(); });
+            } else { setDrv(info); callback(); }
+          }, function(e){ console.error("Driver load error:", e); callback(); });
+        });
+      },
+      focus: function(api, state) { _api = api; },
+      blur:  function(api, state) {}
+    };
+  };
+} else {
+  window._devMode = true;
+}
+
+function setDrv(info) {
+  Object.assign(DRV, info);
+  if (info.name) {
+    const db = document.getElementById("dbar");
+    if (db) db.style.display = "flex";
+    const init = info.name.split(" ").map(w => w[0] || "").join("").toUpperCase().slice(0,2) || "D";
+    document.getElementById("dav").textContent = init;
+    document.getElementById("dnm").textContent = info.name;
+    document.getElementById("dmt").textContent = (info.email||"") + (info.vehicleName ? " • " + info.vehicleName : "");
+    document.getElementById("dgrp").textContent = "📍 " + (info.groupName || "No Group");
+  }
+  const g = id => document.getElementById(id);
+  if (g("ds-drv")) g("ds-drv").value = info.name || "";
+  if (g("ds-grp")) g("ds-grp").value = info.groupName || "";
+  if (g("ds-vid")) g("ds-vid").value = info.vehicleId || "";
+  if (g("ds-vnm")) g("ds-vnm").value = info.vehicleName || "";
+}
+
+window.onload = function() {
+  const td = new Date().toISOString().split("T")[0];
+  document.querySelectorAll('input[type="date"]').forEach(i => i.value = td);
+  document.getElementById("dbadge").textContent = "📅 " + new Date().toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+  buildPT();
+  addIR(); addIR();
+  for (let i = 0; i < 10; i++) addLR();
+  ["sig-driver","sig-consignee","sig-lpd","sig-lpr"].forEach(initSig);
+};
+
+// ── Tab switch ─────────────────────────────────────────────
+function swT(n, btn) {
+  document.getElementById("succ").style.display = "none";
+  [0,1,2].forEach(i => {
+    const el = document.getElementById("t" + i);
+    if (el) el.style.display = i === n ? "block" : "none";
+  });
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+// ── Parts condition table ──────────────────────────────────
+function buildPT() {
+  const tb = document.getElementById("ptb"); tb.innerHTML = "";
+  PARTS.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td style="padding:5px 7px;font-weight:600;white-space:nowrap;font-size:11px">${p}</td>
+      <td><input type="text" placeholder="Model"></td>
+      <td class="tc"><input type="checkbox" class="cbt"></td>
+      <td class="tc"><input type="checkbox" class="cbt"></td>
+      <td><input type="text" placeholder="Notes"></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ── Invoice rows ───────────────────────────────────────────
+let irc = 0;
+function addIR() {
+  irc++;
+  const id = "ir" + irc;
+  const tr = document.createElement("tr"); tr.id = id;
+  tr.innerHTML = `<td><input type="text" style="width:80px"></td>
+    <td><input type="number" value="1" style="width:44px"></td>
+    <td><input type="text" style="min-width:150px;width:100%"></td>
+    <td><input type="text" style="width:80px" oninput="calcT()"></td>
+    <td><input type="text" style="width:80px" oninput="calcT()"></td>
+    <td><button class="btn-rm" onclick="document.getElementById('${id}').remove();calcT()">✕</button></td>`;
+  document.getElementById("itb").appendChild(tr);
+}
+
+function calcT() {
+  let s = 0;
+  document.querySelectorAll("#itb tr").forEach(tr => {
+    const t = tr.querySelector("td:nth-child(5) input");
+    if (t) s += parseFloat(t.value) || 0;
+  });
+  const sh = parseFloat(document.getElementById("ish")?.value) || 0;
+  document.getElementById("itot").textContent = "$" + (s + sh).toFixed(2);
+}
+
+// ── Loose parts rows ───────────────────────────────────────
+let lrc = 0;
+function addLR() {
+  lrc++;
+  const id = "lr" + lrc;
+  const tr = document.createElement("tr"); tr.id = id;
+  tr.innerHTML = `<td><input type="text" style="width:50px"></td>
+    <td><input type="text" style="width:38px"></td>
+    <td><input type="text" style="min-width:140px;width:100%" placeholder="Part"></td>
+    <td class="tc"><input type="checkbox" class="cbt"></td>
+    <td class="tc"><input type="checkbox" class="cbt"></td>
+    <td class="tc"><input type="checkbox" class="cbt"></td>
+    <td class="tc"><input type="checkbox" class="cbt"></td>
+    <td><button class="btn-rm" onclick="document.getElementById('${id}').remove()">✕</button></td>`;
+  document.getElementById("ltb").appendChild(tr);
+}
+
+// ── Booklet pills ──────────────────────────────────────────
+function setBk(v) {
+  bklt = v;
+  document.getElementById("py").className = "pill" + (v === "Y" ? " gn" : "");
+  document.getElementById("pn").className = "pill" + (v === "N" ? " rd" : "");
+}
+
+// ── Signature pad ──────────────────────────────────────────
+function initSig(id) {
+  const c = document.getElementById(id); if (!c) return;
+  const ctx = c.getContext("2d");
+  SS[id] = {drawing:false, signed:false};
+  c.style.touchAction = "none";
+
+  function rsz() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = c.parentElement.clientWidth || 300;
+    const h = 110;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + "px"; c.style.height = h + "px";
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
+  }
+  setTimeout(rsz, 100);
+  window.addEventListener("resize", rsz);
+
+  const pos = e => {
+    const r = c.getBoundingClientRect();
+    const s = e.touches ? e.touches[0] : e;
+    return {x: s.clientX - r.left, y: s.clientY - r.top};
+  };
+
+  c.addEventListener("mousedown", e => { SS[id].drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  c.addEventListener("mousemove", e => { if (!SS[id].drawing) return; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#1e293b"; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+  c.addEventListener("mouseup",   () => mkS(id));
+  c.addEventListener("mouseleave", () => { SS[id].drawing = false; });
+  c.addEventListener("touchstart", e => { e.preventDefault(); SS[id].drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
+  c.addEventListener("touchmove",  e => { e.preventDefault(); if (!SS[id].drawing) return; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#1e293b"; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, {passive:false});
+  c.addEventListener("touchend",   () => mkS(id));
+}
+
+function mkS(id) {
+  SS[id].drawing = false; SS[id].signed = true;
+  document.getElementById(id + "-wrap").classList.add("ok");
+  const ok = document.getElementById(id + "-ok");
+  const ph = document.getElementById(id + "-ph");
+  if (ok) ok.style.display = "block";
+  if (ph) ph.style.display = "none";
+}
+function clrS(id) {
+  const c = document.getElementById(id); if (!c) return;
+  c.getContext("2d").clearRect(0, 0, c.width, c.height);
+  SS[id] = {drawing:false, signed:false};
+  document.getElementById(id + "-wrap").classList.remove("ok");
+  const ok = document.getElementById(id + "-ok");
+  const ph = document.getElementById(id + "-ph");
+  if (ok) ok.style.display = "none";
+  if (ph) ph.style.display = "block";
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function gv(id){ return (document.getElementById(id)?.value || "").trim(); }
+function gc(id){ return document.getElementById(id)?.checked || false; }
+
+// ── Collect delivery data ──────────────────────────────────
+function collectD() {
+  const parts = [], dmg = [];
+  document.querySelectorAll("#ptb tr").forEach(tr => {
+    const c = tr.querySelectorAll("td"); if (!c.length) return;
+    const pt = c[0].textContent.trim();
+    const dm = c[2].querySelector("input")?.checked || false;
+    const sh = c[3].querySelector("input")?.checked || false;
+    if (dm) dmg.push(pt);
+    parts.push({part:pt, model:c[1].querySelector("input")?.value||"", damaged:dm, shortShipped:sh, notes:c[4].querySelector("input")?.value||""});
+  });
+  // Radio button — single selection
+  const ptEl = document.querySelector('input[name="paytype"]:checked');
+  const paymentType = ptEl ? ptEl.value : "COD";
+
+  return {
+    formType:"delivery_sheet", invoiceNo:gv("ds-inv"), dealer:gv("ds-dlr"),
+    dealerAddress:gv("ds-adr") + " " + gv("ds-cty"), dealerContact:gv("ds-cnt"),
+    dealerPhone:gv("ds-ph"), dealerEmail:gv("ds-em"), date:gv("ds-dt"),
+    codAmount:parseFloat(gv("ds-cod")) || 0, paymentType:paymentType,
+    accepted:gc("ck-ac"), booklets:bklt, comments:gv("ds-cm"),
+    driverSigned:SS["sig-driver"]?.signed || false,
+    consigneeSigned:SS["sig-consignee"]?.signed || false,
+    damaged:dmg.length > 0, damagedParts:dmg, parts:parts, status:"Submitted",
+    driverName:DRV.name, driverUserId:DRV.userId, driverEmail:DRV.email,
+    driverGroupId:DRV.groupId, driverGroupName:DRV.groupName, driverGroups:DRV.groups,
+    vehicleId:DRV.vehicleId, vehicleName:DRV.vehicleName, vehicleLicensePlate:DRV.plate
+  };
+}
+
+// ── Submit to API ──────────────────────────────────────────
+function submitToAPI(data) {
+  return new Promise(function(resolve, reject) {
+    if (!_api) { reject(new Error("Not connected to MyGeotab.")); return; }
+    _api.call("Add",
+      {typeName:"AddInData", entity:{addInId:ADDIN_ID, groups:[{id:"GroupCompanyId"}], details:data}},
+      function(id){ resolve({success:true, recordId:id}); },
+      function(err){ reject(new Error(err.message || JSON.stringify(err))); }
+    );
+  });
+}
+
+async function subDelivery() {
+  const data = collectD();
+  if (!data.invoiceNo || !data.dealer) { alert("Invoice # aur Dealer name required!"); return; }
+  const btn = document.getElementById("subbtn");
+  btn.innerHTML = '<span class="sp"></span>Submitting...'; btn.disabled = true;
+  try {
+    const r = await submitToAPI(data);
+    btn.innerHTML = "📤 Submit & Send to Dealer"; btn.disabled = false;
+    if (r.success) showSucc(r.recordId); else alert("Error: " + r.message);
+  } catch(e) { btn.innerHTML = "📤 Submit & Send to Dealer"; btn.disabled = false; alert("Network error: " + e.message); }
+}
+
+async function subInv() {
+  const data = {formType:"invoice", invoiceNo:gv("ino"), date:gv("id"), acctNo:gv("ia"),
+    billTo:gv("ibt"), shipTo:gv("ist"), po:gv("ipo"), terms:gv("itr"),
+    salesOrder:gv("iso"), shippingMethod:gv("ism"),
+    dealer:gv("ibt").split("\n")[0],
+    driverName:DRV.name, driverGroupName:DRV.groupName,
+    driverUserId:DRV.userId, driverGroupId:DRV.groupId, status:"Submitted"};
+  try { const r = await submitToAPI(data); if (r.success) showSucc(r.recordId); else alert("Error: " + r.message); }
+  catch(e) { alert(e.message); }
+}
+
+async function subParts() {
+  const rows = [];
+  document.querySelectorAll("#ltb tr").forEach(tr => {
+    const c = tr.querySelectorAll("td"); if (!c.length) return;
+    const pt = c[2].querySelector("input")?.value || ""; if (!pt) return;
+    const cbs = tr.querySelectorAll('input[type="checkbox"]');
+    rows.push({location:c[0].querySelector("input")?.value||"", qty:c[1].querySelector("input")?.value||"",
+      part:pt, pulled:cbs[0]?.checked, loaded:cbs[1]?.checked, nc:cbs[2]?.checked, cod:cbs[3]?.checked});
+  });
+  const data = {formType:"loose_parts", salesOrder:gv("ls"), invoiceNo:gv("li"),
+    pl:gv("lpl"), trk:gv("lt"), dealer:gv("ld"), date:gv("ldt"), comments:gv("lc"),
+    driverSigned:SS["sig-lpd"]?.signed||false, receiverSigned:SS["sig-lpr"]?.signed||false,
+    driverName:DRV.name, driverGroupName:DRV.groupName, driverUserId:DRV.userId,
+    driverGroupId:DRV.groupId, vehicleId:DRV.vehicleId, vehicleName:DRV.vehicleName,
+    parts:rows, status:"Submitted"};
+  try { const r = await submitToAPI(data); if (r.success) showSucc(r.recordId); else alert("Error: " + r.message); }
+  catch(e) { alert(e.message); }
+}
+
+function showSucc(id) {
+  [0,1,2].forEach(i => { const el = document.getElementById("t"+i); if (el) el.style.display = "none"; });
+  document.getElementById("riddisp").textContent = "MyGeotab ID: " + (id || "—");
+  document.getElementById("succ").style.display = "block";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function resetF() {
+  document.getElementById("succ").style.display = "none";
+  document.getElementById("t0").style.display = "block";
+  document.getElementById("t1").style.display = "none";
+  document.getElementById("t2").style.display = "none";
+  document.querySelectorAll(".tab").forEach((b,i) => b.classList.toggle("active", i===0));
+  ["sig-driver","sig-consignee","sig-lpd","sig-lpr"].forEach(clrS);
+  bklt = "";
+  document.getElementById("py").className = "pill";
+  document.getElementById("pn").className = "pill";
+}
+</script>
 </body>
 </html>
