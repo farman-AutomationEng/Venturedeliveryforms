@@ -271,6 +271,14 @@ function openD(id){
   const parts=(r.parts||[]).filter(p=>p.part);
   const init=(r.driverName||"?").split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||"?";
 
+  // Debug: log signature fields to browser console (F12)
+  console.log("[VentureReports] Record ID:", id);
+  console.log("[VentureReports] driverSigned:", r.driverSigned);
+  console.log("[VentureReports] consigneeSigned:", r.consigneeSigned);
+  console.log("[VentureReports] driverSignature type:", typeof r.driverSignature, "length:", (r.driverSignature||"").length);
+  console.log("[VentureReports] consigneeSignature type:", typeof r.consigneeSignature, "length:", (r.consigneeSignature||"").length);
+  console.log("[VentureReports] driverSignature preview:", (r.driverSignature||"").substring(0,50));
+
   // ── CSS vars as JS strings ──
   const S={
     page:     "font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1A2432;background:#F2F5F7;min-height:100vh",
@@ -321,12 +329,16 @@ function openD(id){
   // Helper: signature box
   function sigBox(label, base64, signed){
     let inner="";
-    // base64 check: must start with "data:image" to be valid
-    const hasImg = base64 && typeof base64 === "string" && base64.indexOf("data:image") === 0 && base64.length > 200;
+    // Any non-empty string that looks like base64/dataURL = try to show as image
+    const hasImg = base64 && typeof base64 === "string" && base64.length > 30;
     if(hasImg){
-      inner=`<img src="${base64}" alt="${label} signature" style="${S.sigImg}">`;
+      // onerror: if image fails to load, replace with signed/not-signed text
+      const fallback = signed
+        ? `this.parentNode.innerHTML='<div style=\\"${S.sigOk}\\">✓ Signed</div>'`
+        : `this.parentNode.innerHTML='<div style=\\"${S.sigNone}\\">— Not Signed —</div>'`;
+      inner=`<img src="${base64}" alt="${label} signature" style="${S.sigImg}" onerror="${fallback}">`;
     }else if(signed){
-      inner=`<div style="${S.sigOk}">✓ Signed (image not captured)</div>`;
+      inner=`<div style="${S.sigOk}">✓ Signed</div>`;
     }else{
       inner=`<div style="${S.sigNone}">— Not Signed —</div>`;
     }
