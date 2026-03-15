@@ -262,3 +262,8 @@ tr.row-link:hover td{background:#EFF6FF !important}
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ── Payment type rows (iOS WebView checkbox fix) ── */
+.ci-row{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:#374151}
+.ci-row span{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ci-row input[type="checkbox"]{width:18px;height:18px;accent-color:#0078D4;cursor:pointer;flex-shrink:0}
