@@ -6,73 +6,11 @@
 <title>Dynasty Delivery Reports</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-/* ── View button ── */
 .btn-view{padding:4px 10px;background:#0078D4;color:white;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-view:hover{background:#006BBD}
 .drv-name{font-weight:600;font-size:12px}
 .drv-grp{font-size:10px;color:#94a3b8;margin-top:1px}
-
-/* ── Inline Detail View ── */
-#detail-view{display:none;padding:0 0 40px}
-
-.det-back{
-  display:flex;align-items:center;gap:8px;
-  padding:12px 18px;
-  background:#f8fafc;
-  border-bottom:2px solid #e2e8f0;
-  margin-bottom:0;
-}
-.btn-back{
-  padding:7px 14px;background:white;color:#374151;
-  border:1px solid #D1D5DB;border-radius:4px;
-  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
-  display:flex;align-items:center;gap:6px;
-}
-.btn-back:hover{background:#f1f5f9;border-color:#9CA3AF}
-.det-title{font-size:14px;font-weight:700;color:#00263E}
-.det-sub{font-size:11px;color:#64748b;margin-left:4px}
-
-.det-body{padding:18px}
-
-/* Detail card sections */
-.det-sec{margin-bottom:20px}
-.det-sec-hdr{
-  font-size:11px;font-weight:700;color:#00263E;
-  text-transform:uppercase;letter-spacing:.7px;
-  padding-bottom:8px;border-bottom:2px solid #E5E7EB;
-  margin-bottom:12px;display:flex;align-items:center;gap:6px;
-}
-.det-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px}
-@media(max-width:600px){.det-grid{grid-template-columns:1fr 1fr}}
-.det-field strong{display:block;font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px}
-.det-field span{font-size:12px;color:#1A2432;font-weight:500}
-
-/* Driver card in detail */
-.drv-card{
-  background:linear-gradient(135deg,#00263E,#003554);
-  border-radius:8px;padding:14px 16px;margin-bottom:20px;
-  display:flex;align-items:center;gap:14px;
-}
-.drv-av{width:40px;height:40px;border-radius:50%;background:#0078D4;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:800;flex-shrink:0}
-.drv-info-name{color:white;font-size:14px;font-weight:800}
-.drv-info-email{color:#7BBFDB;font-size:11px;margin-top:2px}
-.drv-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.drv-tag{background:rgba(255,255,255,.12);color:#D1FAE5;font-size:9px;font-weight:600;padding:2px 8px;border-radius:3px}
-
-/* Parts mini table */
-.mini-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
-.mini-tbl thead tr{background:#F1F5F9}
-.mini-tbl th{padding:5px 8px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
-.mini-tbl td{padding:5px 8px;border-top:1px solid #F3F4F6}
-.mini-tbl tr.dmg-row td{background:#FFF7ED}
-
-/* Signature boxes */
-.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
-.sig-box{border:1px solid #E5E7EB;border-radius:6px;overflow:hidden;background:#FAFAFA}
-.sig-box-lbl{font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase;padding:6px 10px;background:#F3F4F6;border-bottom:1px solid #E5E7EB;letter-spacing:.6px}
-.sig-box img{width:100%;height:70px;object-fit:contain;display:block;background:white;padding:4px}
-.sig-none{height:70px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:11px;font-style:italic}
-.sig-signed{height:70px;display:flex;align-items:center;justify-content:center;color:#00875A;font-size:11px;font-weight:700}
+#detail-view{display:none}
 </style>
 </head>
 <body>
@@ -94,17 +32,13 @@
 
 <div class="err-box" id="errbox"></div>
 
-<!-- ══════════════════════════════════
-     LIST VIEW
-     ══════════════════════════════════ -->
+<!-- LIST VIEW -->
 <div id="list-view">
   <div class="filters">
     <div class="ff"><label>From</label><input type="date" id="f-from"></div>
     <div class="ff"><label>To</label><input type="date" id="f-to"></div>
     <div class="ff"><label>Group</label>
-      <select id="f-grp" onchange="onGrpChange()">
-        <option value="all">All Groups</option>
-      </select>
+      <select id="f-grp" onchange="onGrpChange()"><option value="all">All Groups</option></select>
     </div>
     <div class="ff"><label>Driver</label>
       <select id="f-drv"><option value="all">All Drivers</option></select>
@@ -163,69 +97,47 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     DETAIL VIEW (inline, no panel)
-     ══════════════════════════════════ -->
-<div id="detail-view">
-
-  <!-- Back bar -->
-  <div class="det-back">
-    <button class="btn-back" onclick="showList()">← Back to List</button>
-    <span class="det-title" id="det-title">—</span>
-    <span class="det-sub" id="det-sub"></span>
-  </div>
-
-  <div class="det-body" id="det-body"></div>
-
-</div>
+<!-- DETAIL VIEW — all inline styles, MyGeotab CSS proof -->
+<div id="detail-view"></div>
 
 <script>
 // ============================================================
-// DYNASTY DELIVERY REPORTS — ReportsPage.html
-// Inline detail view — no fixed/absolute panel — iframe safe
+// DYNASTY DELIVERY REPORTS
 // ============================================================
-
 let ALL=[], FILT=[], DRIVERS=[], SK="date", SD=-1, PG=1;
-let _api = null;
+let _api=null;
 const PP=25;
-const ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+const ADDIN_ID="azXOKPvAnSnyIdUK2xZutWA";
 
-// ── Geotab Add-In Entry Point ─────────────────────────────
-geotab.addin.ventureReports = function() {
-  return {
-    initialize: function(api, state, callback) {
-      _api = api;
+geotab.addin.ventureReports=function(){
+  return{
+    initialize:function(api,state,callback){
+      _api=api;
       setGeo("ok","dynasty_communications");
       api.call("Get",{typeName:"Group"},function(gs){
         const sel=document.getElementById("f-grp");
-        const valid=(gs||[]).filter(g=>
-          g.id&&
-          !["GroupCompanyId","GroupEverythingId","GroupNothingId"].includes(g.id)&&
-          !g.id.startsWith("Group")
-        );
-        valid.sort((a,b)=>(a.name||"").localeCompare(b.name||""))
-          .forEach(g=>{ sel.innerHTML+=`<option value="${g.id}">${g.name||g.id}</option>`; });
+        (gs||[]).filter(g=>g.id&&!["GroupCompanyId","GroupEverythingId","GroupNothingId"].includes(g.id)&&!g.id.startsWith("Group"))
+          .sort((a,b)=>(a.name||"").localeCompare(b.name||""))
+          .forEach(g=>{sel.innerHTML+=`<option value="${g.id}">${g.name||g.id}</option>`;});
       },function(){});
       api.call("Get",{typeName:"User",search:{isActive:true}},function(us){
-        DRIVERS=(us||[]).filter(u=>!u.isSystemUser);
-        popDrv("all");
+        DRIVERS=(us||[]).filter(u=>!u.isSystemUser); popDrv("all");
       },function(){});
       callback();
     },
-    focus: function(api,state){ _api=api; loadData(); },
-    blur:  function(api,state){}
+    focus:function(api,state){_api=api;loadData();},
+    blur:function(){}
   };
 };
 
-if(typeof geotab==="undefined"){ window._devMode=true; }
+if(typeof geotab==="undefined"){window._devMode=true;}
 
 function setGeo(s,t){
   const c={ok:"#22c55e",loading:"#f59e0b",err:"#94a3b8"};
   document.getElementById("geo-txt").innerHTML=
     `<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:${c[s]||c.err}"></span>${t}`;
 }
-
-function onGrpChange(){ popDrv(document.getElementById("f-grp").value); }
+function onGrpChange(){popDrv(document.getElementById("f-grp").value);}
 function popDrv(gid){
   const sel=document.getElementById("f-drv");
   sel.innerHTML='<option value="all">All Drivers</option>';
@@ -237,7 +149,6 @@ function popDrv(gid){
     });
 }
 
-// ── View switching ────────────────────────────────────────
 function showList(){
   document.getElementById("list-view").style.display="block";
   document.getElementById("detail-view").style.display="none";
@@ -249,37 +160,30 @@ function showDetail(){
   window.scrollTo(0,0);
 }
 
-// ── Load Data ─────────────────────────────────────────────
 function loadData(){
   showLoad(); hideErr();
   if(!_api){
-    if(window._devMode){ setGeo("ok","Dev Mode"); ALL=[]; applyLocal(); }
+    if(window._devMode){setGeo("ok","Dev Mode");ALL=[];applyLocal();}
     else setGeo("loading","Waiting for MyGeotab...");
     return;
   }
   const f=getF();
-  _api.call("Get",
-    {typeName:"AddInData",search:{addInId:ADDIN_ID}},
+  _api.call("Get",{typeName:"AddInData",search:{addInId:ADDIN_ID}},
     function(rows){
       let parsed=(rows||[]).map(r=>{
-        try{
-          const d=typeof r.details==="string"?JSON.parse(r.details):r.details;
-          if(d) d.id=r.id;
-          return d;
-        }catch(e){return null;}
+        try{const d=typeof r.details==="string"?JSON.parse(r.details):r.details;if(d)d.id=r.id;return d;}
+        catch(e){return null;}
       }).filter(Boolean);
       if(f.fromDate) parsed=parsed.filter(r=>r.date&&r.date>=f.fromDate);
       if(f.toDate)   parsed=parsed.filter(r=>r.date&&r.date<=f.toDate);
       if(f.driverId&&f.driverId!=="all") parsed=parsed.filter(r=>r.driverUserId===f.driverId);
       if(f.formType&&f.formType!=="all") parsed=parsed.filter(r=>r.formType===f.formType);
       if(f.status&&f.status!=="all")     parsed=parsed.filter(r=>r.status===f.status);
-      ALL=parsed;
-      applyLocal();
+      ALL=parsed; applyLocal();
     },
-    function(err){ showErr("Error: "+(err.message||err)); }
+    function(err){showErr("Error: "+(err.message||err));}
   );
 }
-
 function getF(){
   return{
     fromDate:document.getElementById("f-from")?.value||"",
@@ -289,32 +193,23 @@ function getF(){
     status:  document.getElementById("f-sta")?.value||"all",
   };
 }
-
 function applyLocal(){
   const q=(document.getElementById("f-inv")?.value||"").trim().toLowerCase();
   FILT=ALL.filter(r=>!q||(r.invoiceNo||"").toLowerCase().includes(q));
   sortR(); updateKPI(); PG=1; renderT();
 }
-
 function resetF(){
-  const td=new Date().toISOString().split("T")[0];
-  const fm=new Date(); fm.setDate(1);
+  const td=new Date().toISOString().split("T")[0],fm=new Date();fm.setDate(1);
   document.getElementById("f-from").value=fm.toISOString().split("T")[0];
   document.getElementById("f-to").value=td;
   ["f-grp","f-drv","f-type","f-sta"].forEach(id=>document.getElementById(id).value="all");
   document.getElementById("f-inv").value="";
-  popDrv("all");
-  loadData();
+  popDrv("all"); loadData();
 }
-
 function srt(k){if(SK===k)SD*=-1;else{SK=k;SD=-1;}sortR();PG=1;renderT();}
 function sortR(){
-  FILT.sort((a,b)=>{
-    const av=a[SK]||"",bv=b[SK]||"";
-    return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;
-  });
+  FILT.sort((a,b)=>{const av=a[SK]||"",bv=b[SK]||"";return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;});
 }
-
 function updateKPI(){
   const cod=FILT.reduce((s,r)=>s+(parseFloat(r.codAmount)||0),0);
   const dmg=FILT.filter(r=>r.damaged).length;
@@ -324,36 +219,21 @@ function updateKPI(){
   document.getElementById("k3").textContent=dmg;
   document.getElementById("k4").textContent=drvs||"—";
 }
-
-// ── Type label (text, no emoji) ───────────────────────────
-function typeLabel(ft){
-  return {delivery_sheet:"Delivery", invoice:"Invoice", loose_parts:"Loose Parts"}[ft] || (ft||"—");
-}
+function typeLabel(ft){return{delivery_sheet:"Delivery",invoice:"Invoice",loose_parts:"Loose Parts"}[ft]||(ft||"—");}
 function typeBadge(ft){
-  const map={
-    delivery_sheet:'<span class="badge bg-blue">Delivery</span>',
-    invoice:       '<span class="badge bg-gray">Invoice</span>',
-    loose_parts:   '<span class="badge bg-yellow">Loose Parts</span>'
-  };
-  return map[ft]||`<span class="badge bg-gray">${ft||"—"}</span>`;
+  const m={delivery_sheet:'<span class="badge bg-blue">Delivery</span>',invoice:'<span class="badge bg-gray">Invoice</span>',loose_parts:'<span class="badge bg-yellow">Loose Parts</span>'};
+  return m[ft]||`<span class="badge bg-gray">${ft||"—"}</span>`;
 }
 function statusBadge(s){
-  const map={
-    Submitted:'<span class="badge bg-blue">Submitted</span>',
-    Signed:   '<span class="badge bg-green">Signed</span>',
-    Pending:  '<span class="badge bg-yellow">Pending</span>',
-    Test:     '<span class="badge bg-gray">Test</span>'
-  };
-  return map[s]||`<span class="badge bg-gray">${s||"—"}</span>`;
+  const m={Submitted:'<span class="badge bg-blue">Submitted</span>',Signed:'<span class="badge bg-green">Signed</span>',Pending:'<span class="badge bg-yellow">Pending</span>',Test:'<span class="badge bg-gray">Test</span>'};
+  return m[s]||`<span class="badge bg-gray">${s||"—"}</span>`;
 }
-
-// ── Render Table ──────────────────────────────────────────
 function renderT(){
   const tb=document.getElementById("tbody");
   document.getElementById("rcnt").textContent="("+FILT.length+")";
   if(!FILT.length){
     tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div style="font-size:26px;margin-bottom:8px">📭</div><div style="font-weight:700">No records found</div></div></td></tr>`;
-    renderPag(); return;
+    renderPag();return;
   }
   const sl=FILT.slice((PG-1)*PP,PG*PP);
   tb.innerHTML=sl.map(r=>{
@@ -363,10 +243,7 @@ function renderT(){
       <td style="white-space:nowrap;font-weight:600">${r.date||"—"}</td>
       <td style="font-weight:700;color:#0078D4">${r.invoiceNo||"—"}</td>
       <td>${typeBadge(r.formType)}</td>
-      <td>
-        <div class="drv-name">${r.driverName||"—"}</div>
-        <div class="drv-grp">${r.driverGroupName||""}</div>
-      </td>
+      <td><div class="drv-name">${r.driverName||"—"}</div><div class="drv-grp">${r.driverGroupName||""}</div></td>
       <td>${r.dealer||"—"}</td>
       <td style="font-weight:700;color:#00875A">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
       <td>${iss?`<span style="font-size:11px;color:#DE350B;font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
@@ -376,250 +253,315 @@ function renderT(){
   }).join("");
   renderPag();
 }
-
 function renderPag(){
   const tot=FILT.length,pgs=Math.ceil(tot/PP);
   const s=Math.min((PG-1)*PP+1,tot),e=Math.min(PG*PP,tot);
   document.getElementById("pinfo").textContent=tot?`${s}–${e} of ${tot}`:"";
-  const pb=document.getElementById("pbtns"); pb.innerHTML="";
+  const pb=document.getElementById("pbtns");pb.innerHTML="";
   if(pgs<=1)return;
-  const mk=(l,p,act,dis)=>{
-    const b=document.createElement("button");
-    b.className="pb2"+(act?" active":"");
-    b.textContent=l; b.disabled=dis;
-    if(!dis) b.onclick=()=>{PG=p;renderT();};
-    pb.appendChild(b);
-  };
+  const mk=(l,p,act,dis)=>{const b=document.createElement("button");b.className="pb2"+(act?" active":"");b.textContent=l;b.disabled=dis;if(!dis)b.onclick=()=>{PG=p;renderT();};pb.appendChild(b);};
   mk("‹",PG-1,false,PG===1);
-  for(let p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++) mk(p,p,p===PG,false);
+  for(let p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++)mk(p,p,p===PG,false);
   mk("›",PG+1,false,PG===pgs);
 }
 
-// ── Open Detail (inline — no panel/overlay) ───────────────
+// ── DETAIL VIEW — 100% inline styles ────────────────────
 function openD(id){
-  const r=ALL.find(x=>x.id===id); if(!r) return;
-
-  document.getElementById("det-title").textContent="Invoice #"+(r.invoiceNo||"—")+" — "+typeLabel(r.formType);
-  document.getElementById("det-sub").textContent=r.date||"";
-
-  const initials=(r.driverName||"?").split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||"?";
+  const r=ALL.find(x=>x.id===id);if(!r)return;
   const parts=(r.parts||[]).filter(p=>p.part);
+  const init=(r.driverName||"?").split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||"?";
 
-  let html=`
-  <!-- Driver card -->
-  <div class="drv-card">
-    <div class="drv-av">${initials}</div>
+  // ── CSS vars as JS strings ──
+  const S={
+    page:     "font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1A2432;background:#F2F5F7;min-height:100vh",
+    backBar:  "display:flex;align-items:center;gap:10px;padding:12px 18px;background:#ffffff;border-bottom:2px solid #E2E8F0;margin-bottom:0",
+    backBtn:  "padding:7px 14px;background:#ffffff;color:#374151;border:1px solid #D1D5DB;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px",
+    backTitle:"font-size:14px;font-weight:700;color:#00263E;margin:0",
+    backSub:  "font-size:11px;color:#64748b;margin:0",
+    body:     "padding:16px 18px 40px",
+    // Driver card
+    drvCard:  "background:linear-gradient(135deg,#00263E 0%,#003554 100%);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px",
+    drvAv:    "width:44px;height:44px;border-radius:50%;background:#0078D4;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:800;flex-shrink:0;text-align:center;line-height:44px",
+    drvNm:    "color:#FFFFFF;font-size:15px;font-weight:800;margin:0 0 3px",
+    drvEm:    "color:#7BBFDB;font-size:11px;margin:0 0 6px",
+    drvTag:   "display:inline-block;background:rgba(255,255,255,.14);color:#D1FAE5;font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;margin-right:5px",
+    // Section
+    sec:      "background:#ffffff;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:14px;overflow:hidden",
+    secHdr:   "background:#F8FAFC;border-bottom:1px solid #E5E7EB;padding:10px 14px;font-size:11px;font-weight:700;color:#00263E;text-transform:uppercase;letter-spacing:.7px;margin:0",
+    secBody:  "padding:14px",
+    // Grid row
+    grid:     "display:grid;grid-template-columns:repeat(3,1fr);gap:12px 20px",
+    grid2:    "display:grid;grid-template-columns:1fr 1fr;gap:12px 20px",
+    fLbl:     "display:block;font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px",
+    fVal:     "display:block;font-size:12px;font-weight:500;color:#1A2432;word-break:break-word",
+    fValDash: "display:block;font-size:12px;color:#CBD5E1",
+    // Table
+    tbl:      "width:100%;border-collapse:collapse;font-size:11px",
+    th:       "padding:7px 10px;text-align:left;background:#F1F5F9;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB",
+    td:       "padding:7px 10px;border-bottom:1px solid #F3F4F6;color:#374151",
+    tdDmg:    "padding:7px 10px;border-bottom:1px solid #F3F4F6;color:#374151;background:#FFF7ED",
+    // Sig
+    sigWrap:  "display:grid;grid-template-columns:1fr 1fr;gap:14px",
+    sigBox:   "border:1px solid #E5E7EB;border-radius:6px;overflow:hidden",
+    sigLbl:   "background:#F3F4F6;border-bottom:1px solid #E5E7EB;padding:6px 10px;font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px",
+    sigImg:   "width:100%;height:75px;object-fit:contain;display:block;background:white;padding:6px",
+    sigNone:  "height:75px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:11px;font-style:italic;background:white",
+    sigOk:    "height:75px;display:flex;align-items:center;justify-content:center;color:#00875A;font-size:12px;font-weight:700;background:white",
+  };
+
+  // Helper: single field cell
+  function fc(label, val){
+    const v=(val===undefined||val===null||val==="");
+    return `<div>
+      <span style="${S.fLbl}">${label}</span>
+      <span style="${v?S.fValDash:S.fVal}">${v?"—":esc(String(val))}</span>
+    </div>`;
+  }
+
+  // Helper: signature box
+  function sigBox(label, base64, signed){
+    let inner="";
+    if(base64&&base64.length>100){
+      inner=`<img src="${base64}" alt="${label} signature" style="${S.sigImg}">`;
+    }else if(signed){
+      inner=`<div style="${S.sigOk}">✓ Signed</div>`;
+    }else{
+      inner=`<div style="${S.sigNone}">Not signed</div>`;
+    }
+    return`<div style="${S.sigBox}">
+      <div style="${S.sigLbl}">${label}</div>
+      ${inner}
+    </div>`;
+  }
+
+  // ── Build HTML ──
+  let html=`<div style="${S.page}">`;
+
+  // Back bar
+  html+=`<div style="${S.backBar}">
+    <button style="${S.backBtn}" onclick="showList()">← Back to List</button>
+    <p style="${S.backTitle}">Invoice #${esc(r.invoiceNo||"—")} — ${typeLabel(r.formType)}</p>
+    <p style="${S.backSub}">${esc(r.date||"")}</p>
+  </div>`;
+
+  // Body
+  html+=`<div style="${S.body}">`;
+
+  // Driver card
+  html+=`<div style="${S.drvCard}">
+    <div style="${S.drvAv}">${init}</div>
     <div>
-      <div class="drv-info-name">${r.driverName||"Unknown Driver"}</div>
-      <div class="drv-info-email">${r.driverEmail||""}</div>
-      <div class="drv-tags">
-        <span class="drv-tag">📍 ${r.driverGroupName||"No Group"}</span>
-        ${r.vehicleName?`<span class="drv-tag">🚛 ${r.vehicleName}</span>`:""}
-        <span class="drv-tag">${statusBadge(r.status)}</span>
-      </div>
+      <p style="${S.drvNm}">${esc(r.driverName||"Unknown Driver")}</p>
+      <p style="${S.drvEm}">${esc(r.driverEmail||"")}</p>
+      <span style="${S.drvTag}">📍 ${esc(r.driverGroupName||"No Group")}</span>
+      ${r.vehicleName?`<span style="${S.drvTag}">🚛 ${esc(r.vehicleName)}</span>`:""}
+      ${statusBadge(r.status)}
     </div>
   </div>`;
 
-  // ── Delivery ──
+  // ── DELIVERY ──
   if(r.formType==="delivery_sheet"){
-    html+=`
-    <div class="det-sec">
-      <div class="det-sec-hdr">Delivery Information</div>
-      <div class="det-grid">
-        ${df("Date",           r.date)}
-        ${df("Invoice #",      r.invoiceNo)}
-        ${df("Dealer",         r.dealer)}
-        ${df("Address",        r.dealerAddress)}
-        ${df("Contact",        r.dealerContact)}
-        ${df("Phone",          r.dealerPhone)}
-        ${df("Dealer Email",   r.dealerEmail)}
-        ${df("COD Amount",     r.codAmount?"$"+parseFloat(r.codAmount).toFixed(2):"$0.00")}
-        ${df("Payment Type",   r.paymentType)}
-        ${df("Booklets",       r.booklets)}
-        ${df("Accepted",       r.accepted?"YES":"NO")}
-        ${df("Damaged",        r.damaged?"YES":"No")}
-        ${df("Short Shipped",  r.shortShipped?"YES":"No")}
-        ${r.damagedParts&&r.damagedParts.length?df("Damaged Parts",r.damagedParts.join(", ")):""}
+    html+=`<div style="${S.sec}">
+      <p style="${S.secHdr}">Delivery Information</p>
+      <div style="${S.secBody}">
+        <div style="${S.grid}">
+          ${fc("Date",r.date)}
+          ${fc("Invoice #",r.invoiceNo)}
+          ${fc("Dealer",r.dealer)}
+          ${fc("Address",r.dealerAddress)}
+          ${fc("Contact",r.dealerContact)}
+          ${fc("Phone",r.dealerPhone)}
+          ${fc("Dealer Email",r.dealerEmail)}
+          ${fc("COD Amount",r.codAmount?"$"+parseFloat(r.codAmount).toFixed(2):"$0.00")}
+          ${fc("Payment Type",r.paymentType)}
+          ${fc("Booklets",r.booklets)}
+          ${fc("Accepted",r.accepted?"YES":"NO")}
+          ${fc("Damaged",r.damaged?"YES":"No")}
+          ${fc("Short Shipped",r.shortShipped?"YES":"No")}
+          ${r.damagedParts&&r.damagedParts.length?fc("Damaged Parts",r.damagedParts.join(", ")):""}
+        </div>
       </div>
     </div>`;
 
     if(r.comments){
-      html+=`<div class="det-sec">
-        <div class="det-sec-hdr">Comments</div>
-        <div style="background:#f8fafc;border-radius:6px;padding:10px 12px;font-size:12px;color:#374151;line-height:1.6">${r.comments}</div>
+      html+=`<div style="${S.sec}">
+        <p style="${S.secHdr}">Comments</p>
+        <div style="${S.secBody}">
+          <p style="font-size:12px;color:#374151;line-height:1.6;margin:0">${esc(r.comments)}</p>
+        </div>
       </div>`;
     }
 
     if(parts.length){
-      html+=`<div class="det-sec">
-        <div class="det-sec-hdr">Parts Condition (${parts.length})</div>
-        <table class="mini-tbl">
-          <thead><tr><th>Part</th><th>Model</th><th>Damaged</th><th>Short Ship</th><th>Notes</th></tr></thead>
-          <tbody>
-          ${parts.map(p=>`<tr class="${(p.damaged||p.shortShipped)?"dmg-row":""}">
-            <td style="font-weight:600">${p.part}</td>
-            <td>${p.model||"—"}</td>
-            <td>${p.damaged?'<span style="color:#DE350B;font-weight:700">YES</span>':"No"}</td>
-            <td>${p.shortShipped?'<span style="color:#F59E0B;font-weight:700">YES</span>':"No"}</td>
-            <td style="color:#64748b">${p.notes||"—"}</td>
-          </tr>`).join("")}
-          </tbody>
-        </table>
+      html+=`<div style="${S.sec}">
+        <p style="${S.secHdr}">Parts Condition (${parts.length})</p>
+        <div style="overflow-x:auto">
+          <table style="${S.tbl}">
+            <thead><tr>
+              <th style="${S.th}">Part</th>
+              <th style="${S.th}">Model</th>
+              <th style="${S.th}">Damaged</th>
+              <th style="${S.th}">Short Ship</th>
+              <th style="${S.th}">Notes</th>
+            </tr></thead>
+            <tbody>
+            ${parts.map(p=>{
+              const isDmg=p.damaged||p.shortShipped;
+              return`<tr>
+                <td style="${isDmg?S.tdDmg:S.td};font-weight:600">${esc(p.part)}</td>
+                <td style="${isDmg?S.tdDmg:S.td}">${esc(p.model||"—")}</td>
+                <td style="${isDmg?S.tdDmg:S.td}">${p.damaged?'<span style="color:#DE350B;font-weight:700">YES</span>':'<span style="color:#94a3b8">No</span>'}</td>
+                <td style="${isDmg?S.tdDmg:S.td}">${p.shortShipped?'<span style="color:#F59E0B;font-weight:700">YES</span>':'<span style="color:#94a3b8">No</span>'}</td>
+                <td style="${isDmg?S.tdDmg:S.td};color:#64748b">${esc(p.notes||"—")}</td>
+              </tr>`;
+            }).join("")}
+            </tbody>
+          </table>
+        </div>
       </div>`;
     }
 
-    html+=`<div class="det-sec">
-      <div class="det-sec-hdr">Signatures</div>
-      <div class="sig-row">
-        ${sigBox("Driver",    r.driverSignature,    r.driverSigned)}
-        ${sigBox("Consignee", r.consigneeSignature, r.consigneeSigned)}
+    // Signatures
+    html+=`<div style="${S.sec}">
+      <p style="${S.secHdr}">Signatures</p>
+      <div style="${S.secBody}">
+        <div style="${S.sigWrap}">
+          ${sigBox("Driver",    r.driverSignature,    r.driverSigned)}
+          ${sigBox("Consignee", r.consigneeSignature, r.consigneeSigned)}
+        </div>
       </div>
     </div>`;
   }
 
-  // ── Invoice ──
+  // ── INVOICE ──
   if(r.formType==="invoice"){
-    html+=`
-    <div class="det-sec">
-      <div class="det-sec-hdr">Invoice Information</div>
-      <div class="det-grid">
-        ${df("Date",            r.date)}
-        ${df("Invoice #",       r.invoiceNo)}
-        ${df("Acct No.",        r.acctNo)}
-        ${df("Terms",           r.terms)}
-        ${df("Sales Order",     r.salesOrder)}
-        ${df("Shipping Method", r.shippingMethod)}
-        ${df("PO #",            r.po)}
+    html+=`<div style="${S.sec}">
+      <p style="${S.secHdr}">Invoice Information</p>
+      <div style="${S.secBody}">
+        <div style="${S.grid}">
+          ${fc("Date",r.date)}
+          ${fc("Invoice #",r.invoiceNo)}
+          ${fc("Acct No.",r.acctNo)}
+          ${fc("Terms",r.terms)}
+          ${fc("Sales Order",r.salesOrder)}
+          ${fc("Shipping Method",r.shippingMethod)}
+          ${fc("PO #",r.po)}
+        </div>
       </div>
     </div>
-    <div class="det-sec">
-      <div class="det-sec-hdr">Addresses</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div>
-          <div style="font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Bill To</div>
-          <div style="font-size:12px;white-space:pre-line;color:#1A2432">${r.billTo||"—"}</div>
-        </div>
-        <div>
-          <div style="font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Ship To</div>
-          <div style="font-size:12px;white-space:pre-line;color:#1A2432">${r.shipTo||"—"}</div>
+    <div style="${S.sec}">
+      <p style="${S.secHdr}">Addresses</p>
+      <div style="${S.secBody}">
+        <div style="${S.grid2}">
+          <div>
+            <span style="${S.fLbl}">Bill To</span>
+            <span style="font-size:12px;color:#1A2432;white-space:pre-line;display:block">${esc(r.billTo||"—")}</span>
+          </div>
+          <div>
+            <span style="${S.fLbl}">Ship To</span>
+            <span style="font-size:12px;color:#1A2432;white-space:pre-line;display:block">${esc(r.shipTo||"—")}</span>
+          </div>
         </div>
       </div>
     </div>`;
   }
 
-  // ── Loose Parts ──
+  // ── LOOSE PARTS ──
   if(r.formType==="loose_parts"){
-    html+=`
-    <div class="det-sec">
-      <div class="det-sec-hdr">Check-In Information</div>
-      <div class="det-grid">
-        ${df("Date",         r.date)}
-        ${df("Invoice #",    r.invoiceNo)}
-        ${df("Sales Order",  r.salesOrder)}
-        ${df("PL#",          r.pl)}
-        ${df("TRK#",         r.trk)}
-        ${df("Dealer",       r.dealer)}
-        ${df("Driver Signed",   r.driverSigned   ?"YES":"NO")}
-        ${df("Receiver Signed", r.receiverSigned ?"YES":"NO")}
+    html+=`<div style="${S.sec}">
+      <p style="${S.secHdr}">Check-In Information</p>
+      <div style="${S.secBody}">
+        <div style="${S.grid}">
+          ${fc("Date",r.date)}
+          ${fc("Invoice #",r.invoiceNo)}
+          ${fc("Sales Order",r.salesOrder)}
+          ${fc("PL#",r.pl)}
+          ${fc("TRK#",r.trk)}
+          ${fc("Dealer",r.dealer)}
+          ${fc("Driver Signed",   r.driverSigned   ?"YES":"NO")}
+          ${fc("Receiver Signed", r.receiverSigned ?"YES":"NO")}
+        </div>
       </div>
     </div>`;
 
     if(parts.length){
-      html+=`<div class="det-sec">
-        <div class="det-sec-hdr">Parts List (${parts.length})</div>
-        <table class="mini-tbl">
-          <thead><tr><th>Location</th><th>Qty</th><th>Part</th><th>Pulled</th><th>Loaded</th><th>N/C</th><th>COD</th></tr></thead>
-          <tbody>
-          ${parts.map(p=>`<tr>
-            <td>${p.location||"—"}</td><td>${p.qty||"—"}</td>
-            <td style="font-weight:600">${p.part}</td>
-            <td>${p.pulled?'<span style="color:#00875A;font-weight:700">Yes</span>':"—"}</td>
-            <td>${p.loaded?'<span style="color:#00875A;font-weight:700">Yes</span>':"—"}</td>
-            <td>${p.nc   ?'<span style="color:#0078D4;font-weight:700">Yes</span>':"—"}</td>
-            <td>${p.cod  ?'<span style="color:#0078D4;font-weight:700">Yes</span>':"—"}</td>
-          </tr>`).join("")}
-          </tbody>
-        </table>
+      html+=`<div style="${S.sec}">
+        <p style="${S.secHdr}">Parts List (${parts.length})</p>
+        <div style="overflow-x:auto">
+          <table style="${S.tbl}">
+            <thead><tr>
+              <th style="${S.th}">Location</th>
+              <th style="${S.th}">Qty</th>
+              <th style="${S.th}">Part</th>
+              <th style="${S.th}">Pulled</th>
+              <th style="${S.th}">Loaded</th>
+              <th style="${S.th}">N/C</th>
+              <th style="${S.th}">COD</th>
+            </tr></thead>
+            <tbody>
+            ${parts.map(p=>`<tr>
+              <td style="${S.td}">${esc(p.location||"—")}</td>
+              <td style="${S.td}">${esc(p.qty||"—")}</td>
+              <td style="${S.td};font-weight:600">${esc(p.part)}</td>
+              <td style="${S.td}">${p.pulled?'<span style="color:#00875A;font-weight:700">Yes</span>':'<span style="color:#94a3b8">—</span>'}</td>
+              <td style="${S.td}">${p.loaded?'<span style="color:#00875A;font-weight:700">Yes</span>':'<span style="color:#94a3b8">—</span>'}</td>
+              <td style="${S.td}">${p.nc   ?'<span style="color:#0078D4;font-weight:700">Yes</span>':'<span style="color:#94a3b8">—</span>'}</td>
+              <td style="${S.td}">${p.cod  ?'<span style="color:#0078D4;font-weight:700">Yes</span>':'<span style="color:#94a3b8">—</span>'}</td>
+            </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
       </div>`;
     }
 
     if(r.comments){
-      html+=`<div class="det-sec">
-        <div class="det-sec-hdr">Comments</div>
-        <div style="background:#f8fafc;border-radius:6px;padding:10px 12px;font-size:12px;color:#374151">${r.comments}</div>
+      html+=`<div style="${S.sec}">
+        <p style="${S.secHdr}">Comments</p>
+        <div style="${S.secBody}"><p style="font-size:12px;color:#374151;margin:0">${esc(r.comments)}</p></div>
       </div>`;
     }
   }
 
-  // System info
-  html+=`<div class="det-sec">
-    <div class="det-sec-hdr">System</div>
-    <div class="det-grid">
-      ${df("MyGeotab ID", r.id||"—")}
-      ${df("Saved At", r.savedAt?new Date(r.savedAt).toLocaleString("en-US"):"")}
+  // System
+  html+=`<div style="${S.sec}">
+    <p style="${S.secHdr}">System</p>
+    <div style="${S.secBody}">
+      <div style="${S.grid2}">
+        ${fc("MyGeotab ID",r.id||"—")}
+        ${fc("Saved At",r.savedAt?new Date(r.savedAt).toLocaleString("en-US"):"")}
+      </div>
     </div>
   </div>`;
 
-  document.getElementById("det-body").innerHTML=html;
+  html+=`</div></div>`;// /body /page
+
+  document.getElementById("detail-view").innerHTML=html;
   showDetail();
 }
 
-// ── Helpers ───────────────────────────────────────────────
-function df(label, value){
-  const v=(value===undefined||value===null||value==="")?'<span style="color:#9CA3AF">—</span>':
-    `<span>${String(value)}</span>`;
-  return`<div class="det-field"><strong>${label}</strong>${v}</div>`;
-}
-function sigBox(label, base64, signed){
-  const lbl=`<div class="sig-box-lbl">${label}</div>`;
-  let inner="";
-  if(base64&&base64.length>50){
-    inner=`<img src="${base64}" alt="${label} signature">`;
-  }else if(signed){
-    inner=`<div class="sig-signed">✓ Signed</div>`;
-  }else{
-    inner=`<div class="sig-none">Not signed</div>`;
-  }
-  return`<div class="sig-box">${lbl}${inner}</div>`;
+function esc(s){
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ── CSV Export ────────────────────────────────────────────
 function exportCSV(){
   if(!FILT.length){alert("No data!");return;}
   const h=["Date","Invoice #","Type","Driver","Driver Email","Group","Vehicle","Dealer","COD","Payment","Status","Damaged?","Short?","Damaged Parts","Comments"];
-  const rows=FILT.map(r=>[
-    r.date, r.invoiceNo, typeLabel(r.formType), r.driverName, r.driverEmail,
-    r.driverGroupName, r.vehicleName, r.dealer, r.codAmount, r.paymentType,
-    r.status, r.damaged?"YES":"No", r.shortShipped?"YES":"No",
-    (r.damagedParts||[]).join("; "), r.comments
-  ].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`));
+  const rows=FILT.map(r=>[r.date,r.invoiceNo,typeLabel(r.formType),r.driverName,r.driverEmail,r.driverGroupName,r.vehicleName,r.dealer,r.codAmount,r.paymentType,r.status,r.damaged?"YES":"No",r.shortShipped?"YES":"No",(r.damagedParts||[]).join("; "),r.comments].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`));
   const csv=[h.join(","),...rows.map(r=>r.join(","))].join("\n");
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="venture_"+new Date().toISOString().split("T")[0]+".csv";
-  a.click();
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="venture_"+new Date().toISOString().split("T")[0]+".csv";a.click();
 }
-
-function showLoad(){
-  document.getElementById("tbody").innerHTML=
-    `<tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`;
-}
-function showErr(m){
-  document.getElementById("errbox").style.display="block";
-  document.getElementById("errbox").textContent="⚠️ "+m;
-  document.getElementById("tbody").innerHTML=
-    `<tr><td colspan="9"><div class="empty"><div style="font-size:26px;margin-bottom:8px">⚠️</div><div style="font-weight:700">Error loading data</div></div></td></tr>`;
-}
-function hideErr(){ document.getElementById("errbox").style.display="none"; }
+function showLoad(){document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`;}
+function showErr(m){document.getElementById("errbox").style.display="block";document.getElementById("errbox").textContent="⚠️ "+m;}
+function hideErr(){document.getElementById("errbox").style.display="none";}
 
 window.onload=function(){
-  const td=new Date(), fm=new Date(); fm.setDate(1);
+  const td=new Date(),fm=new Date();fm.setDate(1);
   document.getElementById("f-from").value=fm.toISOString().split("T")[0];
   document.getElementById("f-to").value=td.toISOString().split("T")[0];
-  document.getElementById("dbadge").textContent=
-    "📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  document.getElementById("dbadge").textContent="📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
   document.getElementById("f-inv").addEventListener("keydown",e=>{if(e.key==="Enter")applyLocal();});
-  if(typeof geotab==="undefined"){ setGeo("ok","Dev Mode"); ALL=[]; applyLocal(); }
+  if(typeof geotab==="undefined"){setGeo("ok","Dev Mode");ALL=[];applyLocal();}
 };
 </script>
 </body>
