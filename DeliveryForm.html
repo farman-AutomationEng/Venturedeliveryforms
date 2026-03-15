@@ -48,30 +48,30 @@
     <div class="from-box"><strong>FROM:</strong> Venture Trailers • 5301 North Point Blvd, Baltimore MD 21219</div>
     <div class="g2">
       <div class="f"><label>Date *</label><input type="date" id="ds-dt"></div>
-      <div class="f"><label>Invoice No. *</label><input id="ds-inv" placeholder="132993"></div>
+      <div class="f"><label>Invoice No. *</label><input id="ds-inv"></div>
     </div>
     <div class="sec"><span>🏪</span><h3>Consigned To</h3></div>
     <div class="g2">
-      <div class="f fc"><label>Dealer Name *</label><input id="ds-dlr" placeholder="Blue Mountain Marine"></div>
-      <div class="f fc"><label>Address</label><input id="ds-adr" placeholder="1765 Valley View Dr"></div>
-      <div class="f"><label>City, State, ZIP</label><input id="ds-cty" placeholder="Bangor PA 18013"></div>
-      <div class="f"><label>Contact</label><input id="ds-cnt" placeholder="Ryan"></div>
-      <div class="f"><label>Phone</label><input type="tel" id="ds-ph" placeholder="610-599-3628"></div>
-      <div class="f"><label>Dealer Email</label><input type="email" id="ds-em" placeholder="dealer@company.com"></div>
+      <div class="f fc"><label>Dealer Name *</label><input id="ds-dlr"></div>
+      <div class="f fc"><label>Address</label><input id="ds-adr"></div>
+      <div class="f"><label>City, State, ZIP</label><input id="ds-cty"></div>
+      <div class="f"><label>Contact</label><input id="ds-cnt"></div>
+      <div class="f"><label>Phone</label><input type="tel" id="ds-ph"></div>
+      <div class="f"><label>Dealer Email</label><input type="email" id="ds-em"></div>
     </div>
     <!-- Driver Info: hidden fields only — section hidden, data saved in background -->
     <div id="drv-section" style="display:none">
     <div class="sec"><span>👤</span><h3>Driver Info <span class="abadge">⚡ Auto</span></h3></div>
     <div class="g2">
-      <div class="f"><label>Driver Name</label><input id="ds-drv" readonly placeholder="Auto from Geotab"></div>
-      <div class="f"><label>Driver Group</label><input id="ds-grp" readonly placeholder="Auto"></div>
-      <div class="f"><label>Vehicle ID</label><input id="ds-vid" readonly placeholder="Auto"></div>
-      <div class="f"><label>Vehicle Name</label><input id="ds-vnm" readonly placeholder="Auto"></div>
+      <div class="f"><label>Driver Name</label><input id="ds-drv" readonly></div>
+      <div class="f"><label>Driver Group</label><input id="ds-grp" readonly></div>
+      <div class="f"><label>Vehicle ID</label><input id="ds-vid" readonly></div>
+      <div class="f"><label>Vehicle Name</label><input id="ds-vnm" readonly></div>
     </div>
     </div>
     <div class="sec"><span>💰</span><h3>Payment</h3></div>
     <div class="pay-g2">
-      <div class="f"><label>C.O.D. Amount ($)</label><input type="number" id="ds-cod" placeholder="0.00" step="0.01"></div>
+      <div class="f"><label>C.O.D. Amount ($)</label><input type="number" id="ds-cod" step="0.01"></div>
       <div class="f"><label>Type</label>
         <div id="payment-types">
           <div class="pay-row"><input type="radio" name="paytype" id="ck-cod" value="COD" checked> C.O.D.</div>
@@ -97,7 +97,7 @@
         <div class="pill" id="pn">❌ No</div>
       </div>
     </div>
-    <div class="f mb14"><label>Comments</label><textarea id="ds-cm" placeholder="Any notes..."></textarea></div>
+    <div class="f mb14"><label>Comments</label><textarea id="ds-cm"></textarea></div>
     <div class="sec"><span>✍️</span><h3>Signatures</h3></div>
     <div class="sig-wrap-row">
       <div>
@@ -134,17 +134,17 @@
     <div class="g2">
       <div class="f"><label>Date</label><input type="date" id="id"></div>
       <div class="f"><label>Acct No.</label><input id="ia" value="3818"></div>
-      <div class="f fc"><label>Invoice #</label><input id="ino" placeholder="132993"></div>
+      <div class="f fc"><label>Invoice #</label><input id="ino"></div>
     </div>
     <div class="g2 mt10">
-      <div class="f"><label>Bill To</label><textarea id="ibt" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
-      <div class="f"><label>Ship To</label><textarea id="ist" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
+      <div class="f"><label>Bill To</label><textarea id="ibt"></textarea></div>
+      <div class="f"><label>Ship To</label><textarea id="ist"></textarea></div>
     </div>
     <div class="inv-grid-4 mt10">
       <div class="f"><label>PO #</label><input id="ipo"></div>
       <div class="f"><label>Terms</label><input id="itr" value="Due on receipt"></div>
       <div class="f"><label>Sales Order</label><input id="iso"></div>
-      <div class="f"><label>Shipping Method</label><input id="ism" placeholder="Marine Freight LLC"></div>
+      <div class="f"><label>Shipping Method</label><input id="ism"></div>
     </div>
     <div class="sec"><span>📦</span><h3>Line Items</h3></div>
     <div class="tw"><table><thead><tr><th>Item</th><th>Qty</th><th>Description</th><th>Unit Price</th><th>Total</th><th></th></tr></thead><tbody id="itb"></tbody></table></div>
