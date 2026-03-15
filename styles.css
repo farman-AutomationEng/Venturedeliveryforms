@@ -256,3 +256,9 @@ tr.row-link:hover td{background:#EFF6FF !important}
 
 /* ── Validation error state ── */
 .f input.err,.f select.err,.f textarea.err{border-color:#DE350B !important;box-shadow:0 0 0 3px rgba(222,53,11,.12) !important;background:#FFF8F7}
+
+/* ── iOS WebView touch fix — cursor:pointer enables tap events ── */
+.tab, .btn, .pill, .btn-add, .btn-rm, .scl {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
