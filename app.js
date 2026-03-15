@@ -326,6 +326,23 @@ function initSig(id) {
   c.addEventListener("touchcancel",function(){ SS[id].drawing=false; }, {passive:false});
 }
 
+// ── Get compressed signature as base64 ───────────────────
+function getSigBase64(id) {
+  var c = document.getElementById(id);
+  if (!c || !SS[id] || !SS[id].signed) return "";
+  try {
+    // Create small canvas for compression (150x50)
+    var small = document.createElement("canvas");
+    small.width = 150; small.height = 50;
+    var ctx = small.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 150, 50);
+    ctx.drawImage(c, 0, 0, 150, 50);
+    // JPEG quality 0.25 = very small file ~1-2KB
+    return small.toDataURL("image/jpeg", 0.25);
+  } catch(e) { return ""; }
+}
+
 function mkS(id) {
   SS[id].signed = true;
   var wrap=document.getElementById(id+"-wrap"); if(wrap) wrap.className="sw ok";
@@ -388,6 +405,8 @@ function collectD() {
     accepted:gc("ck-ac"), booklets:bklt, comments:gv("ds-cm"),
     driverSigned:SS["sig-driver"]?SS["sig-driver"].signed:false,
     consigneeSigned:SS["sig-consignee"]?SS["sig-consignee"].signed:false,
+    driverSignature: getSigBase64("sig-driver"),
+    consigneeSignature: getSigBase64("sig-consignee"),
     damaged:dmg.length>0, damagedParts:dmg, parts:parts, status:"Submitted",
     driverName:DRV.name, driverUserId:DRV.userId, driverEmail:DRV.email,
     driverGroupId:DRV.groupId, driverGroupName:DRV.groupName, driverGroups:DRV.groups,
