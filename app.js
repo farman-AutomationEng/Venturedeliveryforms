@@ -558,8 +558,7 @@ function resetF() {
   for (var j=0; j<allTA.length; j++) allTA[j].value = "";
 
   // ── Reset Invoice default fields ─────────────────────
-  var ia = document.getElementById("ia"); if(ia) ia.value = "3818";
-  var itr = document.getElementById("itr"); if(itr) itr.value = "Due on receipt";
+  // ia and itr have no default values
   var itot = document.getElementById("itot"); if(itot) itot.textContent = "$0.00";
 
   // ── Clear invoice line items & loose parts rows ──────
