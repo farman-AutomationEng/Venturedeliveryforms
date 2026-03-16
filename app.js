@@ -481,7 +481,32 @@ function subDelivery() {
   );
 }
 function subInv() {
-  var data={formType:"invoice",invoiceNo:gv("ino"),date:gv("id"),acctNo:gv("ia"),billTo:gv("ibt"),shipTo:gv("ist"),po:gv("ipo"),terms:gv("itr"),salesOrder:gv("iso"),shippingMethod:gv("ism"),dealer:gv("ibt").split("\n")[0],driverName:DRV.name,driverGroupName:DRV.groupName,driverUserId:DRV.userId,driverGroupId:DRV.groupId,status:"Submitted"};
+  // Collect line items from invoice table
+  var lineItems = [];
+  var rows = document.querySelectorAll("#itb tr");
+  for (var i=0; i<rows.length; i++) {
+    var c = rows[i].querySelectorAll("td"); if (!c.length) continue;
+    var item  = c[0].querySelector("input") ? c[0].querySelector("input").value.trim() : "";
+    var qty   = c[1].querySelector("input") ? c[1].querySelector("input").value.trim() : "";
+    var desc  = c[2].querySelector("input") ? c[2].querySelector("input").value.trim() : "";
+    var price = c[3].querySelector("input") ? c[3].querySelector("input").value.trim() : "";
+    var total = c[4].querySelector("input") ? c[4].querySelector("input").value.trim() : "";
+    if (item || desc) {
+      lineItems.push({item:item, qty:qty||"1", description:desc, unitPrice:price, total:total});
+    }
+  }
+  var shipping   = gv("ish");
+  var grandTotal = document.getElementById("itot") ? document.getElementById("itot").textContent : "$0.00";
+  var data = {
+    formType:"invoice", invoiceNo:gv("ino"), date:gv("id"), acctNo:gv("ia"),
+    billTo:gv("ibt"), shipTo:gv("ist"), po:gv("ipo"), terms:gv("itr"),
+    salesOrder:gv("iso"), shippingMethod:gv("ism"),
+    dealer:gv("ibt").split("\n")[0],
+    lineItems:lineItems, shipping:shipping, grandTotal:grandTotal,
+    driverName:DRV.name, driverGroupName:DRV.groupName,
+    driverUserId:DRV.userId, driverGroupId:DRV.groupId,
+    status:"Submitted"
+  };
   submitToAPI(data, function(id){showSucc(id);}, function(e){alert(e.message);});
 }
 function subParts() {
