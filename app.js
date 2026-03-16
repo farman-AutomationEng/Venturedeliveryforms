@@ -335,15 +335,27 @@ function getSigBase64(id) {
   var c = document.getElementById(id);
   if (!c || !SS[id] || !SS[id].signed) return "";
   try {
-    // 400x120 canvas — clear enough to read, small enough to store
+    // MyGeotab AddInData limit: 10,000 chars total
+    // Both sigs + all other fields must fit
+    // 200x60 @ quality 0.3 ≈ 2,500–3,500 chars base64 — safe
     var small = document.createElement("canvas");
-    small.width = 400; small.height = 120;
+    small.width = 200; small.height = 60;
     var ctx = small.getContext("2d");
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 400, 120);
-    ctx.drawImage(c, 0, 0, 400, 120);
-    // JPEG quality 0.6 = ~6-10KB, readable signature
-    return small.toDataURL("image/jpeg", 0.6);
+    ctx.fillRect(0, 0, 200, 60);
+    ctx.drawImage(c, 0, 0, 200, 60);
+    var dataUrl = small.toDataURL("image/jpeg", 0.3);
+    // Safety check: if still too large, compress further
+    if (dataUrl.length > 3500) {
+      var tiny = document.createElement("canvas");
+      tiny.width = 150; tiny.height = 45;
+      var ctx2 = tiny.getContext("2d");
+      ctx2.fillStyle = "#ffffff";
+      ctx2.fillRect(0, 0, 150, 45);
+      ctx2.drawImage(c, 0, 0, 150, 45);
+      dataUrl = tiny.toDataURL("image/jpeg", 0.2);
+    }
+    return dataUrl;
   } catch(e) { return ""; }
 }
 
@@ -395,8 +407,13 @@ function collectD() {
     var pt=c[0].textContent.trim();
     var dm=c[2].querySelector("input")?c[2].querySelector("input").checked:false;
     var sh=c[3].querySelector("input")?c[3].querySelector("input").checked:false;
+    var mdl=c[1].querySelector("input")?c[1].querySelector("input").value:"";
+    var nt=c[4].querySelector("input")?c[4].querySelector("input").value:"";
     if(dm) dmg.push(pt);
-    parts.push({part:pt, model:c[1].querySelector("input")?c[1].querySelector("input").value:"", damaged:dm, shortShipped:sh, notes:c[4].querySelector("input")?c[4].querySelector("input").value:""});
+    // Only save rows that have actual data — skip blank rows to save chars
+    if(dm || sh || mdl || nt){
+      parts.push({part:pt, model:mdl, damaged:dm, shortShipped:sh, notes:nt});
+    }
   }
   // Radio button — only one selected
   var ptEl = document.querySelector('input[name="paytype"]:checked');
@@ -412,9 +429,7 @@ function collectD() {
     driverSignature: getSigBase64("sig-driver"),
     consigneeSignature: getSigBase64("sig-consignee"),
     damaged:dmg.length>0, damagedParts:dmg, parts:parts,
-    // Status: Test if no vehicle assigned, Submitted if real driver
     status: DRV.vehicleId ? "Submitted" : "Test",
-    // Only save driver info if vehicle assigned (actual driver)
     driverName: DRV.vehicleId ? DRV.name : "",
     driverUserId: DRV.vehicleId ? DRV.userId : "",
     driverEmail: DRV.vehicleId ? DRV.email : "",
