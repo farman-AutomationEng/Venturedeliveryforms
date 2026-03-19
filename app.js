@@ -20,17 +20,10 @@ geotab.addin.ventureDelivery = function() {
   return {
 
     initialize: function(api, state, callback) {
+      // ✅ initialize() — just store api ref and call callback
+      // Driver fetch happens in focus() so it always runs fresh per-session
       _api = api;
-      // DEBUG v6.0: show api.user on screen before doing anything
-      var dbgEl = document.getElementById("vt-debug");
-      if (!dbgEl) {
-        dbgEl = document.createElement("div");
-        dbgEl.id = "vt-debug";
-        dbgEl.style.cssText = "position:fixed;top:0;left:0;right:0;background:#FF0;color:#000;font-size:13px;padding:6px;z-index:9999;word-break:break-all;";
-        document.body.appendChild(dbgEl);
-      }
-      dbgEl.textContent = "api.user=" + (api.user||"EMPTY") + " | mobile.exists=" + (api.mobile&&typeof api.mobile.exists==="function"?api.mobile.exists():"N/A");
-      fallbackWebApi(api, callback);
+      callback();
     },
 
     focus: function(api, state) {
@@ -39,11 +32,16 @@ geotab.addin.ventureDelivery = function() {
       var app = document.getElementById("vt-app");
       if (app) app.style.display = "block";
 
-      // Initialize UI only once
+      // Initialize UI only once (tables, buttons, signatures)
       if (!_initialized) {
         _initialized = true;
         initUI();
       }
+
+      // ✅ Fetch driver EVERY time focus fires
+      // This ensures correct driver shows even after user switch or re-login
+      // getSession() in Drive browser context returns the current session user
+      fetchDriver(api);
     },
 
     blur: function(api, state) {
@@ -108,29 +106,25 @@ function fetchVehicleAndFinish(api, info, callback) {
   );
 }
 
-// ── Main driver fetch ──────────────────────────────────────────
-// SOURCE: Official Geotab Drive addin sample (github.com/Geotab/addin-drive)
-// Uses api.user directly — this is the current logged-in user\'s username
-// Then does Get User by userName to fetch full profile (name, groups etc.)
-function fallbackWebApi(api, callback) {
-  // api.user is set by Geotab Drive to the currently logged-in user\'s email
-  // This is exactly what the official Geotab addin-drive sample uses
-  var currentUser = api.user || "";
-
-  if (!currentUser) {
-    // Fallback: getSession as last resort
-    api.getSession(function(sess) {
-      if (sess && sess.userName) {
-        fetchUserByName(api, sess.userName, callback);
-      } else {
-        callback();
-      }
-    });
-    return;
-  }
-
-  fetchUserByName(api, currentUser, callback);
+// ── Fetch driver (called from focus every time) ────────────────
+// getSession() returns the CURRENT session user in both browser and mobile Drive
+// By calling this in focus() (not initialize()), we always get fresh data
+// even when users switch or the add-in is cached from a previous session
+function fetchDriver(api) {
+  api.getSession(function(sess) {
+    if (!sess || !sess.userName) return;
+    fetchUserByName(api, sess.userName, function(){});
+  });
 }
+
+// fallbackWebApi kept for any backward compatibility
+function fallbackWebApi(api, callback) {
+  api.getSession(function(sess) {
+    if (!sess || !sess.userName) { callback(); return; }
+    fetchUserByName(api, sess.userName, callback);
+  });
+}
+
 
 function fetchUserByName(api, userName, callback) {
   api.call("Get", {typeName:"User", search:{userName:userName}}, function(us) {
@@ -154,9 +148,6 @@ function setDrv(info) {
   DRV.groupId=info.groupId||""; DRV.groupName=info.groupName||"";
   DRV.groups=info.groups||[]; DRV.vehicleId=info.vehicleId||"";
   DRV.vehicleName=info.vehicleName||""; DRV.plate=info.plate||"";
-
-  // v5.0 debug: show which path was used
-  console.log("[v5.0] setDrv called:", JSON.stringify({name:info.name, userId:info.userId, email:info.email, vehicleId:info.vehicleId}));
 
   // Always show driver bar when we have a name (not just when vehicle assigned)
   if (info.name) {
