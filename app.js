@@ -21,7 +21,15 @@ geotab.addin.ventureDelivery = function() {
 
     initialize: function(api, state, callback) {
       _api = api;
-      // v5.0: Drive-first using official api.mobile.user.get(false)
+      // DEBUG v6.0: show api.user on screen before doing anything
+      var dbgEl = document.getElementById("vt-debug");
+      if (!dbgEl) {
+        dbgEl = document.createElement("div");
+        dbgEl.id = "vt-debug";
+        dbgEl.style.cssText = "position:fixed;top:0;left:0;right:0;background:#FF0;color:#000;font-size:13px;padding:6px;z-index:9999;word-break:break-all;";
+        document.body.appendChild(dbgEl);
+      }
+      dbgEl.textContent = "api.user=" + (api.user||"EMPTY") + " | mobile.exists=" + (api.mobile&&typeof api.mobile.exists==="function"?api.mobile.exists():"N/A");
       fallbackWebApi(api, callback);
     },
 
