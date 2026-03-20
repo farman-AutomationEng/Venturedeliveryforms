@@ -8,6 +8,8 @@
 <style>
 .btn-view{padding:4px 10px;background:#0078D4;color:white;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-view:hover{background:#006BBD}
+.btn-del{padding:4px 10px;background:#DE350B;color:white;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-left:4px}
+.btn-del:hover{background:#BF2600}
 .drv-name{font-weight:600;font-size:12px}
 .drv-grp{font-size:10px;color:#94a3b8;margin-top:1px}
 #detail-view{display:none}
@@ -248,11 +250,33 @@ function renderT(){
       <td style="font-weight:700;color:#00875A">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
       <td>${iss?`<span style="font-size:11px;color:#DE350B;font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
       <td>${statusBadge(r.status)}</td>
-      <td><button class="btn-view" onclick="openD('${r.id}')">View</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn-view" onclick="openD('${r.id}')">View</button>
+        <button class="btn-del" onclick="delRecord('${r.id}','${(r.invoiceNo||r.date||'record').replace(/'/g,'')}')">🗑</button>
+      </td>
     </tr>`;
   }).join("");
   renderPag();
 }
+function delRecord(id, label) {
+  if (!_api) { alert("Not connected to MyGeotab."); return; }
+  if (!confirm("Delete record "" + label + ""?\n\nThis cannot be undone.")) return;
+  _api.call("Remove",
+    {typeName:"AddInData", entity:{id:id}},
+    function() {
+      // Remove from local arrays
+      ALL  = ALL.filter(function(r){ return r.id !== id; });
+      FILT = FILT.filter(function(r){ return r.id !== id; });
+      if (PG > Math.ceil(FILT.length / PP) && PG > 1) PG--;
+      updateKPI();
+      renderT();
+    },
+    function(e) {
+      alert("Delete failed: " + (e.message || JSON.stringify(e)));
+    }
+  );
+}
+
 function renderPag(){
   const tot=FILT.length,pgs=Math.ceil(tot/PP);
   const s=Math.min((PG-1)*PP+1,tot),e=Math.min(PG*PP,tot);
