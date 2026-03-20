@@ -145,11 +145,36 @@ function fetchUserByName(api, userName, callback) {
   api.call("Get", {typeName:"User", search:{userName:userName}}, function(us) {
     if (!us || !us.length) { callback(); return; }
     var u = us[0];
-    var fn = buildName((u.firstName||"").trim(), (u.lastName||"").trim(), u.name||userName);
+
+    // ✅ CRITICAL: Verify Geotab returned the correct user.
+    // UserSearch.userName requires exact email match.
+    // If userName is not an email (e.g. "usertest"), Geotab may return
+    // the wrong user (first in DB). Detect mismatch and use session userName.
+    var returnedEmail = (u.name || "").toLowerCase();
+    var searchedName  = (userName   || "").toLowerCase();
+    var isCorrectUser = (returnedEmail === searchedName) ||
+                        returnedEmail.indexOf(searchedName) === 0;
+
+    var fn, userId, email, groups, groupId;
+    if (isCorrectUser) {
+      fn      = buildName((u.firstName||"").trim(), (u.lastName||"").trim(), u.name||userName);
+      userId  = u.id   || "";
+      email   = u.name || userName;
+      groups  = (u.companyGroups||[]).map(function(g){return g.id;});
+      groupId = (u.companyGroups&&u.companyGroups[0]) ? u.companyGroups[0].id : "";
+    } else {
+      // Wrong user returned — format the session userName as display name
+      fn      = fmtUsername(userName.split("@")[0]);
+      userId  = u.id   || "";   // keep id for vehicle lookup
+      email   = userName;
+      groups  = [];
+      groupId = "";
+      console.warn("User mismatch: searched=" + userName + " got=" + u.name + " — using session name");
+    }
+
     var info = {
-      name: fn, userId: u.id||"", email: u.name||userName,
-      groups: (u.companyGroups||[]).map(function(g){return g.id;}),
-      groupId: (u.companyGroups&&u.companyGroups[0]) ? u.companyGroups[0].id : "",
+      name: fn, userId: userId, email: email,
+      groups: groups, groupId: groupId,
       groupName: "", vehicleId: "", vehicleName: "", plate: ""
     };
     fetchVehicleAndFinish(api, info, callback);
