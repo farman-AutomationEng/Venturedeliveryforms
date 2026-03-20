@@ -110,9 +110,21 @@ function fetchVehicleAndFinish(api, info, callback) {
 // getSession() returns the CURRENT session user in both browser and mobile Drive
 // By calling this in focus() (not initialize()), we always get fresh data
 // even when users switch or the add-in is cached from a previous session
+function showDebug(msg) {
+  var el = document.getElementById("vt-dbg");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "vt-dbg";
+    el.style.cssText = "position:fixed;top:0;left:0;right:0;background:#FF0;color:#000;font-size:11px;padding:4px 6px;z-index:9999;word-break:break-all;white-space:pre-wrap;";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+}
+
 function fetchDriver(api) {
   api.getSession(function(sess) {
-    if (!sess || !sess.userName) return;
+    if (!sess || !sess.userName) { showDebug("ERROR: getSession returned no userName"); return; }
+    showDebug("getSession: userName=" + sess.userName + " | db=" + sess.database + "\nFetching user...");
     fetchUserByName(api, sess.userName, function(){});
   });
 }
@@ -125,39 +137,33 @@ function fallbackWebApi(api, callback) {
 }
 
 function fetchUserByName(api, userName, callback) {
-  api.call("Get", {typeName:"User", search:{userName:userName}}, function(us) {
+  // ✅ CORRECT FIELD: Geotab UserSearch uses "name" not "userName"
+  // "userName" field does not exist in UserSearch — causes wrong user to be returned
+  // "name" field does a wildcard search on User.name (which IS the login email)
+  // No wildcard = exact match on the name field
+  api.call("Get", {typeName:"User", search:{name:userName}}, function(us) {
     if (!us || !us.length) { callback(); return; }
-    var u = us[0];
 
-    // ✅ CRITICAL: Verify Geotab returned the correct user.
-    // UserSearch.userName requires exact email match.
-    // If userName is not an email (e.g. "usertest"), Geotab may return
-    // the wrong user (first in DB). Detect mismatch and use session userName.
-    var returnedEmail = (u.name || "").toLowerCase();
-    var searchedName  = (userName   || "").toLowerCase();
-    var isCorrectUser = (returnedEmail === searchedName) ||
-                        returnedEmail.indexOf(searchedName) === 0;
-
-    var fn, userId, email, groups, groupId;
-    if (isCorrectUser) {
-      fn      = buildName((u.firstName||"").trim(), (u.lastName||"").trim(), u.name||userName);
-      userId  = u.id   || "";
-      email   = u.name || userName;
-      groups  = (u.companyGroups||[]).map(function(g){return g.id;});
-      groupId = (u.companyGroups&&u.companyGroups[0]) ? u.companyGroups[0].id : "";
-    } else {
-      // Wrong user returned — format the session userName as display name
-      fn      = fmtUsername(userName.split("@")[0]);
-      userId  = u.id   || "";   // keep id for vehicle lookup
-      email   = userName;
-      groups  = [];
-      groupId = "";
-      console.warn("User mismatch: searched=" + userName + " got=" + u.name + " — using session name");
+    // Find exact match — name search may return partial matches
+    var u = null;
+    var lowerTarget = userName.toLowerCase();
+    for (var i = 0; i < us.length; i++) {
+      if ((us[i].name||"").toLowerCase() === lowerTarget) {
+        u = us[i];
+        break;
+      }
     }
+    // If no exact match found, use first result as fallback
+    if (!u) u = us[0];
 
+    var fn = buildName((u.firstName||"").trim(), (u.lastName||"").trim(), u.name||userName);
+    showDebug("getSession: userName=" + userName + "\nUser found: " + (u.firstName||"") + " " + (u.lastName||"") + " | email=" + (u.name||"") + " | id=" + (u.id||""));
     var info = {
-      name: fn, userId: userId, email: email,
-      groups: groups, groupId: groupId,
+      name: fn,
+      userId:  u.id   || "",
+      email:   u.name || userName,
+      groups:  (u.companyGroups||[]).map(function(g){return g.id;}),
+      groupId: (u.companyGroups&&u.companyGroups[0]) ? u.companyGroups[0].id : "",
       groupName: "", vehicleId: "", vehicleName: "", plate: ""
     };
     fetchVehicleAndFinish(api, info, callback);
