@@ -110,27 +110,10 @@ function fetchVehicleAndFinish(api, info, callback) {
 // getSession() returns the CURRENT session user in both browser and mobile Drive
 // By calling this in focus() (not initialize()), we always get fresh data
 // even when users switch or the add-in is cached from a previous session
-function showDebug(msg) {
-  var el = document.getElementById("vt-dbg");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "vt-dbg";
-    el.style.cssText = "position:fixed;top:0;left:0;right:0;background:#FF0;color:#000;font-size:11px;padding:4px 6px;z-index:9999;word-break:break-all;white-space:pre-wrap;";
-    document.body.appendChild(el);
-  }
-  el.textContent = msg;
-}
-
 function fetchDriver(api) {
   api.getSession(function(sess) {
-    var sessStr = sess ? ("userName="+sess.userName+" | db="+sess.database) : "NULL";
-    showDebug("getSession: " + sessStr);
-    if (!sess || !sess.userName) { showDebug("ERROR: no userName in session"); return; }
-    api.call("Get", {typeName:"User", search:{userName:sess.userName}}, function(us) {
-      var u = us && us[0];
-      showDebug("getSession: " + sessStr + "\nUser found: " + (u ? (u.firstName+" "+u.lastName+" | email="+u.name) : "NONE"));
-      if (u) fetchUserByName(api, sess.userName, function(){});
-    }, function(e){ showDebug("User GET error: "+JSON.stringify(e)); });
+    if (!sess || !sess.userName) return;
+    fetchUserByName(api, sess.userName, function(){});
   });
 }
 
