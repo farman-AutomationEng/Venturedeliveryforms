@@ -110,21 +110,9 @@ function fetchVehicleAndFinish(api, info, callback) {
 // getSession() returns the CURRENT session user in both browser and mobile Drive
 // By calling this in focus() (not initialize()), we always get fresh data
 // even when users switch or the add-in is cached from a previous session
-function showDebug(msg) {
-  var el = document.getElementById("vt-dbg");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "vt-dbg";
-    el.style.cssText = "position:fixed;top:0;left:0;right:0;background:#FF0;color:#000;font-size:11px;padding:4px 6px;z-index:9999;word-break:break-all;white-space:pre-wrap;";
-    document.body.appendChild(el);
-  }
-  el.textContent = msg;
-}
-
 function fetchDriver(api) {
   api.getSession(function(sess) {
-    if (!sess || !sess.userName) { showDebug("ERROR: getSession returned no userName"); return; }
-    showDebug("getSession: userName=" + sess.userName + " | db=" + sess.database + "\nFetching user...");
+    if (!sess || !sess.userName) return;
     fetchUserByName(api, sess.userName, function(){});
   });
 }
@@ -157,7 +145,6 @@ function fetchUserByName(api, userName, callback) {
     if (!u) u = us[0];
 
     var fn = buildName((u.firstName||"").trim(), (u.lastName||"").trim(), u.name||userName);
-    showDebug("getSession: userName=" + userName + "\nUser found: " + (u.firstName||"") + " " + (u.lastName||"") + " | email=" + (u.name||"") + " | id=" + (u.id||""));
     var info = {
       name: fn,
       userId:  u.id   || "",
@@ -533,7 +520,7 @@ function collectD() {
     formType:"delivery_sheet", invoiceNo:gv("ds-inv"), dealer:gv("ds-dlr"),
     dealerAddress:gv("ds-adr")+" "+gv("ds-cty"), dealerContact:gv("ds-cnt"),
     dealerPhone:gv("ds-ph"), dealerEmail:gv("ds-em"), date:gv("ds-dt"),
-    codAmount:parseFloat(gv("ds-cod"))||0, paymentType:pt.join(", "),
+    codAmount:Math.round((parseFloat(gv("ds-cod"))||0)*100)/100, paymentType:pt.join(", "),
     accepted:gc("ck-ac"), booklets:bklt, comments:gv("ds-cm"),
     driverSigned:SS["sig-driver"]?SS["sig-driver"].signed:false,
     consigneeSigned:SS["sig-consignee"]?SS["sig-consignee"].signed:false,
