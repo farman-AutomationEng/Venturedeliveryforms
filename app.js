@@ -145,6 +145,7 @@ function checkLicense(api, callback) {
 }
 
 function sendLicenseRequest(database, userCount, deviceCount, callback) {
+  console.log("[License] Checking:", database, "URL:", LICENSE_SERVER_URL);
   var payload = JSON.stringify({
     action: "verify",
     database: database,
@@ -160,12 +161,14 @@ function sendLicenseRequest(database, userCount, deviceCount, callback) {
     if (xhr.readyState !== 4) return;
     if (xhr.status === 200) {
       try { callback(JSON.parse(xhr.responseText)); }
-      catch(e) { callback({allowed: true, warning: "Parse error"}); }
+      catch(e) { callback({allowed: false, reason: "License check error. Contact Dynasty Communications."}); }
     } else {
-      callback({allowed: true, warning: "License server unreachable"});
+      // Non-200 response — server reachable but error
+      callback({allowed: false, reason: "License server error (HTTP " + xhr.status + "). Contact Dynasty Communications."});
     }
   };
-  xhr.ontimeout = function() { callback({allowed: true, warning: "License check timed out"}); };
+  // Timeout only = fail-open (server may be temporarily down — don't block drivers)
+  xhr.ontimeout = function() { callback({allowed: true, warning: "License check timed out — operating in offline mode"}); };
   xhr.send(payload);
 }
 
