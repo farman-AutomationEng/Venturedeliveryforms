@@ -145,31 +145,28 @@ function checkLicense(api, callback) {
 }
 
 function sendLicenseRequest(database, userCount, deviceCount, callback) {
-  console.log("[License] Checking:", database, "URL:", LICENSE_SERVER_URL);
-  var payload = JSON.stringify({
-    action: "verify",
-    database: database,
-    addinId: ADDIN_ID,
-    userCount: userCount,
-    deviceCount: deviceCount
-  });
+  // Use GET — GAS GET requests work cross-origin (POST gets CORS blocked)
+  var url = LICENSE_SERVER_URL +
+    "?action=verify" +
+    "&database=" + encodeURIComponent(database) +
+    "&addinId=" + encodeURIComponent(ADDIN_ID) +
+    "&userCount=" + (userCount || 0) +
+    "&deviceCount=" + (deviceCount || 0);
+
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", LICENSE_SERVER_URL, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.timeout = 8000;
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState !== 4) return;
+  xhr.open("GET", url, true);
+  xhr.timeout = 10000;
+  xhr.onload = function() {
     if (xhr.status === 200) {
       try { callback(JSON.parse(xhr.responseText)); }
-      catch(e) { callback({allowed: false, reason: "License check error. Contact Dynasty Communications."}); }
+      catch(e) { callback({allowed: true, warning: "License parse error — offline mode"}); }
     } else {
-      // Non-200 response — server reachable but error
-      callback({allowed: false, reason: "License server error (HTTP " + xhr.status + "). Contact Dynasty Communications."});
+      callback({allowed: true, warning: "License server error — offline mode"});
     }
   };
-  // Timeout only = fail-open (server may be temporarily down — don't block drivers)
-  xhr.ontimeout = function() { callback({allowed: true, warning: "License check timed out — operating in offline mode"}); };
-  xhr.send(payload);
+  xhr.onerror   = function() { callback({allowed: true, warning: "License unreachable — offline mode"}); };
+  xhr.ontimeout = function() { callback({allowed: true, warning: "License timeout — offline mode"}); };
+  xhr.send();
 }
 
 function showLicenseError(reason) {
