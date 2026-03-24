@@ -65,31 +65,39 @@ function checkLicense(api, callback) {
     }
     var database = sess.database;
 
-    // DeviceStatusInfo — single call gives us:
-    // 1. Online devices (communicated in last 24 hours)
-    // 2. Total devices (all with any status entry)
-    api.call("Get", {typeName: "DeviceStatusInfo"}, function(dsi) {
-      var dsiList = dsi || [];
+    // Step 1: Get total device count
+    api.call("Get", {typeName: "Device", search: {activeFrom: "1986-01-01T00:00:00Z"}}, function(devices) {
+      var totalCount = (devices || []).length;
 
-      // Online devices = communicated in last 24 hours
-      var now    = new Date();
-      var cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      var onlineCount = 0;
-      var totalCount  = 0;
+      // Step 2: Get online devices via DeviceStatusInfo
+      // Online = communicated in last 24 hours
+      api.call("Get", {typeName: "DeviceStatusInfo"}, function(dsi) {
+        var dsiList = dsi || [];
+        var now     = new Date();
+        var cutoff  = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        var onlineCount = 0;
 
-      dsiList.forEach(function(item) {
-        if (!item.device || !item.device.id) return;
-        totalCount++;
-        if (item.dateTime) {
-          var lastComm = new Date(item.dateTime);
-          if (lastComm >= cutoff) onlineCount++;
-        }
+        dsiList.forEach(function(item) {
+          if (!item.device || !item.device.id) return;
+          // dateTime can be string or Date object
+          if (item.dateTime) {
+            var lastComm = (item.dateTime instanceof Date) ? item.dateTime : new Date(item.dateTime);
+            if (!isNaN(lastComm.getTime()) && lastComm >= cutoff) {
+              onlineCount++;
+            }
+          }
+        });
+
+        console.log("[License] DB:", database, "| Total devices:", totalCount, "| DSI entries:", dsiList.length, "| Online (24h):", onlineCount);
+        sendLicenseRequest(database, onlineCount, totalCount, callback);
+
+      }, function(err) {
+        console.error("[License] DeviceStatusInfo error:", err);
+        sendLicenseRequest(database, 0, totalCount, callback);
       });
 
-      sendLicenseRequest(database, onlineCount, totalCount, callback);
-
     }, function(err) {
-      console.error("DeviceStatusInfo error:", err);
+      console.error("[License] Device count error:", err);
       sendLicenseRequest(database, 0, 0, callback);
     });
   });
