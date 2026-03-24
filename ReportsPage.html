@@ -248,11 +248,11 @@ function renderT(){
       <td><div class="drv-name">${r.driverName||"—"}</div><div class="drv-grp">${r.driverGroupName||""}</div></td>
       <td>${r.dealer||"—"}</td>
       <td style="font-weight:700;color:#00875A">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
-      <td>${iss?`<span style="font-size:11px;color:#DE350B;font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
+      <td>${iss?'<span style="font-size:11px;color:#DE350B;font-weight:700">'+iss+'</span>':'<span style="color:#94a3b8">—</span>'}</td>
       <td>${statusBadge(r.status)}</td>
       <td style="white-space:nowrap">
         <button class="btn-view" onclick="openD('${r.id}')">View</button>
-        <button class="btn-del" onclick="delRecord('${r.id}','${(r.invoiceNo||r.date||'record').replace(/'/g,'')}')">🗑</button>
+        <button class="btn-del" onclick="delRecord('${r.id}','${(r.invoiceNo||r.date||'rec').replace(/'/g,'')}')">Del</button>
       </td>
     </tr>`;
   }).join("");
