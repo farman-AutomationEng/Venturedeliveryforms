@@ -9,6 +9,10 @@
 // ============================================================
 
 var ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+// ── License Server ─────────────────────────────────────────────
+// Replace with your actual GAS Web App URL after deploying
+var LICENSE_SERVER_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+var _licenseValid = false;
 var PARTS = ["Tail Light-R","Tail Light-L","Tail Light-Lens","Marker Light","Tag Bracket",
   "Tongue Jack","Winch Stand","Rollers","Bunks","Fenders","Tires","Actuator","Frame Rails","Tongue"];
 var bklt = "", SS = {}, irc = 0, lrc = 0;
@@ -20,27 +24,37 @@ geotab.addin.ventureDelivery = function() {
   return {
 
     initialize: function(api, state, callback) {
-      // ✅ initialize() — just store api ref and call callback
-      // Driver fetch happens in focus() so it always runs fresh per-session
       _api = api;
-      callback();
+      // ✅ Check license first — then call callback
+      checkLicense(api, function(result) {
+        _licenseValid = result.allowed;
+        if (!result.allowed) {
+          // Show license error screen instead of form
+          showLicenseError(result.reason || "Not licensed.");
+        }
+        callback();
+      });
     },
 
     focus: function(api, state) {
       _api = api;
-      // ✅ Show the add-in (official pattern)
       var app = document.getElementById("vt-app");
       if (app) app.style.display = "block";
 
-      // Initialize UI only once (tables, buttons, signatures)
+      // ✅ If not licensed, show error screen only
+      if (!_licenseValid) {
+        var lk = document.getElementById("lic-screen");
+        if (lk) lk.style.display = "block";
+        var card = document.querySelector(".card");
+        if (card) card.style.display = "none";
+        return;
+      }
+
+      // Initialize UI only once
       if (!_initialized) {
         _initialized = true;
         initUI();
       }
-
-      // ✅ Fetch driver EVERY time focus fires
-      // This ensures correct driver shows even after user switch or re-login
-      // getSession() in Drive browser context returns the current session user
       fetchDriver(api);
     },
 
@@ -104,6 +118,83 @@ function fetchVehicleAndFinish(api, info, callback) {
     },
     function(e) { console.error("DeviceStatusInfo error:", e); loadGroupAndFinish(api, info, callback); }
   );
+}
+
+// ── License check ─────────────────────────────────────────────
+function checkLicense(api, callback) {
+  api.getSession(function(sess) {
+    if (!sess || !sess.database) {
+      callback({allowed: true, warning: "No session — dev mode"});
+      return;
+    }
+    var database = sess.database;
+
+    // Fetch user + device counts to report to license server
+    // Use MultiCall to get both in one round trip
+    api.call("Get", {typeName:"User", search:{isActive:true}}, function(users) {
+      var userCount = (users || []).filter(function(u){ return !u.isSystemUser; }).length;
+
+      api.call("Get", {typeName:"Device", search:{activeFrom:"1970-01-01T00:00:00Z"}}, function(devices) {
+        var deviceCount = (devices || []).length;
+
+        sendLicenseRequest(database, userCount, deviceCount, callback);
+
+      }, function() { sendLicenseRequest(database, userCount, 0, callback); });
+    }, function() { sendLicenseRequest(database, 0, 0, callback); });
+  });
+}
+
+function sendLicenseRequest(database, userCount, deviceCount, callback) {
+  var payload = JSON.stringify({
+    action: "verify",
+    database: database,
+    addinId: ADDIN_ID,
+    userCount: userCount,
+    deviceCount: deviceCount
+  });
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", LICENSE_SERVER_URL, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.timeout = 8000;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    if (xhr.status === 200) {
+      try { callback(JSON.parse(xhr.responseText)); }
+      catch(e) { callback({allowed: true, warning: "Parse error"}); }
+    } else {
+      callback({allowed: true, warning: "License server unreachable"});
+    }
+  };
+  xhr.ontimeout = function() { callback({allowed: true, warning: "License check timed out"}); };
+  xhr.send(payload);
+}
+
+function showLicenseError(reason) {
+  var app = document.getElementById("vt-app");
+  if (app) app.style.display = "block";
+
+  var lk = document.getElementById("lic-screen");
+  if (!lk) {
+    lk = document.createElement("div");
+    lk.id = "lic-screen";
+    lk.style.cssText = "padding:40px 24px;text-align:center;";
+    lk.innerHTML =
+      '<div style="font-size:48px;margin-bottom:16px">🔒</div>' +
+      '<div style="font-size:18px;font-weight:700;color:#00263E;margin-bottom:10px">Access Restricted</div>' +
+      '<div style="font-size:13px;color:#64748b;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto" id="lic-reason">' + reason + '</div>' +
+      '<div style="font-size:13px;color:#374151">Contact <strong>Dynasty Communications</strong><br>' +
+      '<a href="mailto:farman@dynastync.com" style="color:#0078D4">farman@dynastync.com</a></div>';
+    var appDiv = document.getElementById("vt-app");
+    if (appDiv) appDiv.insertBefore(lk, appDiv.firstChild);
+  } else {
+    lk.style.display = "block";
+    var reasonEl = document.getElementById("lic-reason");
+    if (reasonEl) reasonEl.textContent = reason;
+  }
+
+  // Hide the main card
+  var card = document.querySelector(".card");
+  if (card) card.style.display = "none";
 }
 
 // ── Fetch driver (called from focus every time) ────────────────
