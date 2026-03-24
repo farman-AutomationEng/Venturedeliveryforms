@@ -284,7 +284,7 @@ function renderT(){
       <td>${statusBadge(r.status)}</td>
       <td style="white-space:nowrap">
         <button class="btn-view" onclick="openD('${r.id}')">View</button>
-        <button class="btn-view" onclick="deleteD('${r.id}','${r.invoiceNo||r.id}')" style="background:#DE350B;margin-left:4px">Delete</button>
+        <button class="btn-view" onclick="deleteD('${r.id}','${r.invoiceNo||r.id}')" style="margin-left:4px">Delete</button>
       </td>
     </tr>`;
   }).join("");
