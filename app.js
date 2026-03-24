@@ -70,11 +70,11 @@ function checkLicense(api, callback) {
       var totalCount = (devices || []).length;
 
       // Step 2: Get online devices via DeviceStatusInfo
-      // Online = communicated in last 24 hours
+      // Online = communicated in last 5 minutes (real-time)
       api.call("Get", {typeName: "DeviceStatusInfo"}, function(dsi) {
         var dsiList = dsi || [];
         var now     = new Date();
-        var cutoff  = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        var cutoff  = new Date(now.getTime() - 5 * 60 * 1000);
         var onlineCount = 0;
 
         dsiList.forEach(function(item) {
@@ -88,7 +88,7 @@ function checkLicense(api, callback) {
           }
         });
 
-        console.log("[License] DB:", database, "| Total devices:", totalCount, "| DSI entries:", dsiList.length, "| Online (24h):", onlineCount);
+        console.log("[License] DB:", database, "| Total devices:", totalCount, "| DSI entries:", dsiList.length, "| Online (5min):", onlineCount);
         sendLicenseRequest(database, onlineCount, totalCount, callback);
 
       }, function(err) {
