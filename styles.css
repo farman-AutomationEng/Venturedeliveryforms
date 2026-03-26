@@ -363,3 +363,10 @@ tr.row-link:hover td{background:#EFF6FF !important}
 .dc-toast.show{opacity:1}
 .dc-toast.ok{background:#16a34a}
 .dc-toast.er{background:#DC2626}
+
+/* ── Badge color variants (used by ReportsPage) ── */
+.badge.bg-blue{background:#DBEAFE;color:#1E40AF}
+.badge.bg-green{background:#D1FAE5;color:#065F46}
+.badge.bg-yellow{background:#FEF9C3;color:#92400E}
+.badge.bg-gray{background:#F1F5F9;color:#374151}
+.badge.bg-red{background:#FEE2E2;color:#991B1B}
