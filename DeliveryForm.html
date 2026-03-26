@@ -7,10 +7,33 @@
 <title>Venture Trailers — Delivery Form</title>
 <link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css">
 <script src="https://farman-automationeng.github.io/Venturedeliveryforms/app.js"></script>
+<style>
+#pending-screen{padding:0 0 40px}
+.pl-hdr{background:#00263E;color:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.pl-hdr h2{font-size:15px;font-weight:700;margin:0}
+.pl-hdr-sub{font-size:11px;opacity:.7;margin:2px 0 0}
+.pl-loading{text-align:center;padding:32px;color:#64748b;font-size:13px}
+.pl-card{background:white;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin:12px 12px 0;overflow:hidden}
+.pl-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F1F5F9}
+.pl-item:last-child{border-bottom:none}
+.pl-item-left{flex:1;margin-right:12px}
+.pl-inv{font-size:15px;font-weight:700;color:#00263E;margin-bottom:3px}
+.pl-dealer{font-size:13px;color:#374151;margin-bottom:5px}
+.pl-meta{font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:8px}
+.pl-open-btn{padding:9px 22px;font-size:13px;white-space:nowrap}
+.pl-empty-box{text-align:center;padding:48px 24px}
+.pl-empty-icon{font-size:40px;margin-bottom:12px}
+.pl-empty-box p{font-size:13px;color:#64748b}
+#form-back-bar{display:none;align-items:center;gap:12px;padding:10px 14px;background:#F8FAFC;border-bottom:2px solid #E2E8F0;position:sticky;top:0;z-index:10}
+#btnBackToList{padding:6px 14px;background:white;border:1px solid #D1D5DB;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151}
+#form-bar-title{font-size:12px;font-weight:700;color:#00263E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ro-hint{font-size:10px;color:#16a34a;font-weight:600;margin-left:6px}
+input[readonly],textarea[readonly]{background:#F8FAFC!important;color:#64748b!important;cursor:default!important;border-color:#E5E7EB!important}
+input:disabled{background:#F8FAFC!important;color:#94a3b8!important;cursor:default!important;border-color:#E5E7EB!important}
+</style>
 </head>
 <body ontouchstart="">
 
-<!-- ✅ Exactly like official Geotab samples: div hidden by default, shown in focus() -->
 <div id="vt-app" style="display:none">
 
 <div class="hdr">
@@ -18,11 +41,44 @@
   <span class="dbadge" id="dbadge"></span>
 </div>
 
-<div class="dbar" id="dbar">
+<div class="dbar" id="dbar" style="display:none">
   <div class="dav" id="dav">?</div>
   <div class="dbar-flex"><div class="dnm" id="dnm"></div><div class="dmt" id="dmt"></div></div>
   <span class="dgrp" id="dgrp"></span>
 </div>
+
+<!-- ══ PENDING FORMS LIST ══════════════════════════════ -->
+<div id="pending-screen">
+  <div class="pl-hdr">
+    <div>
+      <h2>Pending Deliveries</h2>
+      <p class="pl-hdr-sub" id="pl-driver-label">Loading driver...</p>
+    </div>
+    <button onclick="fetchPendingForms()" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">↺ Refresh</button>
+  </div>
+  <div id="pl-loading" class="pl-loading" style="display:none">
+    <div class="sp"></div><p style="margin-top:8px">Loading forms...</p>
+  </div>
+  <div class="pl-card">
+    <div id="pl-list"></div>
+    <div id="pl-empty" style="display:none">
+      <div class="pl-empty-box">
+        <div class="pl-empty-icon">📭</div>
+        <p>No pending forms assigned to you.</p>
+        <p style="margin-top:6px;font-size:11px;color:#94a3b8">Your dispatcher will assign forms to you.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORM BACK BAR ═══════════════════════════════════ -->
+<div id="form-back-bar">
+  <button id="btnBackToList">← Back</button>
+  <span id="form-bar-title"></span>
+</div>
+
+<!-- ══ FORM AREA ═══════════════════════════════════════ -->
+<div id="form-area" style="display:none">
 
 <div class="tabs-wrap">
   <div class="tabs">
@@ -38,67 +94,59 @@
     <div class="si">✓</div>
     <h2 class="succ-title">Submitted!</h2>
     <p class="succ-sub">Saved to MyGeotab • Email will be sent shortly</p>
-    <!-- MyGeotab ID hidden -->
-    <button class="btn bp btn-new" id="btnNew">+ New Form</button>
+    <button class="btn bp btn-new" id="btnNew">← Back to List</button>
   </div>
 
-  <!-- TAB 0: DELIVERY -->
+  <!-- TAB 0: DELIVERY ───────────────────────────────── -->
   <div id="t0">
     <div class="notice">⚠️ <strong>Inspect all merchandise.</strong> Damages not replaced unless noted at delivery.</div>
     <div class="from-box"><strong>FROM:</strong> Venture Trailers • 5301 North Point Blvd, Baltimore MD 21219</div>
     <div class="g2">
-      <div class="f"><label>Date *</label><input type="date" id="ds-dt"></div>
-      <div class="f"><label>Invoice No. *</label><input id="ds-inv" placeholder="132993"></div>
+      <div class="f"><label>Date</label><input type="date" id="ds-dt" readonly></div>
+      <div class="f"><label>Invoice No.</label><input id="ds-inv" readonly></div>
     </div>
     <div class="sec"><span>🏪</span><h3>Consigned To</h3></div>
     <div class="g2">
-      <div class="f fc"><label>Dealer Name *</label><input id="ds-dlr" placeholder="Blue Mountain Marine"></div>
-      <div class="f fc"><label>Address</label><input id="ds-adr" placeholder="1765 Valley View Dr"></div>
-      <div class="f"><label>City, State, ZIP</label><input id="ds-cty" placeholder="Bangor PA 18013"></div>
-      <div class="f"><label>Contact</label><input id="ds-cnt" placeholder="Ryan"></div>
-      <div class="f"><label>Phone</label><input type="tel" id="ds-ph" placeholder="610-599-3628"></div>
-      <div class="f"><label>Dealer Email</label><input type="email" id="ds-em" placeholder="dealer@company.com"></div>
-    </div>
-    <!-- Driver Info: hidden fields only — section hidden, data saved in background -->
-    <div id="drv-section" style="display:none">
-    <div class="sec"><span>👤</span><h3>Driver Info <span class="abadge">⚡ Auto</span></h3></div>
-    <div class="g2">
-      <div class="f"><label>Driver Name</label><input id="ds-drv" readonly placeholder="Auto from Geotab"></div>
-      <div class="f"><label>Driver Group</label><input id="ds-grp" readonly placeholder="Auto"></div>
-      <div class="f"><label>Vehicle ID</label><input id="ds-vid" readonly placeholder="Auto"></div>
-      <div class="f"><label>Vehicle Name</label><input id="ds-vnm" readonly placeholder="Auto"></div>
-    </div>
+      <div class="f fc"><label>Dealer Name</label><input id="ds-dlr" readonly></div>
+      <div class="f fc"><label>Address</label><input id="ds-adr" readonly></div>
+      <div class="f"><label>City, State, ZIP</label><input id="ds-cty" readonly></div>
+      <div class="f"><label>Contact</label><input id="ds-cnt" readonly></div>
+      <div class="f"><label>Phone</label><input type="tel" id="ds-ph" readonly></div>
+      <div class="f"><label>Dealer Email</label><input type="email" id="ds-em" readonly></div>
     </div>
     <div class="sec"><span>💰</span><h3>Payment</h3></div>
     <div class="pay-g2">
-      <div class="f"><label>C.O.D. Amount ($)</label><input type="text" inputmode="decimal" id="ds-cod" placeholder="0.00"></div>
+      <div class="f"><label>C.O.D. Amount ($)</label><input type="text" id="ds-cod" readonly></div>
       <div class="f"><label>Type</label>
         <div id="payment-types">
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-cod" value="COD" checked> C.O.D.</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-fp" value="Floor Plan"> Floor Plan</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-pt" value="Parts"> Parts</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-rv" value="Return to Vendor"> Return to Vendor</div>
-          <div class="pay-row"><input type="radio" name="paytype" id="ck-wn" value="Warranty"> Warranty</div>
+          <div class="pay-row"><input type="radio" name="paytype" id="ck-cod" value="COD" disabled> C.O.D.</div>
+          <div class="pay-row"><input type="radio" name="paytype" id="ck-fp" value="Floor Plan" disabled> Floor Plan</div>
+          <div class="pay-row"><input type="radio" name="paytype" id="ck-pt" value="Parts" disabled> Parts</div>
+          <div class="pay-row"><input type="radio" name="paytype" id="ck-rv" value="Return to Vendor" disabled> Return to Vendor</div>
+          <div class="pay-row"><input type="radio" name="paytype" id="ck-wn" value="Warranty" disabled> Warranty</div>
         </div>
       </div>
     </div>
-    <div class="sec"><span>🔧</span><h3>Parts Condition</h3></div>
+    <div class="sec"><span>🔧</span><h3>Parts Condition <span class="ro-hint">✏️ Check damaged/short + add notes</span></h3></div>
     <div class="tw">
       <table><thead><tr><th>Part</th><th>Model</th><th class="tc">Dmg</th><th class="tc">Short</th><th>Notes</th></tr></thead>
       <tbody id="ptb"></tbody></table>
     </div>
     <div class="notice notice-mb">
-      <label class="ci ci-lg"><input type="checkbox" id="ck-ac"> ACCEPTED — product accepted as is, except where noted.</label>
+      <label class="ci ci-lg"><input type="checkbox" id="ck-ac" disabled> ACCEPTED — product accepted as is, except where noted.</label>
     </div>
     <div class="bk-box">
       <div class="bk-lbl">Received "You and Your Trailer" booklets?</div>
       <div class="pills">
-        <div class="pill" id="py">✅ Yes</div>
-        <div class="pill" id="pn">❌ No</div>
+        <div class="pill" id="py" style="pointer-events:none">✅ Yes</div>
+        <div class="pill" id="pn" style="pointer-events:none">❌ No</div>
       </div>
     </div>
-    <div class="f mb14"><label>Comments</label><textarea id="ds-cm" placeholder="Any notes..."></textarea></div>
-    <div class="sec"><span>✍️</span><h3>Signatures</h3></div>
+    <div class="f mb14">
+      <label>Comments <span class="ro-hint">✏️ You can edit this</span></label>
+      <textarea id="ds-cm" placeholder="Add any notes about this delivery..."></textarea>
+    </div>
+    <div class="sec"><span>✍️</span><h3>Signatures <span class="ro-hint">✏️ Sign below</span></h3></div>
     <div class="sig-wrap-row">
       <div>
         <div class="sig-lbl">Driver</div>
@@ -120,64 +168,66 @@
       </div>
     </div>
     <div class="sa">
-      <button class="btn bs" id="btnDraft">💾 Draft</button>
-      <button class="btn bp" id="subbtn">📤 Submit &amp; Send to Dealer</button>
+      <button class="btn bp" id="subbtn">📤 Submit Delivery</button>
     </div>
   </div>
 
-  <!-- TAB 1: INVOICE -->
+  <!-- TAB 1: INVOICE (VIEW ONLY) ─────────────────────── -->
   <div id="t1" class="tab-hidden">
+    <div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400E;font-weight:600">
+      📋 This invoice is view-only. No edits can be made by the driver.
+    </div>
     <div class="inv-hdr">
       <div><div class="inv-company">VENTURE TRAILERS, INC.</div><div class="inv-addr">5301 North Point Blvd • Baltimore MD 21219</div></div>
       <div class="inv-badge">INVOICE</div>
     </div>
     <div class="g2">
-      <div class="f"><label>Date</label><input type="date" id="id"></div>
-      <div class="f"><label>Acct No.</label><input id="ia" value="3818"></div>
-      <div class="f fc"><label>Invoice #</label><input id="ino" placeholder="132993"></div>
+      <div class="f"><label>Date</label><input type="date" id="id" readonly></div>
+      <div class="f"><label>Acct No.</label><input id="ia" readonly></div>
+      <div class="f fc"><label>Invoice #</label><input id="ino" readonly></div>
     </div>
     <div class="g2 mt10">
-      <div class="f"><label>Bill To</label><textarea id="ibt" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
-      <div class="f"><label>Ship To</label><textarea id="ist" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
+      <div class="f"><label>Bill To</label><textarea id="ibt" readonly></textarea></div>
+      <div class="f"><label>Ship To</label><textarea id="ist" readonly></textarea></div>
     </div>
     <div class="inv-grid-4 mt10">
-      <div class="f"><label>PO #</label><input id="ipo"></div>
-      <div class="f"><label>Terms</label><input id="itr" value="Due on receipt"></div>
-      <div class="f"><label>Sales Order</label><input id="iso"></div>
-      <div class="f"><label>Shipping Method</label><input id="ism" placeholder="Marine Freight LLC"></div>
+      <div class="f"><label>PO #</label><input id="ipo" readonly></div>
+      <div class="f"><label>Terms</label><input id="itr" readonly></div>
+      <div class="f"><label>Sales Order</label><input id="iso" readonly></div>
+      <div class="f"><label>Shipping Method</label><input id="ism" readonly></div>
     </div>
     <div class="sec"><span>📦</span><h3>Line Items</h3></div>
-    <div class="tw"><table><thead><tr><th>Item</th><th>Qty</th><th>Description</th><th>Unit Price</th><th>Total</th><th></th></tr></thead><tbody id="itb"></tbody></table></div>
-    <button class="btn-add" id="btnAddIR">+ Add Line</button>
+    <div class="tw"><table><thead><tr><th>Item</th><th>Qty</th><th>Description</th><th>Unit Price</th><th>Total</th></tr></thead><tbody id="itb"></tbody></table></div>
     <div class="totals-wrap">
       <div class="totals-box">
-        <div class="totals-row"><span>Shipping</span><input id="ish" class="ish-input"></div>
+        <div class="totals-row"><span>Shipping</span><input id="ish" class="ish-input" readonly></div>
         <div class="totals-due"><span>Amount Due</span><span id="itot">$0.00</span></div>
       </div>
     </div>
-    <div class="sa"><button class="btn bs">💾 Draft</button><button class="btn bp" id="btnSubInv">📤 Submit Invoice</button></div>
   </div>
 
-  <!-- TAB 2: LOOSE PARTS -->
+  <!-- TAB 2: LOOSE PARTS ──────────────────────────────── -->
   <div id="t2" class="tab-hidden">
     <div class="lp-hdr">
       <div class="lp-company">VENTURE TRAILERS</div>
       <div class="lp-sub">LOOSE PARTS CHECK-IN</div>
     </div>
     <div class="g2">
-      <div class="f"><label>Sales Order #</label><input id="ls"></div>
-      <div class="f"><label>Invoice #</label><input id="li"></div>
-      <div class="f"><label>PL#</label><input id="lpl"></div>
-      <div class="f"><label>TRK#</label><input id="lt"></div>
-      <div class="f"><label>Dealer</label><input id="ld"></div>
-      <div class="f"><label>Date</label><input type="date" id="ldt"></div>
+      <div class="f"><label>Sales Order #</label><input id="ls" readonly></div>
+      <div class="f"><label>Invoice #</label><input id="li" readonly></div>
+      <div class="f"><label>PL#</label><input id="lpl" readonly></div>
+      <div class="f"><label>TRK#</label><input id="lt" readonly></div>
+      <div class="f"><label>Dealer</label><input id="ld" readonly></div>
+      <div class="f"><label>Date</label><input type="date" id="ldt" readonly></div>
     </div>
-    <div class="sec"><span>🔩</span><h3>Parts List</h3></div>
-    <div class="tw"><table><thead><tr><th>Loc</th><th>Qty</th><th>Part</th><th class="tc">Pulled</th><th class="tc">Loaded</th><th class="tc">N/C</th><th class="tc">COD</th><th></th></tr></thead><tbody id="ltb"></tbody></table></div>
-    <button class="btn-add" id="btnAddLR">+ Add Row</button>
-    <div class="f mb14"><label>Comments</label><textarea id="lc"></textarea></div>
+    <div class="sec"><span>🔩</span><h3>Parts List <span class="ro-hint">✏️ Check Pulled/Loaded/N/C/COD</span></h3></div>
+    <div class="tw"><table><thead><tr><th>Loc</th><th>Qty</th><th>Part</th><th class="tc">Pulled</th><th class="tc">Loaded</th><th class="tc">N/C</th><th class="tc">COD</th></tr></thead><tbody id="ltb"></tbody></table></div>
+    <div class="f mb14">
+      <label>Comments <span class="ro-hint">✏️ You can edit this</span></label>
+      <textarea id="lc" placeholder="Add any notes..."></textarea>
+    </div>
     <div class="notice nred notice-center">⚠️ MUST BE COMPLETED AT TIME OF DELIVERY</div>
-    <div class="sec mt14"><span>✍️</span><h3>Signatures</h3></div>
+    <div class="sec mt14"><span>✍️</span><h3>Signatures <span class="ro-hint">✏️ Sign below</span></h3></div>
     <div class="sig-wrap-row">
       <div>
         <div class="sig-lbl">Driver</div>
@@ -198,12 +248,12 @@
         </div>
       </div>
     </div>
-    <div class="sa"><button class="btn bs">💾 Draft</button><button class="btn bp" id="btnSubParts">📤 Submit Parts Form</button></div>
+    <div class="sa"><button class="btn bp" id="btnSubParts">📤 Submit Parts Form</button></div>
   </div>
 
 </div><!-- /card -->
+</div><!-- /form-area -->
 
 </div><!-- /vt-app -->
-
 </body>
 </html>
