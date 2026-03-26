@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venture Trailers — Dispatch</title>
+<link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css?v=63">
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div>
+    <h1>Dispatch Console</h1>
+    <p id="geo-txt"><span class="geo-dot loading" id="geo-dot"></span>Connecting...</p>
+  </div>
+  <div class="dc-actions" style="gap:8px">
+    <span class="dbadge" id="today-badge"></span>
+    <button class="btn bp" onclick="openNewForm()">+ New Form</button>
+    <button class="btn bg2" onclick="loadAll()">↺ Refresh</button>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi" onclick="setFilter('all')">
+    <div class="kv" id="k-total">—</div>
+    <div class="kl">Total Forms</div>
+  </div>
+  <div class="kpi y" onclick="setFilter('Pending')">
+    <div class="kv" id="k-pending">—</div>
+    <div class="kl">Pending</div>
+  </div>
+  <div class="kpi g" onclick="setFilter('Submitted')">
+    <div class="kv" id="k-submitted">—</div>
+    <div class="kl">Submitted</div>
+  </div>
+  <div class="kpi" onclick="focusDriverPanel()">
+    <div class="kv" id="k-online">—</div>
+    <div class="kl">Drivers Online</div>
+  </div>
+</div>
+
+<div class="err-box" id="errbox"></div>
+
+<!-- Main Grid -->
+<div class="dc-grid">
+
+  <!-- LEFT: Forms -->
+  <div class="dc-panel">
+    <div class="dc-panel-hdr">
+      <h2>Assigned Forms <span id="forms-count" class="empty" style="font-size:11px;font-weight:400;padding:0"></span></h2>
+      <input id="srch" placeholder="Search invoice, dealer..." class="ff" style="flex:0 0 180px;padding:5px 9px;font-size:12px" oninput="renderForms()">
+      <button class="btn bp" style="padding:5px 12px;font-size:12px" onclick="openNewForm()">+ New</button>
+    </div>
+    <div class="dc-tabs">
+      <button class="dc-tab active" id="ft-all" onclick="setFilter('all')">All</button>
+      <button class="dc-tab" id="ft-Pending" onclick="setFilter('Pending')">Pending</button>
+      <button class="dc-tab" id="ft-Submitted" onclick="setFilter('Submitted')">Submitted</button>
+    </div>
+    <div id="forms-list" class="dc-panel-body"></div>
+  </div>
+
+  <!-- RIGHT: Drivers -->
+  <div class="dc-panel" id="driver-panel">
+    <div class="dc-panel-hdr">
+      <h2>Drivers</h2>
+      <span class="empty" id="drivers-count" style="font-size:11px;padding:0"></span>
+    </div>
+    <div id="drivers-list" class="dc-panel-body">
+      <div class="empty"><div class="sp"></div> Loading...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ NEW FORM MODAL ══ -->
+<div class="dc-modal" id="form-modal">
+  <div class="dc-modal-box">
+    <div class="dc-modal-hdr">
+      <h3>Create New Form</h3>
+      <button class="dc-modal-close" onclick="closeFormModal()">×</button>
+    </div>
+    <div class="dc-modal-body">
+      <div class="dc-g2">
+        <div class="dc-field">
+          <label>Assign to Driver *</label>
+          <select id="fm-driver"><option value="">-- Select Driver --</option></select>
+        </div>
+        <div class="dc-field">
+          <label>Form Type *</label>
+          <select id="fm-type" onchange="switchFormType(this.value)">
+            <option value="delivery_sheet">Delivery Sheet</option>
+            <option value="invoice">Invoice</option>
+            <option value="loose_parts">Loose Parts</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div id="fm-delivery">
+        <div class="dc-sec">Delivery Information</div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Date</label><input type="date" id="fm-date"></div>
+          <div class="dc-field"><label>Invoice # *</label><input id="fm-inv-no" placeholder="132993"></div>
+        </div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Dealer Name</label><input id="fm-dealer" placeholder="Blue Mountain Marine"></div>
+          <div class="dc-field"><label>Dealer Email</label><input type="email" id="fm-email" placeholder="dealer@company.com"></div>
+        </div>
+        <div class="dc-field"><label>Address</label><input id="fm-address" placeholder="1765 Valley View Dr, Bangor PA 18013"></div>
+        <div class="dc-g3">
+          <div class="dc-field"><label>Contact</label><input id="fm-contact" placeholder="Ryan"></div>
+          <div class="dc-field"><label>Phone</label><input id="fm-phone" placeholder="610-599-3628"></div>
+          <div class="dc-field"><label>COD Amount ($)</label><input type="text" id="fm-cod" placeholder="0.00"></div>
+        </div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Payment Type</label>
+            <select id="fm-payment">
+              <option value="COD">C.O.D.</option>
+              <option value="Floor Plan">Floor Plan</option>
+              <option value="Parts">Parts</option>
+              <option value="Return to Vendor">Return to Vendor</option>
+              <option value="Warranty">Warranty</option>
+            </select>
+          </div>
+          <div class="dc-field"><label>Booklets</label>
+            <select id="fm-booklets">
+              <option value="">--</option>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="dc-sec">Parts List <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#94a3b8">Leave empty for default 14 parts</span></div>
+        <table class="dc-tbl">
+          <thead><tr><th>Part Name</th><th>Model</th><th style="width:30px"></th></tr></thead>
+          <tbody id="fm-parts-body"></tbody>
+        </table>
+        <button class="dc-add-row" onclick="addDeliveryPart()">+ Add Part</button>
+      </div>
+
+      <!-- INVOICE -->
+      <div id="fm-invoice" style="display:none">
+        <div class="dc-sec">Invoice Information</div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Date</label><input type="date" id="fm-inv-date"></div>
+          <div class="dc-field"><label>Invoice # *</label><input id="fm-inv-number" placeholder="132993"></div>
+        </div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Acct No.</label><input id="fm-acct"></div>
+          <div class="dc-field"><label>PO #</label><input id="fm-po"></div>
+        </div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Bill To</label><textarea id="fm-bill-to" rows="3" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
+          <div class="dc-field"><label>Ship To</label><textarea id="fm-ship-to" rows="3"></textarea></div>
+        </div>
+        <div class="dc-g3">
+          <div class="dc-field"><label>Terms</label><input id="fm-terms"></div>
+          <div class="dc-field"><label>Sales Order</label><input id="fm-so"></div>
+          <div class="dc-field"><label>Shipping Method</label><input id="fm-ship-method"></div>
+        </div>
+        <div class="dc-sec">Line Items</div>
+        <table class="dc-tbl">
+          <thead><tr><th>Item</th><th style="width:50px">Qty</th><th>Description</th><th style="width:85px">Unit Price</th><th style="width:75px">Total</th><th style="width:28px"></th></tr></thead>
+          <tbody id="fm-inv-body"></tbody>
+        </table>
+        <button class="dc-add-row" onclick="addInvLine()">+ Add Line</button>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;align-items:center;gap:14px;font-size:13px">
+          <span style="color:#64748b">Shipping: <input id="fm-shipping" type="number" step="0.01" placeholder="0.00" oninput="calcGrand()" style="width:80px;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;font-size:12px"></span>
+          <span style="font-weight:700;color:#00263E">Amount Due: <span id="fm-grand">$0.00</span></span>
+        </div>
+      </div>
+
+      <!-- LOOSE PARTS -->
+      <div id="fm-parts" style="display:none">
+        <div class="dc-sec">Check-In Information</div>
+        <div class="dc-g2">
+          <div class="dc-field"><label>Date</label><input type="date" id="fm-parts-date"></div>
+          <div class="dc-field"><label>Invoice # *</label><input id="fm-parts-inv"></div>
+        </div>
+        <div class="dc-g3">
+          <div class="dc-field"><label>Sales Order #</label><input id="fm-parts-so"></div>
+          <div class="dc-field"><label>PL#</label><input id="fm-parts-pl"></div>
+          <div class="dc-field"><label>TRK#</label><input id="fm-parts-trk"></div>
+        </div>
+        <div class="dc-field"><label>Dealer</label><input id="fm-parts-dealer"></div>
+        <div class="dc-sec">Parts List <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#94a3b8">Driver will check Pulled/Loaded/N-C/COD</span></div>
+        <table class="dc-tbl">
+          <thead><tr><th>Location</th><th style="width:60px">Qty</th><th>Part Name</th><th style="width:28px"></th></tr></thead>
+          <tbody id="fm-parts-rows"></tbody>
+        </table>
+        <button class="dc-add-row" onclick="addPartsRow()">+ Add Part</button>
+      </div>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="btn bg2" onclick="closeFormModal()">Cancel</button>
+      <button class="btn bp" id="fm-save-btn" onclick="saveForm()">Save & Assign to Driver</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REASSIGN MODAL ══ -->
+<div class="dc-modal" id="reassign-modal">
+  <div class="dc-modal-box" style="max-width:360px">
+    <div class="dc-modal-hdr">
+      <h3>Reassign Form</h3>
+      <button class="dc-modal-close" onclick="closeReassign()">×</button>
+    </div>
+    <div class="dc-modal-body">
+      <div class="dc-field"><label>Assign to Driver</label><select id="ra-driver"></select></div>
+      <p style="font-size:12px;color:#64748b" id="ra-info"></p>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="btn bg2" onclick="closeReassign()">Cancel</button>
+      <button class="btn bp" onclick="confirmReassign()">Reassign</button>
+    </div>
+  </div>
+</div>
+
+<div class="dc-toast" id="toast"></div>
+
+<script>
+const ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+let _api=null, ALL_FORMS=[], ALL_DRIVERS=[], ALL_DSI=[], FILTER="all", _reassignId=null, _irc=0;
+
+geotab.addin.ventureDispatch = function(){
+  return {
+    initialize: function(api, state, cb){ _api=api; setGeo("ok","dynasty_communications"); cb(); },
+    focus:      function(api, state){ _api=api; loadAll(); },
+    blur:       function(){}
+  };
+};
+
+function loadAll(){
+  setGeo("loading","Loading...");
+  document.getElementById("today-badge").textContent = "📅 "+new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  let done=0;
+  function check(){ if(++done===3){ buildDrivers(); renderForms(); updateKPIs(); setGeo("ok","dynasty_communications"); } }
+  _api.call("Get",{typeName:"DeviceStatusInfo"},function(d){ALL_DSI=d||[];check();},function(){ALL_DSI=[];check();});
+  _api.call("Get",{typeName:"User",search:{isActive:true}},function(us){
+    ALL_DRIVERS=(us||[]).filter(u=>!u.isSystemUser).map(u=>({
+      id:u.id, name:((u.firstName||"")+" "+(u.lastName||"")).trim()||u.name||u.id,
+      email:u.name||"", groups:(u.companyGroups||[]).map(g=>g.id)
+    })).sort((a,b)=>a.name.localeCompare(b.name));
+    check();
+  },function(){ALL_DRIVERS=[];check();});
+  _api.call("Get",{typeName:"AddInData",search:{addInId:ADDIN_ID}},function(recs){
+    ALL_FORMS=(recs||[]).map(r=>{
+      try{ const d=typeof r.details==="string"?JSON.parse(r.details):r.details; if(d){d._id=r.id;return d;} }catch(e){}
+      return null;
+    }).filter(Boolean);
+    check();
+  },function(){ALL_FORMS=[];check();});
+}
+
+function setGeo(s,t){
+  const c={ok:"#00875A",loading:"#F59E0B",err:"#DE350B"};
+  const el=document.getElementById("geo-txt");
+  if(el) el.innerHTML='<span class="geo-dot" id="geo-dot" style="background:'+c[s]+'"></span>'+t;
+}
+
+function updateKPIs(){
+  document.getElementById("k-total").textContent=ALL_FORMS.filter(f=>f.status==="Pending"||f.status==="Submitted").length;
+  document.getElementById("k-pending").textContent=ALL_FORMS.filter(f=>f.status==="Pending").length;
+  document.getElementById("k-submitted").textContent=ALL_FORMS.filter(f=>f.status==="Submitted").length;
+  document.getElementById("k-online").textContent=ALL_DSI.filter(d=>d.isDeviceCommunicating).length;
+}
+
+function setFilter(f){
+  FILTER=f;
+  ["all","Pending","Submitted"].forEach(k=>{
+    const el=document.getElementById("ft-"+k);
+    if(el) el.className="dc-tab"+(k===f?" active":"");
+  });
+  renderForms();
+}
+
+function renderForms(){
+  const q=(document.getElementById("srch").value||"").toLowerCase();
+  let forms=ALL_FORMS.filter(f=>f.status==="Pending"||f.status==="Submitted");
+  if(FILTER==="Pending")   forms=forms.filter(f=>f.status==="Pending");
+  if(FILTER==="Submitted") forms=forms.filter(f=>f.status==="Submitted");
+  if(q) forms=forms.filter(f=>(f.invoiceNo||"").toLowerCase().includes(q)||(f.dealer||"").toLowerCase().includes(q)||(f.driverName||"").toLowerCase().includes(q));
+  forms.sort((a,b)=>{if(a.status==="Pending"&&b.status!=="Pending")return -1;if(b.status==="Pending"&&a.status!=="Pending")return 1;return (b.date||"").localeCompare(a.date||"");});
+  const cnt=document.getElementById("forms-count"); if(cnt) cnt.textContent="("+forms.length+")";
+  const el=document.getElementById("forms-list");
+  if(!forms.length){ el.innerHTML='<div class="empty"><div style="font-size:28px;margin-bottom:8px">📭</div><p>No forms found</p></div>'; return; }
+
+  const tl={delivery_sheet:"Delivery",invoice:"Invoice",loose_parts:"Parts"};
+  const tb={delivery_sheet:"dc-b-delivery",invoice:"dc-b-invoice",loose_parts:"dc-b-parts"};
+
+  el.innerHTML=forms.map(f=>{
+    const driver=f.assignedDriverId?(ALL_DRIVERS.find(d=>d.id===f.assignedDriverId)||{}).name||"Driver":(f.driverName||"Unassigned");
+    const ip=f.status==="Pending";
+    return`<div class="dc-row">
+      <div class="dc-row-info">
+        <span class="dc-inv">Invoice #${esc(f.invoiceNo||"—")}
+          <span class="badge ${tb[f.formType]||"dc-b-invoice"}" style="margin-left:5px">${tl[f.formType]||"Form"}</span>
+          <span class="badge ${ip?"dc-b-pending":"dc-b-submitted"}" style="margin-left:4px">${f.status}</span>
+        </span>
+        <span class="dc-dealer">${esc(f.dealer||f.billTo||"—")}</span>
+        <span class="dc-meta">
+          <span>👤 ${esc(driver)}</span>
+          <span>📅 ${esc(f.date||"")}</span>
+          ${f.codAmount?`<span>💰 $${f.codAmount}</span>`:""}
+          ${f.damaged?`<span style="color:#DE350B;font-weight:700">⚠️ DMG</span>`:""}
+        </span>
+      </div>
+      <div class="dc-actions">
+        ${ip?`<button class="btn amber" style="padding:4px 10px;font-size:11px" onclick="openReassign('${f._id}','${esc(driver)}','${esc(f.invoiceNo||"")}')">↻</button>`:""}
+        ${ip?`<button class="btn red" style="padding:4px 10px;font-size:11px" onclick="cancelForm('${f._id}','${esc(f.invoiceNo||"")}')">✕</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function buildDrivers(){
+  const pending={};
+  ALL_FORMS.filter(f=>f.status==="Pending"&&f.assignedDriverId).forEach(f=>{ pending[f.assignedDriverId]=(pending[f.assignedDriverId]||0)+1; });
+  const onlineSet=new Set();
+  ALL_DSI.forEach(d=>{ if(d.isDeviceCommunicating&&d.driver&&d.driver.id) onlineSet.add(d.driver.id); });
+  const online=ALL_DRIVERS.filter(d=>onlineSet.has(d.id));
+  const offline=ALL_DRIVERS.filter(d=>!onlineSet.has(d.id));
+  const cnt=document.getElementById("drivers-count"); if(cnt) cnt.textContent=online.length+" online / "+ALL_DRIVERS.length+" total";
+  document.getElementById("k-online").textContent=online.length;
+  const row=(d,isOn)=>{
+    const init=d.name.split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||"?";
+    const pc=pending[d.id]||0;
+    return`<div class="dc-driver">
+      <div class="dc-av">${init}</div>
+      <div class="dc-dinfo">
+        <span class="dc-dname">${esc(d.name)}</span>
+        <span class="dc-dsub">
+          <span class="dc-online ${isOn?"yes":"no"}"><span class="dc-dot"></span>${isOn?"Online":"Offline"}</span>
+          ${pc?`<span class="dc-pcount">${pc} pending</span>`:""}
+        </span>
+      </div>
+      <button class="btn bp" style="padding:4px 12px;font-size:11px" onclick="quickAssign('${d.id}')">+ Assign</button>
+    </div>`;
+  };
+  document.getElementById("drivers-list").innerHTML=
+    (online.length?`<span class="dc-grp-lbl">● Online (${online.length})</span>`:"") + online.map(d=>row(d,true)).join("") +
+    (offline.length?`<span class="dc-grp-lbl">● Offline (${offline.length})</span>`:"") + offline.map(d=>row(d,false)).join("");
+}
+
+function focusDriverPanel(){ document.getElementById("driver-panel").scrollIntoView({behavior:"smooth"}); }
+
+function openNewForm(pre){
+  const td=new Date().toISOString().split("T")[0];
+  document.getElementById("fm-type").value="delivery_sheet"; switchFormType("delivery_sheet");
+  ["fm-date","fm-inv-date","fm-parts-date"].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=td; });
+  ["fm-inv-no","fm-dealer","fm-email","fm-address","fm-contact","fm-phone","fm-cod","fm-inv-number","fm-acct","fm-po","fm-bill-to","fm-ship-to","fm-terms","fm-so","fm-ship-method","fm-parts-inv","fm-parts-so","fm-parts-pl","fm-parts-trk","fm-parts-dealer"].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=""; });
+  document.getElementById("fm-payment").value="COD"; document.getElementById("fm-booklets").value="";
+  const g=document.getElementById("fm-grand"); if(g) g.textContent="$0.00";
+  ["fm-parts-body","fm-inv-body","fm-parts-rows"].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=""; });
+  _irc=0;
+  const sel=document.getElementById("fm-driver");
+  sel.innerHTML='<option value="">-- Select Driver --</option>';
+  ALL_DRIVERS.forEach(d=>sel.innerHTML+=`<option value="${d.id}"${pre===d.id?" selected":""}>${esc(d.name)}</option>`);
+  document.getElementById("form-modal").classList.add("open");
+}
+function quickAssign(id){ openNewForm(id); }
+function closeFormModal(){ document.getElementById("form-modal").classList.remove("open"); }
+function switchFormType(t){
+  ["fm-delivery","fm-invoice","fm-parts"].forEach(id=>document.getElementById(id).style.display="none");
+  document.getElementById({delivery_sheet:"fm-delivery",invoice:"fm-invoice",loose_parts:"fm-parts"}[t]).style.display="block";
+}
+function addDeliveryPart(){
+  const tb=document.getElementById("fm-parts-body"); const tr=tb.insertRow();
+  tr.innerHTML='<td><input type="text" placeholder="e.g. Tail Light-R"></td><td><input type="text" placeholder="Model"></td><td><button class="dc-del-row" onclick="this.closest(\'tr\').remove()">✕</button></td>';
+}
+function addInvLine(){
+  _irc++; const n=_irc; const tb=document.getElementById("fm-inv-body"); const tr=tb.insertRow();
+  tr.innerHTML=`<td><input type="text" placeholder="Item"></td><td><input type="number" value="1" min="1" id="iq-${n}" oninput="calcInvRow(${n})"></td><td><input type="text" placeholder="Description"></td><td><input type="number" step="0.01" placeholder="0.00" id="ip-${n}" oninput="calcInvRow(${n})"></td><td><input type="text" id="it-${n}" readonly style="background:#F8FAFC;font-weight:700"></td><td><button class="dc-del-row" onclick="this.closest('tr').remove();calcGrand()">✕</button></td>`;
+}
+function calcInvRow(n){
+  const q=parseFloat((document.getElementById("iq-"+n)||{}).value)||0;
+  const p=parseFloat((document.getElementById("ip-"+n)||{}).value)||0;
+  const t=document.getElementById("it-"+n); if(t) t.value=(q*p)>0?(q*p).toFixed(2):""; calcGrand();
+}
+function calcGrand(){
+  let s=0; document.querySelectorAll("#fm-inv-body tr").forEach(r=>{ const t=r.querySelector("td:nth-child(5) input"); if(t) s+=parseFloat(t.value)||0; });
+  s+=parseFloat((document.getElementById("fm-shipping")||{}).value)||0;
+  document.getElementById("fm-grand").textContent="$"+s.toFixed(2);
+}
+function addPartsRow(){
+  const tb=document.getElementById("fm-parts-rows"); const tr=tb.insertRow();
+  tr.innerHTML='<td><input type="text" placeholder="Location"></td><td><input type="text" placeholder="Qty"></td><td><input type="text" placeholder="Part name"></td><td><button class="dc-del-row" onclick="this.closest(\'tr\').remove()">✕</button></td>';
+}
+function saveForm(){
+  const type=document.getElementById("fm-type").value;
+  const driverId=document.getElementById("fm-driver").value;
+  if(!driverId){ alert("Please select a driver."); return; }
+  let invNo="";
+  if(type==="delivery_sheet") invNo=document.getElementById("fm-inv-no").value.trim();
+  else if(type==="invoice")   invNo=document.getElementById("fm-inv-number").value.trim();
+  else                        invNo=document.getElementById("fm-parts-inv").value.trim();
+  if(!invNo){ alert("Invoice # is required."); return; }
+  const data={formType:type,status:"Pending",assignedDriverId:driverId,createdAt:new Date().toISOString(),createdBy:"Dispatch"};
+  if(type==="delivery_sheet"){
+    data.date=document.getElementById("fm-date").value; data.invoiceNo=invNo;
+    data.dealer=document.getElementById("fm-dealer").value; data.dealerAddress=document.getElementById("fm-address").value;
+    data.dealerContact=document.getElementById("fm-contact").value; data.dealerPhone=document.getElementById("fm-phone").value;
+    data.dealerEmail=document.getElementById("fm-email").value; data.codAmount=parseFloat(document.getElementById("fm-cod").value)||0;
+    data.paymentType=document.getElementById("fm-payment").value; data.booklets=document.getElementById("fm-booklets").value;
+    data.accepted=false; data.damaged=false; data.shortShipped=false; data.damagedParts=[];
+    const DEFAULT_PARTS=["Tail Light-R","Tail Light-L","Tail Light-Lens","Marker Light","Tag Bracket","Tongue Jack","Winch Stand","Rollers","Bunks","Fenders","Tires","Actuator","Frame Rails","Tongue"];
+    let parts=[]; document.querySelectorAll("#fm-parts-body tr").forEach(r=>{ const ins=r.querySelectorAll("input"); const pn=ins[0]?ins[0].value.trim():""; const md=ins[1]?ins[1].value.trim():""; if(pn) parts.push({part:pn,model:md,damaged:false,shortShipped:false,notes:""}); });
+    data.parts=parts.length?parts:DEFAULT_PARTS.map(p=>({part:p,model:"",damaged:false,shortShipped:false,notes:""}));
+  } else if(type==="invoice"){
+    data.date=document.getElementById("fm-inv-date").value; data.invoiceNo=invNo;
+    data.acctNo=document.getElementById("fm-acct").value; data.billTo=document.getElementById("fm-bill-to").value;
+    data.shipTo=document.getElementById("fm-ship-to").value; data.po=document.getElementById("fm-po").value;
+    data.terms=document.getElementById("fm-terms").value; data.salesOrder=document.getElementById("fm-so").value;
+    data.shippingMethod=document.getElementById("fm-ship-method").value; data.shipping=document.getElementById("fm-shipping").value;
+    data.grandTotal=document.getElementById("fm-grand").textContent;
+    data.dealer=(document.getElementById("fm-bill-to").value||"").split("\n")[0];
+    const items=[]; document.querySelectorAll("#fm-inv-body tr").forEach(r=>{ const ins=r.querySelectorAll("input"); const item=ins[0]?ins[0].value.trim():""; const desc=ins[2]?ins[2].value.trim():""; if(item||desc) items.push({item,qty:ins[1]?ins[1].value:"1",description:desc,unitPrice:ins[3]?ins[3].value:"",total:ins[4]?ins[4].value:""}); });
+    data.lineItems=items;
+  } else {
+    data.date=document.getElementById("fm-parts-date").value; data.invoiceNo=invNo;
+    data.salesOrder=document.getElementById("fm-parts-so").value; data.pl=document.getElementById("fm-parts-pl").value;
+    data.trk=document.getElementById("fm-parts-trk").value; data.dealer=document.getElementById("fm-parts-dealer").value;
+    const pList=[]; document.querySelectorAll("#fm-parts-rows tr").forEach(r=>{ const ins=r.querySelectorAll("input"); const prt=ins[2]?ins[2].value.trim():""; if(prt) pList.push({location:ins[0]?ins[0].value.trim():"",qty:ins[1]?ins[1].value.trim():"",part:prt,pulled:false,loaded:false,nc:false,cod:false}); });
+    data.parts=pList;
+  }
+  const btn=document.getElementById("fm-save-btn"); btn.textContent="Saving..."; btn.disabled=true;
+  const driver=ALL_DRIVERS.find(d=>d.id===driverId);
+  const grps=driver&&driver.groups&&driver.groups.length?driver.groups.map(g=>({id:g})):[{id:"GroupCompanyId"}];
+  _api.call("Add",{typeName:"AddInData",entity:{addInId:ADDIN_ID,groups:grps,details:data}},
+    function(){ btn.textContent="Save & Assign to Driver"; btn.disabled=false; closeFormModal(); toast("Form created and assigned!","ok"); loadAll(); },
+    function(e){ btn.textContent="Save & Assign to Driver"; btn.disabled=false; alert("Error: "+(e.message||e)); }
+  );
+}
+function cancelForm(id,inv){
+  if(!confirm("Cancel pending form?\nInvoice #"+inv+"\n\nThis will delete the form.")) return;
+  _api.call("Remove",{typeName:"AddInData",entity:{id}},function(){ toast("Form cancelled.","ok"); loadAll(); },function(e){ alert("Error: "+(e.message||e)); });
+}
+function openReassign(id,driver,inv){
+  _reassignId=id;
+  document.getElementById("ra-info").textContent="Invoice #"+inv+" — currently: "+driver;
+  const sel=document.getElementById("ra-driver"); sel.innerHTML='<option value="">-- Select Driver --</option>';
+  ALL_DRIVERS.forEach(d=>sel.innerHTML+=`<option value="${d.id}">${esc(d.name)}</option>`);
+  document.getElementById("reassign-modal").classList.add("open");
+}
+function closeReassign(){ document.getElementById("reassign-modal").classList.remove("open"); _reassignId=null; }
+function confirmReassign(){
+  const nd=document.getElementById("ra-driver").value; if(!nd){ alert("Select a driver."); return; }
+  const form=ALL_FORMS.find(f=>f._id===_reassignId); if(!form){ closeReassign(); return; }
+  const upd=Object.assign({},form,{assignedDriverId:nd}); delete upd._id;
+  const driver=ALL_DRIVERS.find(d=>d.id===nd);
+  const grps=driver&&driver.groups&&driver.groups.length?driver.groups.map(g=>({id:g})):[{id:"GroupCompanyId"}];
+  _api.call("Set",{typeName:"AddInData",entity:{id:_reassignId,addInId:ADDIN_ID,groups:grps,details:upd}},
+    function(){ closeReassign(); toast("Reassigned!","ok"); loadAll(); },function(e){ alert("Error: "+(e.message||e)); });
+}
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function toast(msg,type){ const t=document.getElementById("toast"); t.textContent=msg; t.className="dc-toast show "+(type||""); setTimeout(()=>t.className="dc-toast",3200); }
+
+window.onload=function(){
+  document.getElementById("today-badge").textContent="📅 "+new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  if(typeof geotab==="undefined") setGeo("ok","Dev Mode");
+};
+</script>
+</body>
+</html>
