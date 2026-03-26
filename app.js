@@ -556,8 +556,20 @@ function collectD() {
 
 function submitToAPI(data, onOk, onErr) {
   if (!_api) { onErr(new Error("Not connected to MyGeotab.")); return; }
+
+  // Build groups array from driver's actual groups
+  // Fall back to GroupCompanyId if no groups available
+  var grps = [];
+  if (DRV.groups && DRV.groups.length > 0) {
+    grps = DRV.groups.map(function(gid){ return {id: gid}; });
+  } else if (DRV.groupId) {
+    grps = [{id: DRV.groupId}];
+  } else {
+    grps = [{id: "GroupCompanyId"}];
+  }
+
   _api.call("Add",
-    {typeName:"AddInData", entity:{addInId:ADDIN_ID, groups:[{id:"GroupCompanyId"}], details:data}},
+    {typeName:"AddInData", entity:{addInId:ADDIN_ID, groups:grps, details:data}},
     function(id){ onOk(id); },
     function(e){ onErr(new Error(e.message||JSON.stringify(e))); }
   );
