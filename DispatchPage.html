@@ -6,16 +6,15 @@
 <title>Venture Trailers — Dispatch</title>
 <link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css">
 <style>
-/* Dispatch Console — all layout properties use !important to override MyGeotab CSS */
-
-.dispatch-grid{display:grid!important;grid-template-columns:1fr 320px;gap:14px;padding:14px 20px 40px}
+/* Dispatch Console overrides */
+.dispatch-grid{display:grid!important;grid-template-columns:1fr 320px!important;gap:14px!important;padding:14px 20px 40px!important}
 @media(max-width:900px){.dispatch-grid{grid-template-columns:1fr!important}}
 
-.tbl-wrap{background:white!important;border-radius:8px!important;box-shadow:0 1px 3px rgba(0,0,0,.07)!important;overflow:hidden!important;margin-bottom:0!important}
-.tbl-head{padding:10px 14px!important;border-bottom:1px solid #F1F5F9!important;display:flex!important;align-items:center!important;gap:8px!important}
-.tbl-head h2{font-size:13px!important;font-weight:700!important;flex:1!important;color:#00263E!important;margin:0!important}
+.dispatch-panel{background:white!important;border-radius:6px!important;border:1px solid #E5E7EB!important;overflow:hidden!important;margin-bottom:0!important;padding:0!important}
+.dispatch-panel-hdr{padding:10px 14px!important;border-bottom:1px solid #F1F5F9!important;display:flex!important;align-items:center!important;gap:8px!important}
+.dispatch-panel-hdr h2{font-size:13px!important;font-weight:700!important;flex:1!important;color:#00263E!important;margin:0!important}
 
-.ftab-row{display:flex!important;gap:5px!important;padding:8px 14px!important;border-bottom:1px solid #F8FAFC!important;flex-wrap:wrap!important}
+.ftab-row{display:flex!important;gap:5px!important;padding:8px 14px!important;flex-wrap:wrap!important;border-bottom:1px solid #F1F5F9!important}
 .ftab{display:inline-block!important;padding:4px 12px!important;border-radius:20px!important;font-size:11px!important;font-weight:600!important;cursor:pointer!important;border:1px solid #E2E8F0!important;background:white!important;color:#64748b!important;font-family:inherit!important;margin:0!important}
 .ftab.on{background:#00263E!important;color:white!important;border-color:#00263E!important}
 
@@ -31,7 +30,7 @@
 .driver-row{display:flex!important;align-items:center!important;padding:10px 14px!important;border-bottom:1px solid #F1F5F9!important;gap:10px!important;background:white!important}
 .driver-row:last-child{border-bottom:none!important}
 .driver-row:hover{background:#FAFBFC!important}
-.driver-av{width:34px!important;height:34px!important;border-radius:50%!important;background:#0078D4!important;display:flex!important;align-items:center!important;justify-content:center!important;color:white!important;font-size:12px!important;font-weight:700!important;flex-shrink:0!important;text-align:center!important;line-height:34px!important}
+.driver-av{width:34px!important;height:34px!important;border-radius:50%!important;background:#0078D4!important;display:flex!important;align-items:center!important;justify-content:center!important;color:white!important;font-size:12px!important;font-weight:700!important;flex-shrink:0!important;line-height:34px!important}
 .driver-nm{font-size:12px!important;font-weight:600!important;color:#1A2432!important;display:block!important}
 .driver-sub{font-size:10px!important;color:#94a3b8!important;margin-top:2px!important;display:flex!important;align-items:center!important;gap:6px!important}
 .driver-info{flex:1!important;min-width:0!important}
@@ -40,38 +39,34 @@
 .online-pill.off{background:#F1F5F9!important;color:#94a3b8!important}
 .online-dot-sm{width:6px!important;height:6px!important;border-radius:50%!important;background:currentColor!important;display:inline-block!important}
 .pending-pill{font-size:10px!important;background:#FEF9C3!important;color:#CA8A04!important;padding:2px 7px!important;border-radius:10px!important;font-weight:700!important;display:inline-block!important}
-.sec-lbl{font-size:10px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.5px!important;padding:6px 14px 3px!important;color:#94a3b8!important;border-top:1px solid #F1F5F9!important;margin-top:2px!important;display:block!important}
+.sec-lbl{font-size:10px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.5px!important;padding:6px 14px 3px!important;color:#94a3b8!important;border-top:1px solid #F1F5F9!important;display:block!important}
 
-/* Badges */
 .badge.b-pending{background:#FEF9C3!important;color:#CA8A04!important}
 .badge.b-submitted{background:#DCFCE7!important;color:#16a34a!important}
 .badge.b-delivery{background:#DBEAFE!important;color:#1d4ed8!important}
 .badge.b-invoice{background:#F1F5F9!important;color:#374151!important}
 .badge.b-parts{background:#FEF9C3!important;color:#CA8A04!important}
 
-/* Buttons */
 .btn.bd{background:#DC2626!important;color:white!important;border:none!important}
 .btn.bw{background:#D97706!important;color:white!important;border:none!important}
 
-/* Modal */
 .modal-overlay{display:none!important;position:fixed!important;inset:0!important;background:rgba(0,0,0,.5)!important;z-index:9999!important;align-items:flex-start!important;justify-content:center!important;overflow-y:auto!important;padding:20px!important}
 .modal-overlay.open{display:flex!important}
-.modal-box{background:white!important;border-radius:8px!important;width:580px!important;max-width:95vw!important;margin:auto!important;box-shadow:0 8px 32px rgba(0,0,0,.2)!important}
-.modal-hdr{background:#00263E!important;color:white!important;padding:14px 18px!important;border-radius:8px 8px 0 0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+.modal-box{background:white!important;border-radius:6px!important;width:580px!important;max-width:95vw!important;margin:auto!important;box-shadow:0 8px 32px rgba(0,0,0,.2)!important}
+.modal-hdr{background:#00263E!important;color:white!important;padding:14px 18px!important;border-radius:6px 6px 0 0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
 .modal-hdr h3{font-size:14px!important;font-weight:700!important;margin:0!important;color:white!important}
 .modal-close{background:none!important;border:none!important;color:white!important;font-size:22px!important;cursor:pointer!important;line-height:1!important;padding:0!important}
 .modal-body{padding:18px!important}
 .modal-footer{display:flex!important;justify-content:flex-end!important;gap:8px!important;padding:12px 18px!important;border-top:1px solid #E2E8F0!important}
 .f-row{margin-bottom:12px!important}
 .f-row label{display:block!important;font-size:11px!important;font-weight:700!important;color:#374151!important;margin-bottom:3px!important;text-transform:uppercase!important;letter-spacing:.4px!important}
-.f-row input,.f-row select,.f-row textarea{width:100%!important;padding:8px 10px!important;border:1px solid #D1D5DB!important;border-radius:5px!important;font-size:13px!important;font-family:inherit!important;outline:none!important;box-sizing:border-box!important}
-.f-row input:focus,.f-row select:focus,.f-row textarea:focus{border-color:#0078D4!important;box-shadow:0 0 0 3px rgba(0,120,212,.1)!important}
+.f-row input,.f-row select,.f-row textarea{width:100%!important;padding:8px 10px!important;border:1px solid #D1D5DB!important;border-radius:4px!important;font-size:13px!important;font-family:inherit!important;outline:none!important;box-sizing:border-box!important}
+.f-row input:focus,.f-row select:focus,.f-row textarea:focus{border-color:#0078D4!important}
 .f-row textarea{resize:vertical!important;min-height:60px!important}
-.g2{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
-.g3{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:10px!important}
+.modal-g2{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+.modal-g3{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:10px!important}
 .modal-sec{font-size:11px!important;font-weight:700!important;text-transform:uppercase!important;color:#64748b!important;letter-spacing:.5px!important;padding:8px 0 6px!important;border-bottom:1px solid #F1F5F9!important;margin-bottom:10px!important}
 
-/* Mini table */
 .mini-tbl{width:100%!important;border-collapse:collapse!important;font-size:12px!important}
 .mini-tbl th{padding:6px 8px!important;text-align:left!important;background:#F8FAFC!important;border-bottom:1px solid #E2E8F0!important;color:#64748b!important;font-weight:700!important;font-size:10px!important;text-transform:uppercase!important}
 .mini-tbl td{padding:5px 8px!important;border-bottom:1px solid #F8FAFC!important}
@@ -79,15 +74,10 @@
 .add-row-btn{font-size:11px!important;color:#0078D4!important;background:none!important;border:none!important;cursor:pointer!important;padding:6px 0!important;font-weight:600!important;font-family:inherit!important;display:block!important}
 .del-row-btn{background:none!important;border:none!important;color:#DC2626!important;cursor:pointer!important;font-size:14px!important;padding:0 4px!important}
 
-/* Toast */
-.toast{position:fixed!important;bottom:20px!important;right:20px!important;background:#1A2432!important;color:white!important;padding:12px 16px!important;border-radius:8px!important;font-size:13px!important;font-weight:600!important;z-index:99999!important;opacity:0!important;transition:opacity .3s!important;max-width:300px!important;pointer-events:none!important}
+.toast{position:fixed!important;bottom:20px!important;right:20px!important;background:#1A2432!important;color:white!important;padding:12px 16px!important;border-radius:6px!important;font-size:13px!important;font-weight:600!important;z-index:99999!important;opacity:0!important;transition:opacity .3s!important;max-width:300px!important;pointer-events:none!important}
 .toast.show{opacity:1!important}
 .toast.ok{background:#16a34a!important}
 .toast.er{background:#DC2626!important}
-
-/* Empty state */
-.empty-state{text-align:center!important;padding:40px 20px!important;color:#94a3b8!important}
-.empty-icon{font-size:32px!important;display:block!important;margin-bottom:10px!important}
 </style>
 </head>
 <body>
@@ -131,8 +121,8 @@
 <div class="dispatch-grid">
 
   <!-- LEFT: Forms Panel -->
-  <div class="tbl-wrap">
-    <div class="tbl-head">
+  <div class="dispatch-panel">
+    <div class="dispatch-panel-hdr">
       <h2>Assigned Forms <span id="forms-count" style="font-weight:400;color:#64748b"></span></h2>
       <div style="display:flex;gap:6px">
         <input id="srch" placeholder="Search invoice, dealer..." style="padding:5px 10px;border:1px solid #D1D5DB;border-radius:5px;font-size:12px;width:180px" oninput="renderForms()">
@@ -149,8 +139,8 @@
   </div>
 
   <!-- RIGHT: Drivers Panel -->
-  <div class="tbl-wrap" id="driver-panel">
-    <div class="tbl-head">
+  <div class="dispatch-panel" id="driver-panel">
+    <div class="dispatch-panel-hdr">
       <h2>Drivers</h2>
       <span id="drivers-count" style="font-size:11px;color:#64748b"></span>
     </div>
@@ -171,7 +161,7 @@
     <div class="modal-body">
 
       <!-- Common: Driver + Type -->
-      <div class="g2">
+      <div class="modal-g2">
         <div class="f-row">
           <label>Assign to Driver *</label>
           <select id="fm-driver">
@@ -191,21 +181,21 @@
       <!-- ── DELIVERY ── -->
       <div id="fm-delivery">
         <div class="modal-sec">Delivery Information</div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Date</label><input type="date" id="fm-date"></div>
           <div class="f-row"><label>Invoice # *</label><input id="fm-inv-no" placeholder="132993"></div>
         </div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Dealer Name</label><input id="fm-dealer" placeholder="Blue Mountain Marine"></div>
           <div class="f-row"><label>Dealer Email</label><input type="email" id="fm-email" placeholder="dealer@company.com"></div>
         </div>
         <div class="f-row"><label>Address</label><input id="fm-address" placeholder="1765 Valley View Dr, Bangor PA 18013"></div>
-        <div class="g3">
+        <div class="modal-g3">
           <div class="f-row"><label>Contact</label><input id="fm-contact" placeholder="Ryan"></div>
           <div class="f-row"><label>Phone</label><input id="fm-phone" placeholder="610-599-3628"></div>
           <div class="f-row"><label>COD Amount ($)</label><input type="text" id="fm-cod" placeholder="0.00"></div>
         </div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row">
             <label>Payment Type</label>
             <select id="fm-payment">
@@ -238,19 +228,19 @@
       <!-- ── INVOICE ── -->
       <div id="fm-invoice" style="display:none">
         <div class="modal-sec">Invoice Information</div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Date</label><input type="date" id="fm-inv-date"></div>
           <div class="f-row"><label>Invoice # *</label><input id="fm-inv-number" placeholder="132993"></div>
         </div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Acct No.</label><input id="fm-acct"></div>
           <div class="f-row"><label>PO #</label><input id="fm-po"></div>
         </div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Bill To</label><textarea id="fm-bill-to" rows="3" placeholder="Company&#10;Address&#10;City, State ZIP"></textarea></div>
           <div class="f-row"><label>Ship To</label><textarea id="fm-ship-to" rows="3"></textarea></div>
         </div>
-        <div class="g3">
+        <div class="modal-g3">
           <div class="f-row"><label>Terms</label><input id="fm-terms"></div>
           <div class="f-row"><label>Sales Order</label><input id="fm-so"></div>
           <div class="f-row"><label>Shipping Method</label><input id="fm-ship-method"></div>
@@ -270,11 +260,11 @@
       <!-- ── LOOSE PARTS ── -->
       <div id="fm-parts" style="display:none">
         <div class="modal-sec">Check-In Information</div>
-        <div class="g2">
+        <div class="modal-g2">
           <div class="f-row"><label>Date</label><input type="date" id="fm-parts-date"></div>
           <div class="f-row"><label>Invoice # *</label><input id="fm-parts-inv"></div>
         </div>
-        <div class="g3">
+        <div class="modal-g3">
           <div class="f-row"><label>Sales Order #</label><input id="fm-parts-so"></div>
           <div class="f-row"><label>PL#</label><input id="fm-parts-pl"></div>
           <div class="f-row"><label>TRK#</label><input id="fm-parts-trk"></div>
