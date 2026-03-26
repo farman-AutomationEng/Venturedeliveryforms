@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Venture Trailers — Dispatch</title>
-<link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css?v=63">
+<link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css?v=65">
 </head>
 <body>
 
@@ -16,26 +16,26 @@
   </div>
   <div class="dc-actions" style="gap:8px">
     <span class="dbadge" id="today-badge"></span>
-    <button class="btn bp" onclick="openNewForm()">+ New Form</button>
-    <button class="btn bg2" onclick="loadAll()">↺ Refresh</button>
+    <button class="btn bp" onclick="VD.openNewForm()">+ New Form</button>
+    <button class="btn bg2" onclick="VD.loadAll()">↺ Refresh</button>
   </div>
 </div>
 
 <!-- KPIs -->
 <div class="kpis">
-  <div class="kpi" onclick="setFilter('all')">
+  <div class="kpi" onclick="VD.setFilter('all')">
     <div class="kv" id="k-total">—</div>
     <div class="kl">Total Forms</div>
   </div>
-  <div class="kpi y" onclick="setFilter('Pending')">
+  <div class="kpi y" onclick="VD.setFilter('Pending')">
     <div class="kv" id="k-pending">—</div>
     <div class="kl">Pending</div>
   </div>
-  <div class="kpi g" onclick="setFilter('Submitted')">
+  <div class="kpi g" onclick="VD.setFilter('Submitted')">
     <div class="kv" id="k-submitted">—</div>
     <div class="kl">Submitted</div>
   </div>
-  <div class="kpi" onclick="focusDriverPanel()">
+  <div class="kpi" onclick="VD.focusDriverPanel()">
     <div class="kv" id="k-online">—</div>
     <div class="kl">Drivers Online</div>
   </div>
@@ -51,12 +51,12 @@
     <div class="dc-panel-hdr">
       <h2>Assigned Forms <span id="forms-count" class="empty" style="font-size:11px;font-weight:400;padding:0"></span></h2>
       <input id="srch" placeholder="Search invoice, dealer..." class="ff" style="flex:0 0 180px;padding:5px 9px;font-size:12px" oninput="renderForms()">
-      <button class="btn bp" style="padding:5px 12px;font-size:12px" onclick="openNewForm()">+ New</button>
+      <button class="btn bp" style="padding:5px 12px;font-size:12px" onclick="VD.openNewForm()">+ New</button>
     </div>
     <div class="dc-tabs">
-      <button class="dc-tab active" id="ft-all" onclick="setFilter('all')">All</button>
-      <button class="dc-tab" id="ft-Pending" onclick="setFilter('Pending')">Pending</button>
-      <button class="dc-tab" id="ft-Submitted" onclick="setFilter('Submitted')">Submitted</button>
+      <button class="dc-tab active" id="ft-all" onclick="VD.setFilter('all')">All</button>
+      <button class="dc-tab" id="ft-Pending" onclick="VD.setFilter('Pending')">Pending</button>
+      <button class="dc-tab" id="ft-Submitted" onclick="VD.setFilter('Submitted')">Submitted</button>
     </div>
     <div id="forms-list" class="dc-panel-body"></div>
   </div>
@@ -79,7 +79,7 @@
   <div class="dc-modal-box">
     <div class="dc-modal-hdr">
       <h3>Create New Form</h3>
-      <button class="dc-modal-close" onclick="closeFormModal()">×</button>
+      <button class="dc-modal-close" onclick="VD.closeFormModal()">×</button>
     </div>
     <div class="dc-modal-body">
       <div class="dc-g2">
@@ -137,7 +137,7 @@
           <thead><tr><th>Part Name</th><th>Model</th><th style="width:30px"></th></tr></thead>
           <tbody id="fm-parts-body"></tbody>
         </table>
-        <button class="dc-add-row" onclick="addDeliveryPart()">+ Add Part</button>
+        <button class="dc-add-row" onclick="VD.addDeliveryPart()">+ Add Part</button>
       </div>
 
       <!-- INVOICE -->
@@ -165,7 +165,7 @@
           <thead><tr><th>Item</th><th style="width:50px">Qty</th><th>Description</th><th style="width:85px">Unit Price</th><th style="width:75px">Total</th><th style="width:28px"></th></tr></thead>
           <tbody id="fm-inv-body"></tbody>
         </table>
-        <button class="dc-add-row" onclick="addInvLine()">+ Add Line</button>
+        <button class="dc-add-row" onclick="VD.addInvLine()">+ Add Line</button>
         <div style="display:flex;justify-content:flex-end;margin-top:8px;align-items:center;gap:14px;font-size:13px">
           <span style="color:#64748b">Shipping: <input id="fm-shipping" type="number" step="0.01" placeholder="0.00" oninput="calcGrand()" style="width:80px;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;font-size:12px"></span>
           <span style="font-weight:700;color:#00263E">Amount Due: <span id="fm-grand">$0.00</span></span>
@@ -190,12 +190,12 @@
           <thead><tr><th>Location</th><th style="width:60px">Qty</th><th>Part Name</th><th style="width:28px"></th></tr></thead>
           <tbody id="fm-parts-rows"></tbody>
         </table>
-        <button class="dc-add-row" onclick="addPartsRow()">+ Add Part</button>
+        <button class="dc-add-row" onclick="VD.addPartsRow()">+ Add Part</button>
       </div>
     </div>
     <div class="dc-modal-footer">
-      <button class="btn bg2" onclick="closeFormModal()">Cancel</button>
-      <button class="btn bp" id="fm-save-btn" onclick="saveForm()">Save & Assign to Driver</button>
+      <button class="btn bg2" onclick="VD.closeFormModal()">Cancel</button>
+      <button class="btn bp" id="fm-save-btn" onclick="VD.saveForm()">Save & Assign to Driver</button>
     </div>
   </div>
 </div>
@@ -205,15 +205,15 @@
   <div class="dc-modal-box" style="max-width:360px">
     <div class="dc-modal-hdr">
       <h3>Reassign Form</h3>
-      <button class="dc-modal-close" onclick="closeReassign()">×</button>
+      <button class="dc-modal-close" onclick="VD.closeReassign()">×</button>
     </div>
     <div class="dc-modal-body">
       <div class="dc-field"><label>Assign to Driver</label><select id="ra-driver"></select></div>
       <p style="font-size:12px;color:#64748b" id="ra-info"></p>
     </div>
     <div class="dc-modal-footer">
-      <button class="btn bg2" onclick="closeReassign()">Cancel</button>
-      <button class="btn bp" onclick="confirmReassign()">Reassign</button>
+      <button class="btn bg2" onclick="VD.closeReassign()">Cancel</button>
+      <button class="btn bp" onclick="VD.confirmReassign()">Reassign</button>
     </div>
   </div>
 </div>
@@ -221,8 +221,14 @@
 <div class="dc-toast" id="toast"></div>
 
 <script>
-const ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
-let _api=null, ALL_FORMS=[], ALL_DRIVERS=[], ALL_DSI=[], FILTER="all", _reassignId=null, _irc=0;
+// SDK requirement: all variables inside IIFE — no global scope conflicts
+(function() {
+
+  var VD = window.VD = {};
+  
+
+var ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+var _api=null, ALL_FORMS=[], ALL_DRIVERS=[], ALL_DSI=[], FILTER="all", _reassignId=null, _irc=0;
 
 geotab.addin.ventureDispatch = function(){
   return {
@@ -308,8 +314,8 @@ function renderForms(){
         </span>
       </div>
       <div class="dc-actions">
-        ${ip?`<button class="btn amber" style="padding:4px 10px;font-size:11px" onclick="openReassign('${f._id}','${esc(driver)}','${esc(f.invoiceNo||"")}')">↻</button>`:""}
-        ${ip?`<button class="btn red" style="padding:4px 10px;font-size:11px" onclick="cancelForm('${f._id}','${esc(f.invoiceNo||"")}')">✕</button>`:""}
+        ${ip?`<button class="btn amber" style="padding:4px 10px;font-size:11px" onclick="VD.openReassign('${f._id}','${esc(driver)}','${esc(f.invoiceNo||"")}')">↻</button>`:""}
+        ${ip?`<button class="btn red" style="padding:4px 10px;font-size:11px" onclick="VD.cancelForm('${f._id}','${esc(f.invoiceNo||"")}')">✕</button>`:""}
       </div>
     </div>`;
   }).join("");
@@ -336,7 +342,7 @@ function buildDrivers(){
           ${pc?`<span class="dc-pcount">${pc} pending</span>`:""}
         </span>
       </div>
-      <button class="btn bp" style="padding:4px 12px;font-size:11px" onclick="quickAssign('${d.id}')">+ Assign</button>
+      <button class="btn bp" style="padding:4px 12px;font-size:11px" onclick="VD.quickAssign('${d.id}')">+ Assign</button>
     </div>`;
   };
   document.getElementById("drivers-list").innerHTML=
@@ -461,6 +467,18 @@ window.onload=function(){
   document.getElementById("today-badge").textContent="📅 "+new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
   if(typeof geotab==="undefined") setGeo("ok","Dev Mode");
 };
+
+
+  // Expose to onclick handlers
+  VD.loadAll=loadAll; VD.openNewForm=openNewForm; VD.closeFormModal=closeFormModal;
+  VD.switchFormType=switchFormType; VD.addDeliveryPart=addDeliveryPart;
+  VD.addInvLine=addInvLine; VD.addPartsRow=addPartsRow; VD.saveForm=saveForm;
+  VD.setFilter=setFilter; VD.openReassign=openReassign; VD.closeReassign=closeReassign;
+  VD.confirmReassign=confirmReassign; VD.cancelForm=cancelForm;
+  VD.quickAssign=quickAssign; VD.focusDriverPanel=focusDriverPanel;
+  VD.calcInvRow=calcInvRow; VD.calcGrand=calcGrand;
+
+})();
 </script>
 </body>
 </html>
