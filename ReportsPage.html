@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynasty Delivery Reports</title>
+<link rel="stylesheet" href="https://farman-automationeng.github.io/Venturedeliveryforms/styles.css?v=65">
+<style>
+.btn-view{padding:4px 10px;background:#0078D4;color:white;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-view:hover{background:#006BBD}
+.drv-name{font-weight:600;font-size:12px}
+.drv-grp{font-size:10px;color:#94a3b8;margin-top:1px}
+#detail-view{display:none}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>Dynasty Delivery Reports</h1>
+    <p id="geo-txt"><span class="geo-dot loading"></span>Connecting...</p>
+  </div>
+  <span style="background:rgba(255,255,255,.15);color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px" id="dbadge"></span>
+</div>
+<div class="kpis">
+  <div class="kpi">  <div class="kv" id="k1">—</div><div class="kl">Total Deliveries</div></div>
+  <div class="kpi g"><div class="kv" id="k2">—</div><div class="kl">Total COD</div></div>
+  <div class="kpi r"><div class="kv" id="k3">—</div><div class="kl">Damages</div></div>
+  <div class="kpi y"><div class="kv" id="k4">—</div><div class="kl">Drivers</div></div>
+</div>
+<div class="err-box" id="errbox"></div>
+<div id="list-view">
+  <div class="filters">
+    <div class="ff"><label>From</label><input type="date" id="f-from"></div>
+    <div class="ff"><label>To</label><input type="date" id="f-to"></div>
+    <div class="ff"><label>Group</label><select id="f-grp" onchange="VR.onGrpChange()"><option value="all">All Groups</option></select></div>
+    <div class="ff"><label>Driver</label><select id="f-drv"><option value="all">All Drivers</option></select></div>
+    <div class="ff"><label>Type</label>
+      <select id="f-type">
+        <option value="all">All Types</option>
+        <option value="delivery_sheet">Delivery</option>
+        <option value="invoice">Invoice</option>
+        <option value="loose_parts">Loose Parts</option>
+      </select>
+    </div>
+    <div class="ff"><label>Status</label>
+      <select id="f-sta">
+        <option value="all">All Status</option>
+        <option value="Submitted">Submitted</option>
+        <option value="Pending">Pending</option>
+        <option value="Signed">Signed</option>
+        <option value="Test">Test</option>
+      </select>
+    </div>
+    <div class="ff"><label>Invoice #</label><input id="f-inv" style="width:85px"></div>
+    <div class="btn-row">
+      <button class="btn bp" onclick="VR.loadData()">🔍 Search</button>
+      <button class="btn bg2" onclick="VR.resetF()">↺</button>
+      <button class="btn bn" onclick="VR.exportCSV()">⬇ CSV</button>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <h2>Delivery Records <span id="rcnt" style="font-weight:400;color:#64748b"></span></h2>
+      <button class="btn bg2" style="font-size:11px" onclick="VR.loadData()">↺ Refresh</button>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th onclick="VR.srt('date')">Date ↕</th>
+          <th onclick="VR.srt('invoiceNo')">Invoice # ↕</th>
+          <th onclick="VR.srt('formType')">Type ↕</th>
+          <th onclick="VR.srt('driverName')">Driver ↕</th>
+          <th onclick="VR.srt('dealer')">Dealer ↕</th>
+          <th onclick="VR.srt('codAmount')">COD ↕</th>
+          <th>Issues</th>
+          <th onclick="VR.srt('status')">Status ↕</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody id="tbody">
+          <tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading...</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pag"><span id="pinfo"></span><div class="pbtns" id="pbtns"></div></div>
+  </div>
+</div>
+<div id="detail-view"></div>
+
+<script>
+// ── All code inside IIFE — no global variable conflicts ──────
+// SDK requirement: variables must be in add-in scope, not global
+(function() {
+
+  var ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
+  var ALL=[], FILT=[], DRIVERS=[], SK="date", SD=-1, PG=1;
+  var _api = null;
+  var PP = 25;
+
+  // Expose public methods via namespace for onclick handlers
+  window.VR = {};
+
+  geotab.addin.ventureReports = function() {
+    return {
+      initialize: function(api, state, callback) {
+        _api = api;
+        setGeo("ok","dynasty_communications");
+        api.call("Get",{typeName:"Group"},function(gs){
+          var sel=document.getElementById("f-grp");
+          (gs||[]).filter(function(g){ return g.id&&!["GroupCompanyId","GroupEverythingId","GroupNothingId"].includes(g.id)&&!g.id.startsWith("Group"); })
+            .sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); })
+            .forEach(function(g){ sel.innerHTML+=`<option value="${g.id}">${g.name||g.id}</option>`; });
+        },function(){});
+        api.call("Get",{typeName:"User",search:{isActive:true}},function(us){
+          DRIVERS=(us||[]).filter(function(u){ return !u.isSystemUser; });
+          popDrv("all");
+        },function(){});
+        callback();
+      },
+      focus: function(api, state) { _api=api; loadData(); },
+      blur:  function() {}
+    };
+  };
+
+  function setGeo(s,t){
+    var c={ok:"#22c55e",loading:"#f59e0b",err:"#94a3b8"};
+    var el=document.getElementById("geo-txt");
+    if(el) el.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;background:${c[s]||c.err}"></span>${t}`;
+  }
+
+  function popDrv(gid){
+    var sel=document.getElementById("f-drv");
+    sel.innerHTML='<option value="all">All Drivers</option>';
+    var drv=gid==="all"?DRIVERS:DRIVERS.filter(function(u){ return (u.companyGroups||[]).some(function(g){ return g.id===gid; }); });
+    drv.sort(function(a,b){ return ((a.firstName||"")+" "+(a.lastName||"")).localeCompare((b.firstName||"")+" "+(b.lastName||"")); })
+      .forEach(function(u){
+        var nm=((u.firstName||"")+" "+(u.lastName||"")).trim()||u.name||u.id;
+        sel.innerHTML+=`<option value="${u.id}">${nm}</option>`;
+      });
+  }
+
+  function loadData(){
+    showLoad(); hideErr();
+    if(!_api){ setGeo("loading","Waiting for MyGeotab..."); return; }
+    var f=getF();
+    var timer=setTimeout(function(){ showErr("Timeout — please Refresh."); },30000);
+    _api.call("Get",{typeName:"AddInData",search:{addInId:ADDIN_ID}},
+      function(rows){
+        clearTimeout(timer);
+        var parsed=(rows||[]).map(function(r){
+          try{ var d=typeof r.details==="string"?JSON.parse(r.details):r.details; if(d) d.id=r.id; return d; }
+          catch(e){ return null; }
+        }).filter(Boolean);
+        if(f.fromDate) parsed=parsed.filter(function(r){ return r.date&&r.date>=f.fromDate; });
+        if(f.toDate)   parsed=parsed.filter(function(r){ return r.date&&r.date<=f.toDate; });
+        if(f.driverId&&f.driverId!=="all") parsed=parsed.filter(function(r){ return r.driverUserId===f.driverId; });
+        if(f.formType&&f.formType!=="all") parsed=parsed.filter(function(r){ return r.formType===f.formType; });
+        if(f.status&&f.status!=="all")     parsed=parsed.filter(function(r){ return r.status===f.status; });
+        ALL=parsed; applyLocal();
+      },
+      function(err){ clearTimeout(timer); showErr("Error: "+(err.message||err)); }
+    );
+  }
+
+  function getF(){
+    return{
+      fromDate: document.getElementById("f-from")?.value||"",
+      toDate:   document.getElementById("f-to")?.value||"",
+      driverId: document.getElementById("f-drv")?.value||"all",
+      formType: document.getElementById("f-type")?.value||"all",
+      status:   document.getElementById("f-sta")?.value||"all",
+    };
+  }
+
+  function applyLocal(){
+    var q=(document.getElementById("f-inv")?.value||"").trim().toLowerCase();
+    FILT=ALL.filter(function(r){ return !q||(r.invoiceNo||"").toLowerCase().includes(q); });
+    sortR(); updateKPI(); PG=1; renderT();
+  }
+
+  function resetF(){
+    var td=new Date().toISOString().split("T")[0], fm=new Date(); fm.setDate(1);
+    document.getElementById("f-from").value=fm.toISOString().split("T")[0];
+    document.getElementById("f-to").value=td;
+    ["f-grp","f-drv","f-type","f-sta"].forEach(function(id){ document.getElementById(id).value="all"; });
+    document.getElementById("f-inv").value="";
+    popDrv("all"); loadData();
+  }
+
+  function srt(k){ if(SK===k) SD*=-1; else{ SK=k; SD=-1; } sortR(); PG=1; renderT(); }
+
+  function sortR(){
+    FILT.sort(function(a,b){
+      var av=a[SK]||"", bv=b[SK]||"";
+      return typeof av==="number"?(av-bv)*SD:av.toString().localeCompare(bv.toString())*SD;
+    });
+  }
+
+  function updateKPI(){
+    var cod=FILT.reduce(function(s,r){ return s+(parseFloat(r.codAmount)||0); },0);
+    var dmg=FILT.filter(function(r){ return r.damaged; }).length;
+    var drvs=new Set(FILT.map(function(r){ return r.driverUserId; }).filter(Boolean)).size;
+    document.getElementById("k1").textContent=FILT.length;
+    document.getElementById("k2").textContent="$"+cod.toLocaleString("en-US",{maximumFractionDigits:0});
+    document.getElementById("k3").textContent=dmg;
+    document.getElementById("k4").textContent=drvs||"—";
+  }
+
+  function typeLabel(ft){ return{delivery_sheet:"Delivery",invoice:"Invoice",loose_parts:"Loose Parts"}[ft]||(ft||"—"); }
+
+  function typeBadge(ft){
+    var m={delivery_sheet:'<span class="badge bg-blue">Delivery</span>',invoice:'<span class="badge bg-gray">Invoice</span>',loose_parts:'<span class="badge bg-yellow">Loose Parts</span>'};
+    return m[ft]||`<span class="badge bg-gray">${ft||"—"}</span>`;
+  }
+
+  function statusBadge(s){
+    var m={Submitted:'<span class="badge bg-blue">Submitted</span>',Signed:'<span class="badge bg-green">Signed</span>',Pending:'<span class="badge bg-yellow">Pending</span>',Test:'<span class="badge bg-gray">Test</span>'};
+    return m[s]||`<span class="badge bg-gray">${s||"—"}</span>`;
+  }
+
+  function renderT(){
+    var tb=document.getElementById("tbody");
+    document.getElementById("rcnt").textContent="("+FILT.length+")";
+    if(!FILT.length){
+      tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div style="font-size:26px;margin-bottom:8px">📭</div><div style="font-weight:700">No records found</div></div></td></tr>`;
+      renderPag(); return;
+    }
+    var sl=FILT.slice((PG-1)*PP,PG*PP);
+    tb.innerHTML=sl.map(function(r){
+      var dm=r.damaged||r.shortShipped;
+      var iss=[r.damaged&&"Dmg",r.shortShipped&&"Short"].filter(Boolean).join(", ");
+      return`<tr style="${dm?"background:#FFF7ED":""}">
+        <td style="white-space:nowrap;font-weight:600">${r.date||"—"}</td>
+        <td style="font-weight:700;color:#0078D4">${r.invoiceNo||"—"}</td>
+        <td>${typeBadge(r.formType)}</td>
+        <td><div class="drv-name">${r.driverName||"—"}</div><div class="drv-grp">${r.driverGroupName||""}</div></td>
+        <td>${r.dealer||"—"}</td>
+        <td style="font-weight:700;color:#00875A">$${(parseFloat(r.codAmount)||0).toFixed(2)}</td>
+        <td>${iss?`<span style="font-size:11px;color:#DE350B;font-weight:700">${iss}</span>`:'<span style="color:#94a3b8">—</span>'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td style="white-space:nowrap">
+          <button class="btn-view" onclick="VR.openD('${r.id}')">View</button>
+          <button class="btn-view" onclick="VR.deleteD('${r.id}','${esc(r.invoiceNo||r.id)}')" style="margin-left:4px;background:#DC2626">Delete</button>
+        </td>
+      </tr>`;
+    }).join("");
+    renderPag();
+  }
+
+  function renderPag(){
+    var tot=FILT.length, pgs=Math.ceil(tot/PP);
+    var s=Math.min((PG-1)*PP+1,tot), e=Math.min(PG*PP,tot);
+    document.getElementById("pinfo").textContent=tot?`${s}–${e} of ${tot}`:"";
+    var pb=document.getElementById("pbtns"); pb.innerHTML="";
+    if(pgs<=1) return;
+    function mk(l,p,act,dis){
+      var b=document.createElement("button");
+      b.className="pbtns"+(act?" act":""); b.textContent=l; b.disabled=dis;
+      if(!dis) b.onclick=function(){ PG=p; renderT(); };
+      pb.appendChild(b);
+    }
+    mk("‹",PG-1,false,PG===1);
+    for(var p=Math.max(1,PG-2);p<=Math.min(pgs,PG+2);p++) mk(p,p,p===PG,false);
+    mk("›",PG+1,false,PG===pgs);
+  }
+
+  function openD(id){
+    var r=ALL.find(function(x){ return x.id===id; }); if(!r) return;
+    var parts=(r.parts||[]).filter(function(p){ return p.part; });
+    var init=(r.driverName||"?").split(" ").map(function(w){ return w[0]||""; }).join("").toUpperCase().slice(0,2)||"?";
+    var S={
+      page:     "font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1A2432;background:#F2F5F7;min-height:100vh",
+      backBar:  "display:flex;align-items:center;gap:10px;padding:12px 18px;background:#fff;border-bottom:2px solid #E2E8F0",
+      backBtn:  "padding:7px 14px;background:#fff;color:#374151;border:1px solid #D1D5DB;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit",
+      backTitle:"font-size:14px;font-weight:700;color:#00263E;margin:0",
+      backSub:  "font-size:11px;color:#64748b;margin:0",
+      body:     "padding:16px 18px 40px",
+      drvCard:  "background:linear-gradient(135deg,#00263E 0%,#003554 100%);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px",
+      drvAv:    "width:44px;height:44px;border-radius:50%;background:#0078D4;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:800;flex-shrink:0;text-align:center;line-height:44px",
+      drvNm:    "color:#FFF;font-size:15px;font-weight:800;margin:0 0 3px",
+      drvEm:    "color:#7BBFDB;font-size:11px;margin:0 0 6px",
+      drvTag:   "display:inline-block;background:rgba(255,255,255,.14);color:#D1FAE5;font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;margin-right:5px",
+      sec:      "background:#fff;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:14px;overflow:hidden",
+      secHdr:   "background:#F8FAFC;border-bottom:1px solid #E5E7EB;padding:10px 14px;font-size:11px;font-weight:700;color:#00263E;text-transform:uppercase;letter-spacing:.7px;margin:0",
+      secBody:  "padding:14px",
+      grid:     "display:grid;grid-template-columns:repeat(3,1fr);gap:12px 20px",
+      grid2:    "display:grid;grid-template-columns:1fr 1fr;gap:12px 20px",
+      fLbl:     "display:block;font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px",
+      fVal:     "display:block;font-size:12px;font-weight:500;color:#1A2432;word-break:break-word",
+      fDash:    "display:block;font-size:12px;color:#CBD5E1",
+      tbl:      "width:100%;border-collapse:collapse;font-size:11px",
+      th:       "padding:7px 10px;text-align:left;background:#F1F5F9;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E5E7EB",
+      td:       "padding:7px 10px;border-bottom:1px solid #F3F4F6;color:#374151",
+      tdDmg:    "padding:7px 10px;border-bottom:1px solid #F3F4F6;color:#374151;background:#FFF7ED",
+      sigWrap:  "display:grid;grid-template-columns:1fr 1fr;gap:12px",
+      sigBox:   "border:1px solid #E5E7EB;border-radius:6px;overflow:hidden",
+      sigLbl:   "background:#F3F4F6;border-bottom:1px solid #E5E7EB;padding:6px 10px;font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px",
+      sigImg:   "width:100%;height:90px;object-fit:contain;display:block;background:white;padding:6px",
+      sigNone:  "height:90px;background:#F9FAFB;text-align:center;padding-top:32px;color:#64748b;font-size:12px;font-weight:600;box-sizing:border-box",
+      sigOk:    "height:90px;background:#F0FDF4;text-align:center;padding-top:30px;color:#00875A;font-size:13px;font-weight:700;box-sizing:border-box",
+    };
+    function fc(label,val){
+      var v=(val===undefined||val===null||val==="");
+      return`<div><span style="${S.fLbl}">${label}</span><span style="${v?S.fDash:S.fVal}">${v?"—":esc(String(val))}</span></div>`;
+    }
+    function sigBox(label,base64,signed){
+      var hasImg=base64&&base64.length>30;
+      var inner=hasImg?`<img src="${base64}" style="${S.sigImg}">`:signed?`<div style="${S.sigOk}">✓ Signed</div>`:`<div style="${S.sigNone}">— Not Signed —</div>`;
+      return`<div style="${S.sigBox}"><div style="${S.sigLbl}">${label}</div>${inner}</div>`;
+    }
+    var html=`<div style="${S.page}">
+      <div style="${S.backBar}">
+        <button style="${S.backBtn}" onclick="VR.showList()">← Back</button>
+        <p style="${S.backTitle}">Invoice #${esc(r.invoiceNo||"—")} — ${typeLabel(r.formType)}</p>
+        <p style="${S.backSub}">${esc(r.date||"")}</p>
+      </div>
+      <div style="${S.body}">
+      <div style="${S.drvCard}">
+        <div style="${S.drvAv}">${init}</div>
+        <div>
+          <p style="${S.drvNm}">${esc(r.driverName||"Unknown")}</p>
+          <p style="${S.drvEm}">${esc(r.driverEmail||"")}</p>
+          <span style="${S.drvTag}">📍 ${esc(r.driverGroupName||"No Group")}</span>
+          ${r.vehicleName?`<span style="${S.drvTag}">🚛 ${esc(r.vehicleName)}</span>`:""}
+          ${statusBadge(r.status)}
+        </div>
+      </div>`;
+
+    if(r.formType==="delivery_sheet"){
+      html+=`<div style="${S.sec}"><p style="${S.secHdr}">Delivery Info</p><div style="${S.secBody}"><div style="${S.grid}">
+        ${fc("Date",r.date)}${fc("Invoice #",r.invoiceNo)}${fc("Dealer",r.dealer)}
+        ${fc("Address",r.dealerAddress)}${fc("Contact",r.dealerContact)}${fc("Phone",r.dealerPhone)}
+        ${fc("Email",r.dealerEmail)}${fc("COD",r.codAmount?"$"+parseFloat(r.codAmount).toFixed(2):"$0.00")}
+        ${fc("Payment",r.paymentType)}${fc("Damaged",r.damaged?"YES":"No")}${fc("Short",r.shortShipped?"YES":"No")}
+      </div></div></div>`;
+      if(r.comments) html+=`<div style="${S.sec}"><p style="${S.secHdr}">Comments</p><div style="${S.secBody}"><p style="font-size:12px;color:#374151;line-height:1.6;margin:0">${esc(r.comments)}</p></div></div>`;
+      if(parts.length){
+        html+=`<div style="${S.sec}"><p style="${S.secHdr}">Parts (${parts.length})</p><div style="overflow-x:auto"><table style="${S.tbl}"><thead><tr>
+          <th style="${S.th}">Part</th><th style="${S.th}">Model</th><th style="${S.th}">Dmg</th><th style="${S.th}">Short</th><th style="${S.th}">Notes</th>
+        </tr></thead><tbody>${parts.map(function(p){
+          var d=p.damaged||p.shortShipped;
+          return`<tr><td style="${d?S.tdDmg:S.td};font-weight:600">${esc(p.part)}</td><td style="${S.td}">${esc(p.model||"—")}</td>
+            <td style="${S.td}">${p.damaged?'<span style="color:#DE350B;font-weight:700">YES</span>':'<span style="color:#94a3b8">No</span>'}</td>
+            <td style="${S.td}">${p.shortShipped?'<span style="color:#F59E0B;font-weight:700">YES</span>':'<span style="color:#94a3b8">No</span>'}</td>
+            <td style="${S.td};color:#64748b">${esc(p.notes||"—")}</td></tr>`;
+        }).join("")}</tbody></table></div></div>`;
+      }
+      html+=`<div style="${S.sec}"><p style="${S.secHdr}">Signatures</p><div style="${S.secBody}"><div style="${S.sigWrap}">
+        ${sigBox("Driver",r.driverSignature,r.driverSigned)}
+        ${sigBox("Consignee",r.consigneeSignature,r.consigneeSigned)}
+      </div></div></div>`;
+    }
+
+    if(r.formType==="invoice"){
+      html+=`<div style="${S.sec}"><p style="${S.secHdr}">Invoice Info</p><div style="${S.secBody}"><div style="${S.grid}">
+        ${fc("Date",r.date)}${fc("Invoice #",r.invoiceNo)}${fc("Acct No.",r.acctNo)}
+        ${fc("Terms",r.terms)}${fc("Sales Order",r.salesOrder)}${fc("PO #",r.po)}
+      </div></div></div>`;
+      var items=r.lineItems||[];
+      if(items.length){
+        html+=`<div style="${S.sec}"><p style="${S.secHdr}">Line Items (${items.length})</p><div style="overflow-x:auto"><table style="${S.tbl}"><thead><tr>
+          <th style="${S.th}">Item</th><th style="${S.th}">Description</th><th style="${S.th}">Qty</th><th style="${S.th}">Unit Price</th><th style="${S.th}">Total</th>
+        </tr></thead><tbody>${items.map(function(li){
+          return`<tr><td style="${S.td};font-weight:600">${esc(li.item||"—")}</td><td style="${S.td}">${esc(li.description||"—")}</td>
+            <td style="${S.td};text-align:center">${esc(li.qty||"1")}</td>
+            <td style="${S.td};text-align:right">${li.unitPrice?"$"+parseFloat(li.unitPrice).toFixed(2):"—"}</td>
+            <td style="${S.td};text-align:right;font-weight:700;color:#00263E">${li.total?"$"+parseFloat(li.total).toFixed(2):"—"}</td></tr>`;
+        }).join("")}</tbody></table></div>
+        <div style="text-align:right;padding:10px 14px;font-size:15px;font-weight:900;color:#00263E;border-top:2px solid #E5E7EB">Amount Due: ${r.grandTotal||"$0.00"}</div></div>`;
+      }
+    }
+
+    if(r.formType==="loose_parts"){
+      html+=`<div style="${S.sec}"><p style="${S.secHdr}">Check-In Info</p><div style="${S.secBody}"><div style="${S.grid}">
+        ${fc("Date",r.date)}${fc("Invoice #",r.invoiceNo)}${fc("Sales Order",r.salesOrder)}
+        ${fc("PL#",r.pl)}${fc("TRK#",r.trk)}${fc("Dealer",r.dealer)}
+      </div></div></div>`;
+      if(parts.length){
+        html+=`<div style="${S.sec}"><p style="${S.secHdr}">Parts (${parts.length})</p><div style="overflow-x:auto"><table style="${S.tbl}"><thead><tr>
+          <th style="${S.th}">Loc</th><th style="${S.th}">Qty</th><th style="${S.th}">Part</th>
+          <th style="${S.th}">Pulled</th><th style="${S.th}">Loaded</th><th style="${S.th}">N/C</th><th style="${S.th}">COD</th>
+        </tr></thead><tbody>${parts.map(function(p){
+          var yn=function(v){ return v?'<span style="color:#00875A;font-weight:700">Yes</span>':'<span style="color:#94a3b8">—</span>'; };
+          return`<tr><td style="${S.td}">${esc(p.location||"—")}</td><td style="${S.td}">${esc(p.qty||"—")}</td>
+            <td style="${S.td};font-weight:600">${esc(p.part)}</td><td style="${S.td}">${yn(p.pulled)}</td>
+            <td style="${S.td}">${yn(p.loaded)}</td><td style="${S.td}">${yn(p.nc)}</td><td style="${S.td}">${yn(p.cod)}</td></tr>`;
+        }).join("")}</tbody></table></div></div>`;
+      }
+      if(r.comments) html+=`<div style="${S.sec}"><p style="${S.secHdr}">Comments</p><div style="${S.secBody}"><p style="font-size:12px;color:#374151;margin:0">${esc(r.comments)}</p></div></div>`;
+      html+=`<div style="${S.sec}"><p style="${S.secHdr}">Signatures</p><div style="${S.secBody}"><div style="${S.sigWrap}">
+        ${sigBox("Driver",r.driverSignature,r.driverSigned)}
+        ${sigBox("Receiver",r.receiverSignature,r.receiverSigned)}
+      </div></div></div>`;
+    }
+
+    html+=`</div></div>`;
+    document.getElementById("detail-view").innerHTML=html;
+    showDetail();
+  }
+
+  function showList(){
+    document.getElementById("list-view").style.display="block";
+    document.getElementById("detail-view").style.display="none";
+    window.scrollTo(0,0);
+  }
+  function showDetail(){
+    document.getElementById("list-view").style.display="none";
+    document.getElementById("detail-view").style.display="block";
+    window.scrollTo(0,0);
+  }
+  function deleteD(id,label){
+    if(!_api){ alert("Not connected."); return; }
+    if(!confirm("Delete record?\nInvoice #"+label+"\n\nThis cannot be undone.")) return;
+    _api.call("Remove",{typeName:"AddInData",entity:{id:id}},
+      function(){ ALL=ALL.filter(function(r){ return r.id!==id; }); FILT=FILT.filter(function(r){ return r.id!==id; }); updateKPI(); renderT(); },
+      function(e){ alert("Delete failed: "+(e.message||e)); }
+    );
+  }
+  function showLoad(){ document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="empty"><div class="sp"></div><div>Loading from MyGeotab...</div></div></td></tr>`; }
+  function showErr(m){ var e=document.getElementById("errbox"); e.style.display="block"; e.textContent="⚠️ "+m; }
+  function hideErr(){ document.getElementById("errbox").style.display="none"; }
+  function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function exportCSV(){
+    if(!FILT.length){ alert("No data!"); return; }
+    var h=["Date","Invoice #","Type","Driver","Email","Group","Vehicle","Dealer","COD","Payment","Status","Damaged?","Short?","Parts","Comments"];
+    var rows=FILT.map(function(r){ return[r.date,r.invoiceNo,typeLabel(r.formType),r.driverName,r.driverEmail,r.driverGroupName,r.vehicleName,r.dealer,r.codAmount,r.paymentType,r.status,r.damaged?"YES":"No",r.shortShipped?"YES":"No",(r.damagedParts||[]).join("; "),r.comments].map(function(v){ return'"'+(v||"").toString().replace(/"/g,'""')+'"'; }); });
+    var csv=[h.join(",")].concat(rows.map(function(r){ return r.join(","); })).join("\n");
+    var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download="venture_"+new Date().toISOString().split("T")[0]+".csv"; a.click();
+  }
+
+  // Expose to onclick handlers
+  VR.loadData=loadData; VR.resetF=resetF; VR.srt=srt;
+  VR.openD=openD; VR.deleteD=deleteD; VR.showList=showList;
+  VR.onGrpChange=function(){ popDrv(document.getElementById("f-grp").value); };
+  VR.exportCSV=exportCSV;
+
+  window.onload=function(){
+    var td=new Date(), fm=new Date(); fm.setDate(1);
+    document.getElementById("f-from").value=fm.toISOString().split("T")[0];
+    document.getElementById("f-to").value=td.toISOString().split("T")[0];
+    document.getElementById("dbadge").textContent="📅 "+td.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    document.getElementById("f-inv").addEventListener("keydown",function(e){ if(e.key==="Enter") applyLocal(); });
+  };
+
+})(); // end IIFE
+</script>
+</body>
+</html>
