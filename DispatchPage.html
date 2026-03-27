@@ -85,7 +85,14 @@
       <div class="dc-g2">
         <div class="dc-field">
           <label>Assign to Driver *</label>
-          <select id="fm-driver"><option value="">-- Select Driver --</option></select>
+          <div style="position:relative">
+            <input id="fm-driver-search" type="text" placeholder="Search driver..." autocomplete="off"
+              style="width:100%;padding:8px 10px;border:1px solid #D1D5DB;border-radius:5px;font-size:13px;font-family:inherit;outline:none"
+              oninput="VD.filterDriverDropdown()" onfocus="VD.showDriverDropdown()" onclick="VD.showDriverDropdown()">
+            <input type="hidden" id="fm-driver">
+            <div id="fm-driver-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #D1D5DB;border-top:none;border-radius:0 0 5px 5px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+            </div>
+          </div>
         </div>
         <div class="dc-field">
           <label>Form Type *</label>
@@ -361,9 +368,13 @@ function openNewForm(pre){
   const g=document.getElementById("fm-grand"); if(g) g.textContent="$0.00";
   ["fm-parts-body","fm-inv-body","fm-parts-rows"].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=""; });
   _irc=0;
-  const sel=document.getElementById("fm-driver");
-  sel.innerHTML='<option value="">-- Select Driver --</option>';
-  ALL_DRIVERS.forEach(d=>sel.innerHTML+=`<option value="${d.id}"${pre===d.id?" selected":""}>${esc(d.name)}</option>`);
+  // Reset searchable driver dropdown
+  var searchInp = document.getElementById("fm-driver-search");
+  var hiddenInp = document.getElementById("fm-driver");
+  var dropList  = document.getElementById("fm-driver-list");
+  if(searchInp){ searchInp.value = pre ? (ALL_DRIVERS.find(d=>d.id===pre)||{}).name||"" : ""; }
+  if(hiddenInp) hiddenInp.value = pre||"";
+  if(dropList)  dropList.style.display = "none";
   document.getElementById("form-modal").classList.add("open");
 }
 function quickAssign(id){ openNewForm(id); }
@@ -469,6 +480,53 @@ window.onload=function(){
 };
 
 
+  function renderDriverList(filter){
+    var list = document.getElementById("fm-driver-list");
+    var hidden = document.getElementById("fm-driver");
+    if(!list) return;
+    var q = (filter||"").toLowerCase();
+    var matches = q
+      ? ALL_DRIVERS.filter(d=>d.name.toLowerCase().includes(q))
+      : ALL_DRIVERS;
+    list.innerHTML = matches.map(d=>`
+      <div onclick="VD.selectDriver('${d.id}','${esc(d.name)}')"
+        style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #F1F5F9;color:#1A2432"
+        onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background=''">
+        ${esc(d.name)}
+        ${d.groups&&d.groups.length?'<span style="font-size:10px;color:#94a3b8;margin-left:6px"></span>':""}
+      </div>`).join("");
+    if(!matches.length){
+      list.innerHTML = '<div style="padding:10px 12px;color:#94a3b8;font-size:12px">No drivers found</div>';
+    }
+    list.style.display = "block";
+  }
+
+  function filterDriverDropdown(){
+    var q = document.getElementById("fm-driver-search").value;
+    document.getElementById("fm-driver").value = ""; // clear selection when typing
+    renderDriverList(q);
+  }
+
+  function showDriverDropdown(){
+    var q = document.getElementById("fm-driver-search").value;
+    renderDriverList(q);
+  }
+
+  function selectDriver(id, name){
+    document.getElementById("fm-driver").value = id;
+    document.getElementById("fm-driver-search").value = name;
+    document.getElementById("fm-driver-list").style.display = "none";
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener("click", function(e){
+    var wrap = document.getElementById("fm-driver-search");
+    var list = document.getElementById("fm-driver-list");
+    if(wrap && list && !wrap.contains(e.target) && !list.contains(e.target)){
+      list.style.display = "none";
+    }
+  });
+
   // Expose to onclick handlers
   VD.loadAll=loadAll; VD.openNewForm=openNewForm; VD.closeFormModal=closeFormModal;
   VD.switchFormType=switchFormType; VD.addDeliveryPart=addDeliveryPart;
@@ -477,6 +535,10 @@ window.onload=function(){
   VD.confirmReassign=confirmReassign; VD.cancelForm=cancelForm;
   VD.quickAssign=quickAssign; VD.focusDriverPanel=focusDriverPanel;
   VD.calcInvRow=calcInvRow; VD.calcGrand=calcGrand;
+  VD.toggleSection=toggleSection;
+  VD.filterDriverDropdown=filterDriverDropdown;
+  VD.showDriverDropdown=showDriverDropdown;
+  VD.selectDriver=selectDriver;
 
 })();
 </script>
