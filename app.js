@@ -24,11 +24,9 @@ geotab.addin.ventureDelivery = function() {
 
     initialize: function(api, state, callback) {
       _api = api;
-      checkLicense(api, function(result) {
-        _licenseValid = result.allowed;
-        if (!result.allowed) showLicenseError(result.reason || "Not licensed.");
-        callback();
-      });
+      // ✅ Call callback immediately — don't block UI on license check
+      // License check happens in background during focus()
+      callback();
     },
 
     focus: function(api, state) {
@@ -36,23 +34,26 @@ geotab.addin.ventureDelivery = function() {
       var app = document.getElementById("vt-app");
       if (app) app.style.display = "block";
 
-      if (!_licenseValid) {
-        showLicenseError("Not licensed.");
-        return;
-      }
-
       if (!_initialized) {
         _initialized = true;
         initUI();
       }
 
-      // Fetch driver then show pending list
+      // Show UI immediately, check license in background
       fetchDriver(api, function() {
         _currentFormId = null;
         _currentForm = null;
         showPendingScreen();
         fetchPendingForms();
       });
+
+      // License check in background — don't block UI
+      if (!_licenseValid) {
+        checkLicense(api, function(result) {
+          _licenseValid = result.allowed;
+          if (!result.allowed) showLicenseError(result.reason || "Not licensed.");
+        });
+      }
     },
 
     blur: function(api, state) {
