@@ -385,7 +385,20 @@ function populateDelivery(d) {
   sv("ds-ph",  d.dealerPhone);
   sv("ds-em",  d.dealerEmail);
   sv("ds-cod", d.codAmount || "0");
-  sv("ds-cm",  ""); // driver fills
+  sv("ds-cm",  ""); // driver fills — editable
+
+  // ✅ Make all non-driver fields readonly
+  ["ds-dt","ds-inv","ds-dlr","ds-adr","ds-cty","ds-cnt","ds-ph","ds-em","ds-cod"].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.readOnly=true;
+  });
+  // Payment radios — readonly display only
+  var radios = document.querySelectorAll('input[name="paytype"]');
+  for(var i=0;i<radios.length;i++) radios[i].disabled=true;
+  // Booklets pills — disable interaction
+  var py=document.getElementById("py"); if(py) py.style.pointerEvents="none";
+  var pn=document.getElementById("pn"); if(pn) pn.style.pointerEvents="none";
+  // Accepted checkbox — disable
+  var ckac=document.getElementById("ck-ac"); if(ckac) ckac.disabled=true;
 
   // Payment type
   var radios = document.querySelectorAll('input[name="paytype"]');
@@ -413,6 +426,7 @@ function populateInvoice(d) {
   sv("id",  d.date);
   sv("ia",  d.acctNo);
   sv("ino", d.invoiceNo);
+  // All fields are readonly in HTML
   sv("ibt", d.billTo);
   sv("ist", d.shipTo);
   sv("ipo", d.po);
@@ -728,7 +742,7 @@ function getSigBase64(id) {
 function mkS(id) {
   SS[id].signed = true;
   var wrap = document.getElementById(id+"-wrap"); if(wrap) wrap.className="sw ok";
-  var ok = document.getElementById(id+"-ok"); if(ok) ok.style.display="block";
+  var ok = document.getElementById(id+"-ok"); if(ok) ok.style.display="flex";
   var ph = document.getElementById(id+"-ph"); if(ph) ph.style.display="none";
 }
 
