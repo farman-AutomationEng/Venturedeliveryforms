@@ -233,7 +233,7 @@
   var ADDIN_ID = "azXOKPvAnSnyIdUK2xZutWA";
   var _api = null;
   var ALL_FORMS=[], ALL_DRIVERS=[], ALL_DSI=[];
-  var FILTER="all", _reassignId=null, _irc=0;
+  var FILTER="all", _reassignId=null, _irc=0, _editId=null;
   var _drvrCollapsed = {online:false, offline:true};
 
   // ── Helper: create element with properties ─────────────
@@ -347,9 +347,9 @@
       var info=el("div",{class:"dc-row-info"},[inv,el("span",{class:"dc-dealer",text:f.dealer||f.billTo||"—"}),meta]);
       var actions=el("div",{class:"dc-actions"});
       if(ip){
-        var rBtn=el("button",{class:"btn bw",style:"padding:4px 10px;font-size:11px",text:"↻"});
-        rBtn.addEventListener("click",(function(id,dr,inv){return function(){VD.openReassign(id,dr,inv);};})(f._id,driver,f.invoiceNo||""));
-        var cBtn=el("button",{class:"btn bd",style:"padding:4px 10px;font-size:11px",text:"✕"});
+        var rBtn=el("button",{class:"btn bw",style:"padding:4px 10px;font-size:11px",text:"✏ Edit"});
+        rBtn.addEventListener("click",(function(id){return function(){VD.openEditForm(id);};})(f._id));
+        var cBtn=el("button",{class:"btn bd",style:"padding:4px 10px;font-size:11px;margin-left:4px",text:"🗑 Delete"});
         cBtn.addEventListener("click",(function(id,inv){return function(){VD.cancelForm(id,inv);};})(f._id,f.invoiceNo||""));
         actions.appendChild(rBtn); actions.appendChild(cBtn);
       }
@@ -457,7 +457,107 @@
     document.getElementById("form-modal").classList.add("open");
   }
   function quickAssign(id){ openNewForm(id); }
-  function closeFormModal(){ document.getElementById("form-modal").classList.remove("open"); }
+
+  function openEditForm(id){
+    var form = ALL_FORMS.find(function(f){ return f._id===id; });
+    if(!form) return;
+    _editId = id;
+
+    // Set modal title to Edit
+    var hdr = document.querySelector("#form-modal .dc-modal-hdr h3");
+    if(hdr) hdr.textContent = "Edit Form";
+    var saveBtn = document.getElementById("fm-save-btn");
+    if(saveBtn) saveBtn.textContent = "Save Changes";
+
+    // Set form type
+    var typeEl = document.getElementById("fm-type");
+    if(typeEl){ typeEl.value = form.formType; switchFormType(form.formType); }
+
+    // Set driver
+    var si = document.getElementById("fm-driver-search");
+    var hi = document.getElementById("fm-driver");
+    var dl = document.getElementById("fm-driver-list");
+    var drv = ALL_DRIVERS.find(function(d){ return d.id===form.assignedDriverId; });
+    if(si) si.value = drv ? drv.name : (form.driverName||"");
+    if(hi) hi.value = form.assignedDriverId||"";
+    if(dl) dl.style.display="none";
+
+    // Fill delivery fields
+    if(form.formType==="delivery_sheet"){
+      var s=function(id,v){ var e=document.getElementById(id); if(e) e.value=v||""; };
+      s("fm-date",       form.date);
+      s("fm-inv-no",     form.invoiceNo);
+      s("fm-dealer",     form.dealer);
+      s("fm-address",    form.dealerAddress);
+      s("fm-contact",    form.dealerContact);
+      s("fm-phone",      form.dealerPhone);
+      s("fm-email",      form.dealerEmail);
+      s("fm-cod",        form.codAmount||"0");
+      var pay=document.getElementById("fm-payment"); if(pay) pay.value=form.paymentType||"COD";
+      var bkl=document.getElementById("fm-booklets"); if(bkl) bkl.value=form.booklets||"";
+      // Fill parts list
+      var tb=document.getElementById("fm-parts-body"); clr(tb);
+      (form.parts||[]).forEach(function(p){
+        var tr=tb.insertRow();
+        var t1=el("td"); t1.appendChild(el("input",{type:"text",value:p.part||"",style:"width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"}));
+        var t2=el("td"); t2.appendChild(el("input",{type:"text",value:p.model||"",style:"width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"}));
+        var t3=el("td"); var db=el("button",{class:"dc-del-row",text:"✕"}); db.addEventListener("click",function(){tr.remove();}); t3.appendChild(db);
+        tr.appendChild(t1); tr.appendChild(t2); tr.appendChild(t3);
+      });
+    } else if(form.formType==="invoice"){
+      var s=function(id,v){ var e=document.getElementById(id); if(e) e.value=v||""; };
+      s("fm-inv-date",    form.date);
+      s("fm-inv-number",  form.invoiceNo);
+      s("fm-acct",        form.acctNo);
+      s("fm-po",          form.po);
+      s("fm-bill-to",     form.billTo);
+      s("fm-ship-to",     form.shipTo);
+      s("fm-terms",       form.terms);
+      s("fm-so",          form.salesOrder);
+      s("fm-ship-method", form.shippingMethod);
+      s("fm-shipping",    form.shipping);
+      var gr=document.getElementById("fm-grand"); if(gr) gr.textContent=form.grandTotal||"$0.00";
+      var tb=document.getElementById("fm-inv-body"); clr(tb);
+      (form.lineItems||[]).forEach(function(li){
+        _irc++;
+        var n=_irc; var tr=tb.insertRow();
+        var qI=el("input",{type:"number",value:li.qty||"1",style:"width:60px;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"}); qI.id="iq-"+n;
+        var pI=el("input",{type:"number",step:"0.01",value:li.unitPrice||"",style:"width:80px;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"}); pI.id="ip-"+n;
+        var tI=el("input",{type:"text",value:li.total||"",readonly:"",style:"background:#F8FAFC;font-weight:700;width:80px;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"}); tI.id="it-"+n;
+        qI.addEventListener("input",function(){VD.calcInvRow(n);}); pI.addEventListener("input",function(){VD.calcInvRow(n);});
+        var cells=[
+          el("td",[el("input",{type:"text",value:li.item||"",style:"width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"})]),
+          el("td",[qI]),
+          el("td",[el("input",{type:"text",value:li.description||"",style:"width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"})]),
+          el("td",[pI]), el("td",[tI])
+        ];
+        var dt=el("td"); var db=el("button",{class:"dc-del-row",text:"✕"}); db.addEventListener("click",function(){tr.remove();VD.calcGrand();}); dt.appendChild(db); cells.push(dt);
+        cells.forEach(function(c){tr.appendChild(c);});
+      });
+    } else if(form.formType==="loose_parts"){
+      var s=function(id,v){ var e=document.getElementById(id); if(e) e.value=v||""; };
+      s("fm-parts-date",   form.date);
+      s("fm-parts-inv",    form.invoiceNo);
+      s("fm-parts-so",     form.salesOrder);
+      s("fm-parts-pl",     form.pl);
+      s("fm-parts-trk",    form.trk);
+      s("fm-parts-dealer", form.dealer);
+      var tb=document.getElementById("fm-parts-rows"); clr(tb);
+      (form.parts||[]).forEach(function(p){
+        var tr=tb.insertRow();
+        var mk=function(v){ var t=el("td"); t.appendChild(el("input",{type:"text",value:v||"",style:"width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:12px"})); return t; };
+        var dt=el("td"); var db=el("button",{class:"dc-del-row",text:"✕"}); db.addEventListener("click",function(){tr.remove();}); dt.appendChild(db);
+        [mk(p.location),mk(p.qty),mk(p.part),dt].forEach(function(c){tr.appendChild(c);});
+      });
+    }
+    document.getElementById("form-modal").classList.add("open");
+  }
+  function closeFormModal(){
+    _editId=null;
+    var hdr=document.querySelector("#form-modal .dc-modal-hdr h3"); if(hdr) hdr.textContent="Create New Form";
+    var btn=document.getElementById("fm-save-btn"); if(btn) btn.textContent="Save & Assign to Driver";
+    document.getElementById("form-modal").classList.remove("open");
+  }
   function switchFormType(t){
     ["fm-delivery","fm-invoice","fm-parts"].forEach(function(id){document.getElementById(id).style.display="none";});
     document.getElementById({delivery_sheet:"fm-delivery",invoice:"fm-invoice",loose_parts:"fm-parts"}[t]).style.display="block";
@@ -558,10 +658,17 @@
     var btn=document.getElementById("fm-save-btn"); btn.textContent="Saving..."; btn.disabled=true;
     var drv=ALL_DRIVERS.find(function(d){return d.id===driverId;});
     var grps=drv&&drv.groups&&drv.groups.length?drv.groups.map(function(g){return{id:g};}):[{id:"GroupCompanyId"}];
-    _api.call("Add",{typeName:"AddInData",entity:{addInId:ADDIN_ID,groups:grps,details:data}},
-      function(){btn.textContent="Save & Assign to Driver";btn.disabled=false;closeFormModal();toast("Form created!","ok");loadAll();},
-      function(e){btn.textContent="Save & Assign to Driver";btn.disabled=false;alert("Error: "+(e.message||e));}
-    );
+    if(_editId){
+      _api.call("Set",{typeName:"AddInData",entity:{id:_editId,addInId:ADDIN_ID,groups:grps,details:data}},
+        function(){btn.textContent="Save & Assign to Driver";btn.disabled=false;_editId=null;closeFormModal();toast("Form updated!","ok");loadAll();},
+        function(e){btn.textContent="Save & Assign to Driver";btn.disabled=false;alert("Error: "+(e.message||e));}
+      );
+    } else {
+      _api.call("Add",{typeName:"AddInData",entity:{addInId:ADDIN_ID,groups:grps,details:data}},
+        function(){btn.textContent="Save & Assign to Driver";btn.disabled=false;closeFormModal();toast("Form created!","ok");loadAll();},
+        function(e){btn.textContent="Save & Assign to Driver";btn.disabled=false;alert("Error: "+(e.message||e));}
+      );
+    }
   }
 
   function cancelForm(id,inv){
@@ -603,6 +710,7 @@
   VD.confirmReassign=confirmReassign; VD.cancelForm=cancelForm;
   VD.quickAssign=quickAssign; VD.focusDriverPanel=focusDriverPanel;
   VD.calcInvRow=calcInvRow; VD.calcGrand=calcGrand;
+  VD.openEditForm=openEditForm;
   VD.toggleDriverSection=toggleDriverSection;
   VD.filterDriverDropdown=filterDriverDropdown;
   VD.showDriverDropdown=showDriverDropdown;
