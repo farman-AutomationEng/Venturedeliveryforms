@@ -188,120 +188,211 @@
 
     <!-- ══ TAB 1: INVOICE ═════════════════════════════════ -->
     <div id="t1" class="tab-hidden">
-      <div class="inv-hdr">
+
+      <!-- Venture Trailers Header — matches PDF -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:3px solid #00263E">
         <div>
-          <div class="inv-company">VENTURE TRAILERS, INC.</div>
-          <div class="inv-addr">5301 North Point Blvd • Baltimore MD 21219</div>
-        </div>
-        <div class="inv-badge">INVOICE</div>
-      </div>
-      <div class="inv-readonly-note">📋 View only — filled by dispatcher</div>
-
-      <div class="g2">
-        <div class="f"><label>Date</label><input type="date" id="id" readonly></div>
-        <div class="f"><label>Acct No.</label><input id="ia" readonly></div>
-        <div class="f fc"><label>Invoice #</label><input id="ino" readonly></div>
-      </div>
-
-      <div class="g2 mt12">
-        <div class="f"><label>Bill To</label>
-          <textarea id="ibt" placeholder="Company&#10;Address&#10;City, State ZIP" readonly></textarea>
-        </div>
-        <div class="f"><label>Ship To</label>
-          <textarea id="ist" placeholder="Company&#10;Address&#10;City, State ZIP" readonly></textarea>
-        </div>
-      </div>
-
-      <div class="g2-auto mt12">
-        <div class="f"><label>PO #</label><input id="ipo" readonly></div>
-        <div class="f"><label>Terms</label><input id="itr" readonly></div>
-        <div class="f"><label>Sales Order</label><input id="iso" readonly></div>
-        <div class="f"><label>Shipping Method</label><input id="ism" readonly></div>
-      </div>
-
-      <div class="sec"><span>📦</span><h3>Line Items</h3></div>
-      <div class="tw">
-        <table>
-          <thead><tr>
-            <th>Item</th><th>Qty</th><th>Description</th>
-            <th>Unit Price</th><th>Total</th>
-          </tr></thead>
-          <tbody id="itb"></tbody>
-        </table>
-      </div>
-
-      <div class="totals-wrap">
-        <div class="totals-box">
-          <div class="totals-row">
-            <span>Shipping</span>
-            <input id="ish" class="ish-input" readonly>
+          <div style="font-size:20px;font-weight:900;color:#00263E;letter-spacing:-0.5px">VENTURE</div>
+          <div style="font-size:9px;letter-spacing:4px;color:#00263E;font-weight:700">T R A I L E R S</div>
+          <div style="font-size:11px;color:#475569;margin-top:6px;line-height:1.6">
+            Venture Trailers, Inc.<br>
+            5301 North Point Blvd.<br>
+            Baltimore MD 21219<br>
+            (410) 388-1000
           </div>
-          <div class="totals-due">
-            <span>Amount Due</span><span id="itot">$0.00</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:28px;font-weight:300;color:#00263E;letter-spacing:2px">Invoice</div>
+          <div style="background:#00263E;color:white;border-radius:6px;padding:8px 12px;margin-top:8px;font-size:11px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+              <div><div style="font-size:9px;opacity:.7;margin-bottom:2px">Acct No.</div><div style="font-weight:700" id="ia-d">—</div></div>
+              <div><div style="font-size:9px;opacity:.7;margin-bottom:2px">Date</div><div style="font-weight:700" id="id-d">—</div></div>
+              <div><div style="font-size:9px;opacity:.7;margin-bottom:2px">Invoice #</div><div style="font-weight:700" id="ino-d">—</div></div>
+            </div>
           </div>
         </div>
       </div>
+      <!-- Hidden inputs for data binding -->
+      <input id="id" type="hidden"><input id="ia" type="hidden"><input id="ino" type="hidden">
 
-      <div class="sa">
-        <button class="btn bs">💾 Draft</button>
-        <button class="btn bp" id="btnSubInv">📤 Submit Invoice</button>
+      <!-- Bill To / Ship To -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #D1D5DB;border-radius:6px;overflow:hidden;margin-bottom:14px">
+        <div style="padding:12px;border-right:1px solid #D1D5DB">
+          <div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Bill To</div>
+          <div id="ibt-d" style="font-size:13px;color:#1A2432;line-height:1.6;white-space:pre-line">—</div>
+          <textarea id="ibt" style="display:none"></textarea>
+        </div>
+        <div style="padding:12px">
+          <div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Ship To</div>
+          <div id="ist-d" style="font-size:13px;color:#1A2432;line-height:1.6;white-space:pre-line">—</div>
+          <textarea id="ist" style="display:none"></textarea>
+        </div>
       </div>
+
+      <!-- PO / Terms / Sales Order / Shipping -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #D1D5DB;border-radius:6px;overflow:hidden;margin-bottom:14px;font-size:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <div style="padding:8px 12px;border-right:1px solid #D1D5DB;border-bottom:1px solid #D1D5DB">
+            <div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase">PO #</div>
+            <div id="ipo-d" style="font-weight:600;margin-top:2px">—</div>
+            <input id="ipo" style="display:none">
+          </div>
+          <div style="padding:8px 12px;border-bottom:1px solid #D1D5DB">
+            <div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase">Terms</div>
+            <div id="itr-d" style="font-weight:600;margin-top:2px">—</div>
+            <input id="itr" style="display:none">
+          </div>
+          <div style="padding:8px 12px;border-right:1px solid #D1D5DB">
+            <div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase">Sales Order</div>
+            <div id="iso-d" style="font-weight:600;margin-top:2px">—</div>
+            <input id="iso" style="display:none">
+          </div>
+          <div style="padding:8px 12px">
+            <div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase">Shipping Method</div>
+            <div id="ism-d" style="font-weight:600;margin-top:2px">—</div>
+            <input id="ism" style="display:none">
+          </div>
+        </div>
+        <div style="padding:8px 12px;border-left:1px solid #D1D5DB">
+          <div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase">Shipping Cost</div>
+          <div id="ish-d" style="font-weight:600;margin-top:2px">—</div>
+          <input id="ish" style="display:none">
+        </div>
+      </div>
+
+      <!-- Line Items Table -->
+      <div style="border:1px solid #D1D5DB;border-radius:6px;overflow:hidden;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:80px 40px 1fr 80px 80px;background:#00263E;color:white;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">
+          <div style="padding:8px 10px">Item</div>
+          <div style="padding:8px 6px;text-align:center">Qty</div>
+          <div style="padding:8px 10px">Description</div>
+          <div style="padding:8px 10px;text-align:right">Unit Price</div>
+          <div style="padding:8px 10px;text-align:right">Total</div>
+        </div>
+        <div id="itb-d" style="min-height:80px"></div>
+        <tbody id="itb" style="display:none"></tbody>
+      </div>
+
+      <!-- Totals -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+        <div style="width:min(240px,100%);border:1px solid #D1D5DB;border-radius:6px;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F8FAFC;font-size:12px;border-bottom:1px solid #D1D5DB">
+            <span style="color:#64748b">Subtotal</span><span id="itot-sub" style="font-weight:600">$0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F8FAFC;font-size:12px;border-bottom:2px solid #00263E">
+            <span style="color:#64748b">Shipping</span><span id="ish-val" style="font-weight:600">$0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#00263E;color:white">
+            <span style="font-size:13px;font-weight:700">Amount Due</span>
+            <span id="itot" style="font-size:16px;font-weight:900">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:10px 14px;text-align:center;font-size:12px;color:#854D0E;font-weight:600">
+        📋 This invoice is view-only. Driver signature not required.
+      </div>
+
     </div><!-- /t1 -->
 
     <!-- ══ TAB 2: LOOSE PARTS ═════════════════════════════ -->
     <div id="t2" class="tab-hidden">
-      <div class="lp-hdr">
-        <div class="lp-company">VENTURE TRAILERS</div>
-        <div class="lp-sub">LOOSE PARTS CHECK-IN</div>
+
+      <!-- Header matching PDF -->
+      <div style="text-align:center;margin-bottom:14px;padding-bottom:12px;border-bottom:3px solid #00263E">
+        <div style="font-size:22px;font-weight:900;color:#00263E;letter-spacing:2px">VENTURE</div>
+        <div style="font-size:8px;letter-spacing:5px;color:#00263E;font-weight:700;margin-bottom:4px">T R A I L E R S</div>
+        <div style="font-size:13px;font-weight:800;color:#1A2432;letter-spacing:1px">LOOSE PARTS CHECK-IN</div>
       </div>
 
-      <div class="g2-auto">
-        <div class="f"><label>Sales Order #</label><input id="ls" readonly></div>
-        <div class="f"><label>Invoice #</label><input id="li" readonly></div>
-        <div class="f"><label>PL#</label><input id="lpl" readonly></div>
-        <div class="f"><label>TRK#</label><input id="lt" readonly></div>
-        <div class="f"><label>Dealer</label><input id="ld" readonly></div>
-        <div class="f"><label>Date</label><input type="date" id="ldt" readonly></div>
+      <!-- Header fields matching PDF layout -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div>
+          <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px;margin-bottom:6px">
+            <span style="font-weight:700;color:#374151;white-space:nowrap">Sales Order #:</span>
+            <input id="ls" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
+          </div>
+          <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px;margin-bottom:6px">
+            <span style="font-weight:700;color:#374151;white-space:nowrap">Invoice #:</span>
+            <input id="li" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
+          </div>
+          <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px">
+            <span style="font-weight:700;color:#374151;white-space:nowrap">PL#:</span>
+            <input id="lpl" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px;margin-bottom:6px">
+            <span style="font-weight:700;color:#374151;white-space:nowrap">Date:</span>
+            <input type="date" id="ldt" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
+          </div>
+          <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px;margin-bottom:6px">
+            <span style="font-weight:700;color:#374151;white-space:nowrap">TRK#:</span>
+            <input id="lt" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:baseline;font-size:12px;border-bottom:1px solid #D1D5DB;padding-bottom:4px;margin-bottom:14px">
+        <span style="font-weight:700;color:#374151;white-space:nowrap">Dealer:</span>
+        <input id="ld" readonly style="border:none;outline:none;font-size:13px;font-weight:600;color:#1A2432;flex:1;background:transparent;min-width:0">
       </div>
 
-      <div class="sec"><span>🔩</span><h3>Parts List</h3></div>
+      <!-- Parts table matching PDF -->
       <div class="tw">
         <table>
           <thead><tr>
-            <th>Loc</th><th>Qty</th><th>Part</th>
-            <th class="tc">Pulled</th><th class="tc">Loaded</th>
-            <th class="tc">N/C</th><th class="tc">COD</th>
+            <th style="width:60px">Loc</th>
+            <th style="width:40px">Qty</th>
+            <th>Part</th>
+            <th class="tc" style="width:52px">Pulled</th>
+            <th class="tc" style="width:52px">Loaded</th>
+            <th class="tc" style="width:36px">N/C</th>
+            <th class="tc" style="width:36px">COD</th>
           </tr></thead>
           <tbody id="ltb"></tbody>
         </table>
       </div>
 
-      <div class="f mb14"><label>Comments</label>
-        <textarea id="lc" placeholder="Any notes..."></textarea>
+      <!-- Comments — driver editable -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">COMMENTS:</div>
+        <div style="border-bottom:1px solid #D1D5DB;margin-bottom:6px"></div>
+        <textarea id="lc" placeholder="Enter any comments here..."
+          style="width:100%;padding:10px;border:1.5px solid #D1D5DB;border-radius:6px;
+          font-size:14px;font-family:inherit;resize:vertical;min-height:72px;outline:none"></textarea>
       </div>
 
-      <div class="notice nred notice-center">⚠️ MUST BE COMPLETED AT TIME OF DELIVERY</div>
+      <div class="notice nred notice-center" style="font-size:12px;font-weight:800;letter-spacing:.5px">
+        THIS FORM MUST BE COMPLETED AT TIME OF DELIVERY
+      </div>
 
-      <div class="sec mt14"><span>✍️</span><h3>Signatures</h3></div>
-      <div class="sig-wrap-row">
-        <div>
-          <div class="sig-lbl">Driver</div>
-          <div class="sw" id="sig-lpd-wrap">
-            <canvas id="sig-lpd"></canvas>
-            <div class="sph" id="sig-lpd-ph">Sign here ✍️</div>
-            <button class="scl" id="clr-lpd">Clear</button>
-            <div class="sok" id="sig-lpd-ok">✓ Signed</div>
+      <!-- Signatures matching PDF -->
+      <div style="margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:#00263E;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Signatures</div>
+        <div class="sig-wrap-row">
+          <div>
+            <div class="sig-lbl">Driver Signature</div>
+            <div class="sw" id="sig-lpd-wrap">
+              <canvas id="sig-lpd"></canvas>
+              <div class="sph" id="sig-lpd-ph">Sign here ✍️</div>
+              <button class="scl" id="clr-lpd">Clear</button>
+              <div class="sok" id="sig-lpd-ok">✓ Signed</div>
+            </div>
+          </div>
+          <div>
+            <div class="sig-lbl">Authorized Receiver Signature</div>
+            <div class="sw" id="sig-lpr-wrap">
+              <canvas id="sig-lpr"></canvas>
+              <div class="sph" id="sig-lpr-ph">Sign here ✍️</div>
+              <button class="scl" id="clr-lpr">Clear</button>
+              <div class="sok" id="sig-lpr-ok">✓ Signed</div>
+            </div>
           </div>
         </div>
-        <div>
-          <div class="sig-lbl">Authorized Receiver</div>
-          <div class="sw" id="sig-lpr-wrap">
-            <canvas id="sig-lpr"></canvas>
-            <div class="sph" id="sig-lpr-ph">Sign here ✍️</div>
-            <button class="scl" id="clr-lpr">Clear</button>
-            <div class="sok" id="sig-lpr-ok">✓ Signed</div>
-          </div>
-        </div>
+      </div>
+
+      <div style="text-align:center;font-size:11px;color:#64748b;margin-top:12px;padding-top:10px;border-top:1px solid #E5E7EB">
+        5301 North Point Blvd. • Baltimore, Maryland 21219 • Phone: 410-388-1000
       </div>
 
       <div class="sa">
