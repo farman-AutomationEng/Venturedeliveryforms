@@ -539,8 +539,7 @@
       data.terms=document.getElementById("fm-terms").value; data.salesOrder=document.getElementById("fm-so").value;
       data.shippingMethod=document.getElementById("fm-ship-method").value; data.shipping=document.getElementById("fm-shipping").value;
       data.grandTotal=document.getElementById("fm-grand").textContent;
-      data.dealer=(document.getElementById("fm-bill-to").value||"").split("
-")[0];
+      data.dealer=(document.getElementById("fm-bill-to").value||"").split("\n")[0];
       var items=[]; document.querySelectorAll("#fm-inv-body tr").forEach(function(r){
         var ins=r.querySelectorAll("input"); var item=ins[0]?ins[0].value.trim():""; var desc=ins[2]?ins[2].value.trim():"";
         if(item||desc) items.push({item:item,qty:ins[1]?ins[1].value:"1",description:desc,unitPrice:ins[3]?ins[3].value:"",total:ins[4]?ins[4].value:""});
