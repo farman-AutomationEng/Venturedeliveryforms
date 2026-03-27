@@ -50,7 +50,7 @@
   <div class="dc-panel">
     <div class="dc-panel-hdr">
       <h2>Assigned Forms <span id="forms-count" class="empty" style="font-size:11px;font-weight:400;padding:0"></span></h2>
-      <input id="srch" placeholder="Search invoice, dealer..." class="ff" style="flex:0 0 180px;padding:5px 9px;font-size:12px" oninput="renderForms()">
+      <input id="srch" placeholder="Search invoice, dealer..." class="ff" style="flex:0 0 180px;padding:5px 9px;font-size:12px" oninput="VD.renderForms()">
       <button class="btn bp" style="padding:5px 12px;font-size:12px" onclick="VD.openNewForm()">+ New</button>
     </div>
     <div class="dc-tabs">
@@ -313,7 +313,14 @@
     if(FILTER==="Pending")   forms=forms.filter(function(f){return f.status==="Pending";});
     if(FILTER==="Submitted") forms=forms.filter(function(f){return f.status==="Submitted";});
     if(q) forms=forms.filter(function(f){
-      return (f.invoiceNo||"").toLowerCase().includes(q)||(f.dealer||"").toLowerCase().includes(q)||(f.driverName||"").toLowerCase().includes(q);
+      // Strip # and - so "110" matches "#VT-110", "vt110" also matches
+      var norm=function(s){ return (s||"").toLowerCase().replace(/[#\-\s]/g,""); };
+      var qn=q.replace(/[#\-\s]/g,"");
+      return norm(f.invoiceNo).includes(qn)
+        || (f.invoiceNo||"").toLowerCase().includes(q)
+        || (f.dealer||"").toLowerCase().includes(q)
+        || (f.driverName||"").toLowerCase().includes(q)
+        || (f.driverGroupName||"").toLowerCase().includes(q);
     });
     forms.sort(function(a,b){
       if(a.status==="Pending"&&b.status!=="Pending") return -1;
@@ -631,7 +638,15 @@
       var parts=[]; document.querySelectorAll("#fm-parts-body tr").forEach(function(r){
         var ins=r.querySelectorAll("input"); var pn=ins[0]?ins[0].value.trim():""; if(pn) parts.push({part:pn,model:ins[1]?ins[1].value.trim():"",damaged:false,shortShipped:false,notes:""});
       });
-      data.parts=parts.length?parts:DP.map(function(p){return{part:p,model:"",damaged:false,shortShipped:false,notes:""};});
+      // When editing: if no parts entered in table but form had parts, keep original
+      if(parts.length){
+        data.parts=parts;
+      } else if(_editId){
+        var orig=ALL_FORMS.find(function(f){return f._id===_editId;});
+        data.parts=(orig&&orig.parts&&orig.parts.length)?orig.parts:DP.map(function(p){return{part:p,model:"",damaged:false,shortShipped:false,notes:""};});
+      } else {
+        data.parts=DP.map(function(p){return{part:p,model:"",damaged:false,shortShipped:false,notes:""};});
+      }
     } else if(type==="invoice"){
       data.date=document.getElementById("fm-inv-date").value; data.invoiceNo=invNo;
       data.acctNo=document.getElementById("fm-acct").value; data.billTo=document.getElementById("fm-bill-to").value;
@@ -706,7 +721,8 @@
   VD.loadAll=loadAll; VD.openNewForm=openNewForm; VD.closeFormModal=closeFormModal;
   VD.switchFormType=switchFormType; VD.addDeliveryPart=addDeliveryPart;
   VD.addInvLine=addInvLine; VD.addPartsRow=addPartsRow; VD.saveForm=saveForm;
-  VD.setFilter=setFilter; VD.openReassign=openReassign; VD.closeReassign=closeReassign;
+  VD.setFilter=setFilter;
+  VD.renderForms=renderForms; VD.openReassign=openReassign; VD.closeReassign=closeReassign;
   VD.confirmReassign=confirmReassign; VD.cancelForm=cancelForm;
   VD.quickAssign=quickAssign; VD.focusDriverPanel=focusDriverPanel;
   VD.calcInvRow=calcInvRow; VD.calcGrand=calcGrand;
