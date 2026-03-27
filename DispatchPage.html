@@ -384,7 +384,7 @@
 
     function makeSection(key,label,color,drivers){
       var collapsed=_drvrCollapsed[key];
-      var tri=el("span",{class:"dc-triangle",style:"transform:rotate("+(collapsed?"0":"-90")+"deg)",text:"▼"}); tri.id="tri-"+key;
+      var tri=el("span",{class:"dc-triangle",style:"transform:rotate("+(collapsed?"-90":"0")+"deg)",text:"▼"}); tri.id="tri-"+key;
       var lbl=el("span",{style:"color:"+color,text:"● "+label+" ("+drivers.length+")"});
       var hdr=el("div",{class:"dc-section-hdr"},[lbl,tri]);
       hdr.addEventListener("click",(function(k){return function(){VD.toggleDriverSection(k);};})(key));
@@ -399,7 +399,7 @@
   function toggleDriverSection(key){
     _drvrCollapsed[key]=!_drvrCollapsed[key];
     var sec=document.getElementById("dsec-"+key); if(sec) sec.style.display=_drvrCollapsed[key]?"none":"block";
-    var tri=document.getElementById("tri-"+key);   if(tri) tri.style.transform=_drvrCollapsed[key]?"rotate(0deg)":"rotate(-90deg)";
+    var tri=document.getElementById("tri-"+key);   if(tri) tri.style.transform=_drvrCollapsed[key]?"rotate(-90deg)":"rotate(0deg)";
   }
   function focusDriverPanel(){ document.getElementById("driver-panel").scrollIntoView({behavior:"smooth"}); }
 
