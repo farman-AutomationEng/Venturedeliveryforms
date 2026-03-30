@@ -9,7 +9,7 @@
 <body>
 
 <!-- Header -->
-<div class="hdr">
+<div class="hdr" style="position:relative;display:flex;align-items:center;justify-content:space-between">
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding:4px 0;border-bottom:2px solid #F5A623">
     <svg width="26" height="26" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 18 Q4 6 16 6" stroke="#F5A623" stroke-width="3.5" fill="none" stroke-linecap="round"/>
@@ -23,13 +23,12 @@
       <div style="color:#7B9FD4;font-size:12px;font-style:italic;font-weight:600;font-family:Segoe UI,Arial,sans-serif">forms</div>
     </div>
   </div>
+  <div style="position:absolute;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none">
+    <h1 style="color:white;font-size:15px;font-weight:700;margin:0;letter-spacing:.5px">Dispatch Console</h1>
+    <p id="geo-txt" style="margin:0;font-size:10px"><span class="geo-dot loading" id="geo-dot"></span>Connecting...</p>
   </div>
-  <div>
-    <h1>Dispatch Console</h1>
-    <p id="geo-txt"><span class="geo-dot loading" id="geo-dot"></span>Connecting...</p>
-  </div>
-  <div class="dc-actions" style="gap:8px">
-    <span class="dbadge" id="today-badge"></span>
+  <div class="dc-actions" style="gap:8px;display:flex;align-items:center">
+    <span style="color:#7BBFDB;font-size:11px;font-weight:600" id="today-badge"></span>
     <button class="btn bp" onclick="VD.openNewForm()">+ New Form</button>
     <button class="btn bg2" onclick="VD.loadAll()">↺ Refresh</button>
   </div>
